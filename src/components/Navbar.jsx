@@ -19,8 +19,10 @@ const PERSONAS = [
 ];
 
 const NAV_LINKS = [
-  { to: '/',          label: 'Case Lookup' },
+  { to: '/about',     label: 'About' },
+  { to: '/',          label: 'Look Up a Case' },
   { to: '/scorecard', label: 'Transparency' },
+  { to: '/volunteer', label: 'Volunteer' },
 ];
 
 export default function Navbar({ activePersona = 'public', onPersonaChange }) {

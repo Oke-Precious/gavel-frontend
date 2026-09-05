@@ -1,0 +1,272 @@
+/* ============================================================
+   PublicLookupPage (Landing Page)
+   ============================================================ */
+
+.landing-page {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   Hero Section
+   ============================================================ */
+
+.hero-section {
+  padding: var(--space-8) 0 var(--space-6);
+  background-color: var(--color-bg);
+  text-align: center;
+}
+
+.hero-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  line-height: 1.1;
+  margin: 0 0 var(--space-3);
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0 auto var(--space-6);
+  max-width: 600px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.hero-search-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 480px;
+}
+
+.hero-search-input {
+  flex: 1;
+  height: 44px;
+  padding: 0 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.hero-search-input:focus {
+  outline: none;
+  border-color: var(--color-indigo);
+  box-shadow: 0 0 0 3px var(--color-indigo-light);
+}
+
+.hero-search-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+/* ============================================================
+   Stat Strip
+   ============================================================ */
+
+.stat-strip {
+  padding: var(--space-6) 0;
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.stat-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-indigo);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  max-width: 240px;
+}
+
+/* ============================================================
+   How It Works Section
+   ============================================================ */
+
+.how-it-works-section {
+  padding: var(--space-8) 0;
+  background-color: var(--color-bg);
+  text-align: center;
+}
+
+.section-title {
+  font-size: var(--font-size-h2);
+  font-weight: 600;
+  color: var(--color-navy);
+  margin: 0 0 var(--space-6);
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-6);
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.step-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--color-indigo-light);
+  color: var(--color-indigo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-title {
+  font-size: var(--font-size-h3);
+  font-weight: 600;
+  color: var(--color-navy);
+  margin: 0;
+}
+
+.step-desc {
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 240px;
+}
+
+/* ============================================================
+   Map Preview Section
+   ============================================================ */
+
+.map-preview-section {
+  padding: 0 0 var(--space-8);
+  background-color: var(--color-bg);
+}
+
+.map-card {
+  cursor: pointer;
+  background-color: var(--color-surface);
+}
+
+.map-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.map-card-text {
+  flex: 1;
+  min-width: 280px;
+}
+
+.map-caption {
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.map-card-illustration {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  padding-right: var(--space-4);
+}
+
+.map-states {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  max-width: 320px;
+}
+
+.map-state-pill {
+  padding: 0.25rem 0.75rem;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* ============================================================
+   Responsive Adjustments
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.25rem;
+  }
+  
+  .hero-search-form {
+    flex-direction: column;
+  }
+  
+  .hero-search-form button {
+    width: 100%;
+  }
+
+  .map-card-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .map-card-text .section-title {
+    text-align: center !important;
+  }
+
+  .map-card-illustration {
+    align-items: center;
+    padding-right: 0;
+  }
+  
+  .map-states {
+    justify-content: center;
+  }
+}

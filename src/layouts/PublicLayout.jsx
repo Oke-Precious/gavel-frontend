@@ -18,14 +18,20 @@ export default function PublicLayout() {
       </main>
       <footer className="public-layout__footer">
         <div className="container public-layout__footer-inner">
-          <img src="/gavel%20blue%20logo.png" alt="GAVEL Logo" className="public-layout__footer-brand-img" />
-          <span className="public-layout__footer-copy">
-            A portfolio concept project — not affiliated with any government body.
-            All case data is synthetic.
-          </span>
-          <a href="/style-guide" className="public-layout__footer-link">
-            Style Guide
-          </a>
+          <div className="public-layout__footer-top">
+            <img src="/gavel%20blue%20logo.png" alt="GAVEL Logo" className="public-layout__footer-brand-img" />
+            <div className="public-layout__footer-links">
+              <a href="/about" className="public-layout__footer-link">About</a>
+              <a href="/privacy" className="public-layout__footer-link">Privacy Policy</a>
+              <a href="/terms" className="public-layout__footer-link">Terms of Use</a>
+              <a href="/contact" className="public-layout__footer-link">Contact</a>
+            </div>
+          </div>
+          <div className="public-layout__footer-bottom">
+            <span className="public-layout__footer-copy">
+              This is a concept platform built with synthetic data for demonstration purposes. It is not connected to any government or NGO system.
+            </span>
+          </div>
         </div>
       </footer>
     </div>
