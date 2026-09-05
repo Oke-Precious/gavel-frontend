@@ -18,7 +18,7 @@ export default function PublicLayout() {
       </main>
       <footer className="public-layout__footer">
         <div className="container public-layout__footer-inner">
-          <span className="public-layout__footer-brand">⚖ GAVEL</span>
+          <img src="/gavel%20blue%20logo.png" alt="GAVEL Logo" className="public-layout__footer-brand-img" />
           <span className="public-layout__footer-copy">
             A portfolio concept project — not affiliated with any government body.
             All case data is synthetic.

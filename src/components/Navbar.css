@@ -44,6 +44,12 @@
   text-transform: uppercase;
 }
 
+.navbar__logo-img {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
 /* --- Nav links --- */
 .navbar__nav {
   display: flex;

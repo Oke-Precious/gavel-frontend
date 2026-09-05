@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Scale, Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import './Navbar.css';
 
 /**
@@ -77,8 +77,8 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
         <div className="navbar__inner container">
           {/* Logo */}
           <Link to="/" className="navbar__logo" aria-label="GAVEL — home">
-            <Scale size={22} strokeWidth={2.5} aria-hidden="true" />
-            <span className="navbar__logo-text">GAVEL</span>
+            <img src="/gavel%20white%20logo.png" alt="GAVEL Logo" className="navbar__logo-img" />
+            {/* <span className="navbar__logo-text">GAVEL</span> */}
           </Link>
 
           {/* Desktop nav */}
@@ -185,7 +185,7 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
       >
         <div className="navbar__drawer-header">
           <Link to="/" className="navbar__logo" onClick={() => setMobileOpen(false)}>
-            <Scale size={20} strokeWidth={2.5} aria-hidden="true" />
+            <img src="/gavel%20white%20logo.png" alt="GAVEL Logo" className="navbar__logo-img" />
             <span className="navbar__logo-text">GAVEL</span>
           </Link>
           <button

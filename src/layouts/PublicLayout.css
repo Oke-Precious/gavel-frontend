@@ -27,11 +27,10 @@
   flex-wrap: wrap;
 }
 
-.public-layout__footer-brand {
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-caption);
-  color: var(--color-navy);
-  letter-spacing: 0.06em;
+.public-layout__footer-brand-img {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
   flex-shrink: 0;
 }
 
