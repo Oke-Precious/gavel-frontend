@@ -1,0 +1,96 @@
+/* ============================================================
+   GAVEL Design System — CSS Custom Properties
+   Single source of truth. Never hardcode a value found here.
+   ============================================================ */
+
+:root {
+  /* --- Colors --- */
+  --color-navy:          #0F172A;
+  --color-indigo:        #4F46E5;
+  --color-indigo-hover:  #4338CA;
+  --color-indigo-light:  #EEF2FF;
+  --color-bg:            #F8FAFC;
+  --color-surface:       #FFFFFF;
+  --color-text:          #1E293B;
+  --color-text-muted:    #64748B;
+  --color-border:        #E2E8F0;
+  --color-border-focus:  #4F46E5;
+
+  /* Status — use ONLY for alert levels, never for decoration */
+  --color-compliant:     #10B981;
+  --color-compliant-bg:  #ECFDF5;
+  --color-warning:       #F59E0B;
+  --color-warning-bg:    #FFFBEB;
+  --color-severe:        #F97316;
+  --color-severe-bg:     #FFF7ED;
+  --color-critical:      #EF4444;
+  --color-critical-bg:   #FEF2F2;
+
+  /* Dark mode surface tokens */
+  --color-dark-bg:       #0B1120;
+  --color-dark-surface:  #1E293B;
+  --color-dark-text:     #F1F5F9;
+
+  /* Danger (destructive actions — separate from status) */
+  --color-danger:        #DC2626;
+  --color-danger-hover:  #B91C1C;
+  --color-danger-light:  #FEF2F2;
+
+  /* --- Typography --- */
+  --font-family:         'Inter', system-ui, -apple-system, sans-serif;
+  --font-size-h1:        2rem;       /* 32px */
+  --font-size-h2:        1.5rem;     /* 24px */
+  --font-size-h3:        1.25rem;    /* 20px */
+  --font-size-h4:        1rem;       /* 16px */
+  --font-size-body:      1rem;       /* 16px */
+  --font-size-caption:   0.875rem;   /* 14px */
+  --font-size-small:     0.75rem;    /* 12px */
+  --font-weight-regular: 400;
+  --font-weight-medium:  500;
+  --font-weight-semibold:600;
+  --font-weight-bold:    700;
+  --line-height-base:    1.5;
+  --line-height-tight:   1.25;
+
+  /* --- Spacing (8px base unit) --- */
+  --space-1: 0.5rem;    /* 8px */
+  --space-2: 1rem;      /* 16px */
+  --space-3: 1.5rem;    /* 24px */
+  --space-4: 2rem;      /* 32px */
+  --space-6: 3rem;      /* 48px */
+  --space-8: 4rem;      /* 64px */
+
+  /* --- Border Radius --- */
+  --radius-sm:   4px;
+  --radius-md:   8px;   /* buttons, inputs */
+  --radius-lg:   12px;  /* cards */
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* --- Elevation (3 levels only — never invent a 4th) --- */
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06);                  /* resting card */
+  --shadow-2: 0 4px 12px rgba(15, 23, 42, 0.10);                 /* hover/raised */
+  --shadow-3: 0 12px 32px rgba(15, 23, 42, 0.16);                /* modal/popover */
+
+  /* --- Motion --- */
+  --transition-entrance: 150ms ease-out;
+  --transition-exit:     150ms ease-in;
+  --transition-base:     200ms ease-out;
+
+  /* --- Layout --- */
+  --max-width:      1280px;
+  --sidebar-width:  260px;
+  --sidebar-collapsed: 68px;
+  --navbar-height:  64px;
+
+  /* --- Z-Index Scale --- */
+  --z-base:     1;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-toast:    500;
+
+  /* --- Focus ring --- */
+  --focus-ring: 0 0 0 3px rgba(79, 70, 229, 0.35);
+}

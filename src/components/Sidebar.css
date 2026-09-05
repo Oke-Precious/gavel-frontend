@@ -1,0 +1,292 @@
+/* ============================================================
+   Sidebar Component
+   ============================================================ */
+
+/* --- Desktop sidebar --- */
+.sidebar--desktop {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  height: 100%;
+  background-color: var(--color-navy);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  transition: width var(--transition-base);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sidebar--desktop.sidebar--collapsed {
+  width: var(--sidebar-collapsed);
+}
+
+/* --- Logo row --- */
+.sidebar__logo-row {
+  padding: var(--space-2) var(--space-2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.sidebar__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffffff;
+}
+
+.sidebar__logo-text {
+  font-size: 1rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* --- Nav --- */
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--space-2) var(--space-1);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition:
+    color var(--transition-entrance),
+    background-color var(--transition-entrance);
+  min-height: 44px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar__link:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+}
+
+.sidebar__link--active {
+  color: #ffffff;
+  background-color: rgba(79, 70, 229, 0.35);
+  font-weight: var(--font-weight-semibold);
+}
+
+.sidebar__link--collapsed {
+  justify-content: center;
+  padding: 0.625rem;
+}
+
+.sidebar__link-icon {
+  flex-shrink: 0;
+}
+
+.sidebar__link-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Collapse button --- */
+.sidebar__collapse-btn {
+  position: absolute;
+  right: -12px;
+  top: 72px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  box-shadow: var(--shadow-1);
+  transition: background-color var(--transition-entrance), color var(--transition-entrance);
+  z-index: var(--z-base);
+}
+
+.sidebar__collapse-btn:hover {
+  background-color: var(--color-indigo);
+  color: #ffffff;
+  border-color: var(--color-indigo);
+}
+
+/* --- Footer --- */
+.sidebar__footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: var(--space-2) var(--space-1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.sidebar__user--collapsed {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.sidebar__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-indigo);
+  color: #ffffff;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar__user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  overflow: hidden;
+}
+
+.sidebar__user-name {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__user-role {
+  font-size: var(--font-size-small);
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__logout {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-md);
+  transition: color var(--transition-entrance), background-color var(--transition-entrance);
+  min-height: 44px;
+}
+
+.sidebar__logout:hover {
+  color: #ffffff;
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+.sidebar__logout--collapsed {
+  justify-content: center;
+  padding: 0.625rem;
+}
+
+/* ============================================================
+   Mobile trigger
+   ============================================================ */
+
+.sidebar__mobile-trigger {
+  display: none;
+  color: var(--color-text);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-entrance);
+}
+
+.sidebar__mobile-trigger:hover {
+  background-color: var(--color-bg);
+}
+
+/* ============================================================
+   Mobile overlay & drawer
+   ============================================================ */
+
+.sidebar__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.5);
+  z-index: var(--z-overlay);
+  animation: fade-in 200ms ease-out;
+}
+
+.sidebar--mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(280px, 85vw);
+  height: 100dvh;
+  background-color: var(--color-navy);
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 250ms ease-out;
+  box-shadow: var(--shadow-3);
+}
+
+.sidebar--mobile-open {
+  transform: translateX(0);
+}
+
+.sidebar__drawer-close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-entrance);
+}
+
+.sidebar__drawer-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .sidebar--desktop {
+    display: none;
+  }
+
+  .sidebar__mobile-trigger {
+    display: flex;
+  }
+}

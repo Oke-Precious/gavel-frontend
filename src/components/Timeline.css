@@ -1,0 +1,180 @@
+/* ============================================================
+   Timeline Component
+   Horizontal (desktop) → Vertical (mobile)
+   ============================================================ */
+
+/* --- Container: horizontal by default --- */
+.timeline {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  width: 100%;
+  position: relative;
+}
+
+/* --- Step --- */
+.timeline__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  gap: 0.5rem;
+}
+
+/* --- Connector line (horizontal) --- */
+.timeline__connector {
+  position: absolute;
+  top: 14px; /* vertically centered with node */
+  left: calc(50% + 14px);
+  right: calc(-50% + 14px);
+  height: 2px;
+  background-color: var(--color-border);
+  z-index: 0;
+  transition: background-color var(--transition-base);
+}
+
+.timeline__connector--completed {
+  background-color: var(--color-compliant);
+}
+
+/* --- Node circle --- */
+.timeline__node {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border);
+  background-color: var(--color-surface);
+  position: relative;
+  z-index: 1;
+  transition:
+    border-color    var(--transition-base),
+    background-color var(--transition-base),
+    color           var(--transition-base);
+  flex-shrink: 0;
+}
+
+.timeline__node-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-border);
+  transition: background-color var(--transition-base);
+}
+
+/* Completed */
+.timeline__step--completed .timeline__node {
+  border-color: var(--color-compliant);
+  background-color: var(--color-compliant);
+  color: #ffffff;
+}
+
+/* Active */
+.timeline__step--active .timeline__node {
+  border-color: var(--color-indigo);
+  background-color: var(--color-surface);
+  box-shadow: 0 0 0 4px var(--color-indigo-light);
+}
+
+.timeline__step--active .timeline__node-inner {
+  background-color: var(--color-indigo);
+}
+
+/* Pending */
+.timeline__step--pending .timeline__node {
+  border-color: var(--color-border);
+}
+
+/* --- Labels --- */
+.timeline__label-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  text-align: center;
+  max-width: 120px;
+}
+
+.timeline__label {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  line-height: 1.3;
+  transition: color var(--transition-base);
+}
+
+.timeline__step--active .timeline__label {
+  color: var(--color-indigo);
+}
+
+.timeline__step--completed .timeline__label {
+  color: var(--color-compliant);
+}
+
+.timeline__date {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.timeline__stall-reason {
+  font-size: 10px;
+  color: var(--color-warning);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+/* --- Compact variant --- */
+.timeline--compact .timeline__node {
+  width: 20px;
+  height: 20px;
+}
+
+.timeline--compact .timeline__connector {
+  top: 10px;
+}
+
+.timeline--compact .timeline__label {
+  font-size: 10px;
+}
+
+/* ============================================================
+   Responsive: vertical on mobile
+   ============================================================ */
+
+@media (max-width: 640px) {
+  .timeline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .timeline__step {
+    flex-direction: row;
+    align-items: flex-start;
+    flex: none;
+    width: 100%;
+    gap: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+
+  /* Connector becomes a vertical line */
+  .timeline__connector {
+    position: absolute;
+    top: 28px;
+    left: 13px;
+    right: auto;
+    width: 2px;
+    height: calc(100% - 14px);
+    bottom: 0;
+  }
+
+  .timeline__label-group {
+    align-items: flex-start;
+    text-align: left;
+    max-width: none;
+    padding-top: 0.25rem;
+  }
+}

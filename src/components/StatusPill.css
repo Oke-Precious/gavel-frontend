@@ -1,0 +1,57 @@
+/* ============================================================
+   StatusPill Component
+   ============================================================ */
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* --- Sizes --- */
+.status-pill--sm {
+  font-size: var(--font-size-small);
+  padding: 0.1875rem 0.5rem;
+}
+
+.status-pill--md {
+  font-size: var(--font-size-caption);
+  padding: 0.3125rem 0.75rem;
+}
+
+/* --- Variants --- */
+.status-pill--compliant {
+  color: var(--color-compliant);
+  background-color: var(--color-compliant-bg);
+}
+
+.status-pill--warning {
+  color: #B45309; /* darker amber for legibility on bg */
+  background-color: var(--color-warning-bg);
+}
+
+.status-pill--severe {
+  color: #C2410C; /* darker orange for legibility */
+  background-color: var(--color-severe-bg);
+}
+
+.status-pill--critical {
+  color: var(--color-critical);
+  background-color: var(--color-critical-bg);
+  animation: pulse-critical 2s ease-in-out infinite;
+}
+
+/* --- Icon --- */
+.status-pill__icon {
+  flex-shrink: 0;
+}
+
+/* --- Label --- */
+.status-pill__label {
+  letter-spacing: 0.01em;
+}

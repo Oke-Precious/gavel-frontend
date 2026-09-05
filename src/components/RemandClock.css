@@ -1,0 +1,62 @@
+/* ============================================================
+   RemandClock Component
+   ============================================================ */
+
+.remand-clock {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* --- Size variants (adjust gap) --- */
+.remand-clock--sm { gap: 0.5rem; }
+.remand-clock--md { gap: 0.75rem; }
+.remand-clock--lg { gap: 1rem; }
+
+/* Critical: add subtle ring pulse */
+.remand-clock--critical svg {
+  animation: pulse-critical 2.5s ease-in-out infinite;
+}
+
+/* --- Status label row --- */
+.remand-clock__status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* --- Badge reuses StatusPill-like styling --- */
+.remand-clock__badge {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  padding: 0.1875rem 0.625rem;
+}
+
+.remand-clock__badge--compliant {
+  color: var(--color-compliant);
+  background-color: var(--color-compliant-bg);
+}
+
+.remand-clock__badge--warning {
+  color: #B45309;
+  background-color: var(--color-warning-bg);
+}
+
+.remand-clock__badge--severe {
+  color: #C2410C;
+  background-color: var(--color-severe-bg);
+}
+
+.remand-clock__badge--critical {
+  color: var(--color-critical);
+  background-color: var(--color-critical-bg);
+  animation: pulse-critical 2s ease-in-out infinite;
+}
+
+.remand-clock__limit-label {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}

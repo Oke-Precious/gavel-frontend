@@ -1,0 +1,238 @@
+/* ============================================================
+   DataTable Component
+   ============================================================ */
+
+.datatable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* --- Filters slot --- */
+.datatable__filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* --- Error --- */
+.datatable__error {
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-critical-bg);
+  border: 1px solid var(--color-critical);
+  border-radius: var(--radius-lg);
+  color: var(--color-critical);
+  font-size: var(--font-size-caption);
+}
+
+/* --- Table wrapper (horizontal scroll guard) --- */
+.datatable__table-wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.datatable__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* --- Table head --- */
+.datatable__thead {
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.datatable__th {
+  padding: 0.75rem var(--space-2);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-align: left;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.datatable__th--sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-entrance);
+}
+
+.datatable__th--sortable:hover {
+  color: var(--color-text);
+}
+
+.datatable__th-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.datatable__sort-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-indigo);
+}
+
+.datatable__sort-idle {
+  color: var(--color-border);
+  display: flex;
+}
+
+/* --- Table body --- */
+.datatable__tbody .datatable__row {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color var(--transition-entrance);
+}
+
+.datatable__tbody .datatable__row:last-child {
+  border-bottom: none;
+}
+
+.datatable__tbody .datatable__row:hover {
+  background-color: var(--color-bg);
+}
+
+.datatable__row--clickable {
+  cursor: pointer;
+}
+
+.datatable__row--clickable:focus-visible {
+  outline: 2px solid var(--color-indigo);
+  outline-offset: -2px;
+}
+
+.datatable__td {
+  padding: 1rem var(--space-2);
+  font-size: var(--font-size-caption);
+  color: var(--color-text);
+  vertical-align: middle;
+}
+
+/* --- Empty state wrapper --- */
+.datatable__empty {
+  padding: var(--space-6) var(--space-4);
+}
+
+/* ============================================================
+   Mobile: stacked cards
+   Hide the table, show cards
+   ============================================================ */
+
+.datatable__cards {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.datatable__card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow var(--transition-base);
+}
+
+.datatable__card--clickable {
+  cursor: pointer;
+}
+
+.datatable__card--clickable:hover {
+  box-shadow: var(--shadow-2);
+}
+
+.datatable__card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--font-size-caption);
+}
+
+.datatable__card-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.datatable__card-value {
+  color: var(--color-text);
+  text-align: right;
+}
+
+@media (max-width: 767px) {
+  .datatable__table-wrapper {
+    display: none;
+  }
+
+  .datatable__cards {
+    display: flex;
+  }
+}
+
+/* ============================================================
+   Pagination
+   ============================================================ */
+
+.datatable__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding-top: var(--space-1);
+}
+
+.datatable__pagination-info {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.datatable__pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.datatable__page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  transition: background-color var(--transition-entrance), color var(--transition-entrance);
+}
+
+.datatable__page-btn:hover:not(:disabled) {
+  background-color: var(--color-indigo-light);
+  color: var(--color-indigo);
+}
+
+.datatable__page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.datatable__page-indicator {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  padding: 0 0.5rem;
+  min-width: 60px;
+  text-align: center;
+}

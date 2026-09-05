@@ -1,0 +1,134 @@
+/* ============================================================
+   Toast Component
+   ============================================================ */
+
+/* --- Container --- */
+.toast-container {
+  position: fixed;
+  bottom: var(--space-3);
+  right: var(--space-3);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 380px;
+  width: calc(100vw - 2rem);
+  pointer-events: none;
+}
+
+/* --- Individual toast --- */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem var(--space-2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-3);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  position: relative;
+  overflow: hidden;
+  pointer-events: all;
+  animation: slide-up-fade-in 200ms ease-out;
+  border: 1px solid transparent;
+}
+
+/* --- Variants --- */
+.toast--success {
+  background-color: var(--color-compliant-bg);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #065F46;
+}
+
+.toast--success .toast__icon { color: var(--color-compliant); }
+.toast--success .toast__bar  { background-color: var(--color-compliant); }
+
+.toast--error {
+  background-color: var(--color-critical-bg);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #991B1B;
+}
+
+.toast--error .toast__icon { color: var(--color-critical); }
+.toast--error .toast__bar  { background-color: var(--color-critical); }
+
+.toast--warning {
+  background-color: var(--color-warning-bg);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #92400E;
+}
+
+.toast--warning .toast__icon { color: var(--color-warning); }
+.toast--warning .toast__bar  { background-color: var(--color-warning); }
+
+.toast--info {
+  background-color: var(--color-indigo-light);
+  border-color: rgba(79, 70, 229, 0.2);
+  color: #312E81;
+}
+
+.toast--info .toast__icon { color: var(--color-indigo); }
+.toast--info .toast__bar  { background-color: var(--color-indigo); }
+
+/* --- Icon --- */
+.toast__icon {
+  flex-shrink: 0;
+}
+
+/* --- Message --- */
+.toast__message {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* --- Dismiss button --- */
+.toast__dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: opacity var(--transition-entrance), background-color var(--transition-entrance);
+}
+
+.toast__dismiss:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* --- Countdown bar --- */
+.toast__bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform-origin: left center;
+  transform: scaleX(1);
+  transition: transform linear;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* ============================================================
+   Responsive: toasts appear from top on mobile
+   ============================================================ */
+
+@media (max-width: 640px) {
+  .toast-container {
+    top: var(--space-2);
+    bottom: auto;
+    right: var(--space-2);
+    left: var(--space-2);
+    max-width: none;
+    width: auto;
+  }
+
+  .toast {
+    animation: slide-down-fade-in 200ms ease-out;
+  }
+}
