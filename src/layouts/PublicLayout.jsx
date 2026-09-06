@@ -29,7 +29,7 @@ export default function PublicLayout() {
           </div>
           <div className="public-layout__footer-bottom">
             <span className="public-layout__footer-copy">
-              This is a concept platform built with synthetic data for demonstration purposes. It is not connected to any government or NGO system.
+              © 2026 GAVEL. Tracking justice with transparency. Synthetic data for demonstration purposes. This is a concept platform built with synthetic data for demonstration purposes. It is not connected to any government or NGO system.
             </span>
           </div>
         </div>

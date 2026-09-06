@@ -1,11 +1,12 @@
 /* ============================================================
-   PublicLayout
+   PublicLayout Styling
    ============================================================ */
 
 .public-layout {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  min-height: 100vh;
+  background-color: #F8FAFC;
 }
 
 .public-layout__main {
@@ -14,28 +15,35 @@
 
 /* --- Footer --- */
 .public-layout__footer {
-  border-top: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-  padding: var(--space-2) 0;
+  border-top: 1px solid #E2E8F0;
+  background-color: #F8FAFC;
+  padding: 3rem 0 2rem;
   margin-top: auto;
 }
 
 .public-layout__footer-inner {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 1.75rem;
 }
 
 .public-layout__footer-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: 1.5rem;
   flex-wrap: wrap;
 }
 
+.public-layout__footer-brand-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.02em;
+}
+
 .public-layout__footer-brand-img {
-  height: 20px;
+  height: 48px;
   width: auto;
   object-fit: contain;
   flex-shrink: 0;
@@ -44,31 +52,32 @@
 .public-layout__footer-links {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 1.75rem;
   flex-wrap: wrap;
 }
 
 .public-layout__footer-link {
-  font-size: var(--font-size-small);
-  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  color: #475569;
   text-decoration: none;
-  font-weight: var(--font-weight-medium);
+  font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 .public-layout__footer-link:hover {
-  color: var(--color-indigo);
+  color: #4F46E5;
   text-decoration: none;
 }
 
 .public-layout__footer-bottom {
-  border-top: 1px solid var(--color-border);
-  padding-top: var(--space-3);
+  border-top: 1px solid #E2E8F0;
+  padding-top: 1.5rem;
 }
 
 .public-layout__footer-copy {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  line-height: var(--line-height-base);
+  font-size: 0.75rem;
+  color: #94A3B8;
+  line-height: 1.6;
   display: block;
 }
 
@@ -76,11 +85,11 @@
   .public-layout__footer-top {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-4);
+    gap: 1rem;
   }
   .public-layout__footer-links {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-2);
+    gap: 0.75rem;
   }
 }
