@@ -1,10 +1,3 @@
-import React from 'react';
-import EmptyState from '../../components/EmptyState.jsx';
+import CaseDetailPage from '../CaseDetail/CaseDetailPage.jsx';
 
-export default function CasesPage() {
-  return (
-    <div style={{ padding: '2rem 0' }}>
-      <EmptyState icon="inbox" message="Cases" subtext="Coming soon." />
-    </div>
-  );
-}
+export default CaseDetailPage;

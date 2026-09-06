@@ -96,10 +96,13 @@ export default function Sidebar() {
       <>
         {/* Logo */}
         <div className="sidebar__logo-row">
-          <div className="sidebar__logo">
-            <Scale size={20} strokeWidth={2.5} aria-hidden="true" />
-            {!collapsed && <span className="sidebar__logo-text">GAVEL</span>}
-          </div>
+          <NavLink to="/dashboard" className="sidebar__logo-link" aria-label="GAVEL Dashboard">
+            <img
+              src="/gavel white logo.png"
+              alt="GAVEL"
+              className="sidebar__logo-img"
+            />
+          </NavLink>
         </div>
 
         {/* Nav items */}
