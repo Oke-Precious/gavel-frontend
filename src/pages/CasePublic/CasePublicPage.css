@@ -1,0 +1,304 @@
+/* ============================================================
+   CasePublicPage — Public Case Status Detail Page CSS
+   ============================================================ */
+
+.case-public-page {
+  background-color: #F8FAFC;
+  min-height: calc(100vh - 140px);
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.case-public-container {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navigation Back Action */
+.case-public-nav {
+  margin-bottom: 1.25rem;
+}
+
+.case-public-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  color: #64748B;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  margin-left: -0.6rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.case-public-back-btn:hover {
+  color: #0F172A;
+  background-color: #E2E8F0;
+}
+
+/* Top Header Bar */
+.case-public-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.case-public-header__meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.case-public-header__caption {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748B;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.case-public-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.case-public-header__title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.case-public-watch-btn {
+  height: 44px;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+/* Grid Layout for Remand Clock & Jurisdiction Cards */
+.case-public-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.case-public-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+}
+
+.case-public-card__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+/* Card 1: Time in Custody */
+.case-public-custody-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.case-public-custody-card .case-public-card__title {
+  align-self: flex-start;
+  margin-bottom: 1rem;
+}
+
+.case-public-clock-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 0 0.5rem;
+}
+
+.case-public-custody-caption {
+  font-size: 0.875rem;
+  color: #64748B;
+  text-align: center;
+  max-width: 440px;
+  margin: 1rem auto 0;
+  line-height: 1.6;
+}
+
+/* Card 2: Case Jurisdiction */
+.case-public-jurisdiction-card .case-public-card__title {
+  border-bottom: 1px solid #F1F5F9;
+  padding-bottom: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.case-public-jurisdiction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.jurisdiction-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.jurisdiction-item__label {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #94A3B8;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.jurisdiction-item__value {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.jurisdiction-item__icon {
+  color: #4F46E5;
+  flex-shrink: 0;
+}
+
+/* Card 3: Case Progression Timeline */
+.case-public-progression-card {
+  width: 100%;
+}
+
+.case-public-timeline-wrapper {
+  padding: 1rem 0 0.5rem;
+  width: 100%;
+}
+
+/* Watch This Case Modal */
+.watch-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  padding-top: 0.5rem;
+}
+
+.watch-modal-desc {
+  font-size: 0.875rem;
+  color: #64748B;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.watch-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.watch-modal-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.watch-modal-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.watch-modal-input-icon {
+  position: absolute;
+  left: 1rem;
+  color: #64748B;
+  pointer-events: none;
+}
+
+.watch-modal-input {
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  padding-left: 2.75rem;
+  padding-right: 1rem;
+  border-radius: 8px;
+  border: 1px solid #CBD5E1;
+  font-size: 0.95rem;
+  color: #0F172A;
+  background-color: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.watch-modal-input:focus {
+  outline: none;
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.watch-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Skeleton & Error Placeholders */
+.case-public-skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.case-public-error-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+}
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS (Mobile & Tablet)
+   ============================================================ */
+
+@media (max-width: 992px) {
+  .case-public-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .case-public-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .case-public-header__title {
+    font-size: 1.5rem;
+  }
+
+  .case-public-watch-btn {
+    width: 100%;
+  }
+
+  .case-public-header {
+    align-items: flex-start;
+  }
+}
