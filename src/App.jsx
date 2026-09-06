@@ -18,6 +18,7 @@ const StyleGuidePage     = lazy(() => import('./pages/StyleGuide/StyleGuidePage.
 const PublicLookupPage   = lazy(() => import('./pages/PublicLookup/PublicLookupPage.jsx'));
 const CasePublicPage     = lazy(() => import('./pages/CasePublic/CasePublicPage.jsx'));
 const ScorecardPage      = lazy(() => import('./pages/Scorecard/ScorecardPage.jsx'));
+const BacklogMapPage     = lazy(() => import('./pages/BacklogMap/BacklogMapPage.jsx'));
 const LoginPage          = lazy(() => import('./pages/Login/LoginPage.jsx'));
 const RegisterPage       = lazy(() => import('./pages/Register/RegisterPage.jsx'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPassword/ForgotPasswordPage.jsx'));
@@ -91,6 +92,8 @@ export default function App() {
                   <Route index element={<PublicLookupPage />} />
                   <Route path="lookup/:caseHashId" element={<CasePublicPage />} />
                   <Route path="scorecard" element={<ScorecardPage />} />
+                  <Route path="backlog-map" element={<BacklogMapPage />} />
+                  <Route path="map" element={<BacklogMapPage />} />
                   <Route path="style-guide" element={<StyleGuidePage />} />
                 </Route>
 

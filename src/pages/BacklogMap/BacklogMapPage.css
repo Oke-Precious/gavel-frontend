@@ -1,0 +1,396 @@
+/* ==========================================================================
+   National Backlog Map Page Styles — GAVEL Design System
+   ========================================================================== */
+
+.backlog-map-page {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 16px 48px 16px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .backlog-map-page {
+    padding: 32px 24px 64px 24px;
+  }
+}
+
+.backlog-map-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* --------------------------------------------------------------------------
+   Page Header
+   -------------------------------------------------------------------------- */
+.backlog-map-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .backlog-map-header {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.backlog-map-header__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.backlog-map-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+@media (min-width: 640px) {
+  .backlog-map-title {
+    font-size: 28px;
+  }
+}
+
+.backlog-map-subheading {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.backlog-map-test-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748B;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.15s ease;
+}
+
+.backlog-map-test-toggle:hover,
+.backlog-map-test-toggle.is-active {
+  background-color: #FEF2F2;
+  border-color: #EF4444;
+  color: #EF4444;
+}
+
+/* --------------------------------------------------------------------------
+   Grid Layout: Map Column + Side Panel Column
+   -------------------------------------------------------------------------- */
+.backlog-map-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1025px) {
+  .backlog-map-grid {
+    grid-template-columns: 7fr 5fr;
+  }
+}
+
+.backlog-map-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+/* --------------------------------------------------------------------------
+   Interactive SVG Map Component
+   -------------------------------------------------------------------------- */
+.map-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.backlog-map-mobile-select-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .backlog-map-mobile-select-row {
+    display: none;
+  }
+}
+
+.backlog-map-mobile-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1E293B;
+}
+
+.backlog-map-mobile-select {
+  flex: 1;
+  min-height: 44px;
+  padding: 8px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #0F172A;
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+}
+
+.backlog-map-svg-wrapper {
+  position: relative;
+  width: 100%;
+  background-color: #F8FAFC;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.backlog-map-svg {
+  width: 100%;
+  height: auto;
+  max-height: 480px;
+  overflow: visible;
+}
+
+.backlog-map-state-path {
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, filter 0.15s ease;
+}
+
+.backlog-map-state-path:hover,
+.backlog-map-state-path.is-hovered {
+  opacity: 0.85;
+  filter: brightness(1.08);
+}
+
+.backlog-map-state-path.is-selected {
+  stroke: #0F172A;
+  stroke-width: 3px;
+  filter: drop-shadow(0px 2px 6px rgba(15, 23, 42, 0.3));
+}
+
+.backlog-map-state-path:focus-visible {
+  outline: 2px solid #4F46E5;
+  outline-offset: 2px;
+}
+
+.backlog-map-state-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  fill: #1E293B;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.backlog-map-state-label.is-selected {
+  font-weight: 700;
+  fill: #0F172A;
+}
+
+/* Tooltip */
+.backlog-map-tooltip {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #0F172A;
+  color: #FFFFFF;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+  z-index: 10;
+}
+
+/* --------------------------------------------------------------------------
+   Legend Below Map — Four-Tier Color Ramp
+   -------------------------------------------------------------------------- */
+.backlog-map-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #E2E8F0;
+}
+
+.backlog-map-legend-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+}
+
+.backlog-map-legend-items {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.backlog-map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.legend-swatch--compliant { background-color: #10B981; }
+.legend-swatch--warning   { background-color: #F59E0B; }
+.legend-swatch--severe    { background-color: #F97316; }
+.legend-swatch--critical  { background-color: #EF4444; }
+
+.legend-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1E293B;
+}
+
+/* --------------------------------------------------------------------------
+   Side Panel: State Stat Card
+   -------------------------------------------------------------------------- */
+.stat-panel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.stat-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.stat-panel-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-panel-pin-icon {
+  color: #4F46E5;
+}
+
+.stat-panel-state-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.stat-panel-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.stat-metric-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+}
+
+.stat-metric-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: #EEF2FF;
+  color: #4F46E5;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.stat-metric-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-metric-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748B;
+}
+
+.stat-metric-value {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.stat-metric-value--reason {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.stat-panel-footer {
+  padding-top: 16px;
+  border-top: 1px solid #E2E8F0;
+}
+
+.stat-panel-cta {
+  width: 100%;
+  min-height: 44px;
+}
+
+/* --------------------------------------------------------------------------
+   Skeleton & Error States
+   -------------------------------------------------------------------------- */
+.backlog-map-skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.backlog-map-error-card {
+  max-width: 640px;
+  margin: 48px auto;
+}
