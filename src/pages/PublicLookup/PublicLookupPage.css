@@ -1,587 +1,232 @@
 /* ============================================================
-   PublicLookupPage — Redesigned Landing Page CSS
+   PublicLookupPage — Standalone Public Case Lookup Page
    ============================================================ */
 
-.landing-page {
+.public-lookup-page {
   display: flex;
   flex-direction: column;
-  background-color: #F8FAFC;
-  min-height: 100vh;
-}
-
-/* ============================================================
-   1. HERO SECTION
-   ============================================================ */
-
-.hero-section {
-  padding: 4.5rem 0 4rem;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 140px);
+  padding: 3rem 1.5rem;
   background-color: #F8FAFC;
 }
 
-.hero-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 3.5rem;
-  align-items: center;
-}
-
-.hero-content {
+.public-lookup-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-}
-
-.hero-title {
-  font-size: 2.85rem;
-  font-weight: 800;
-  color: #0F172A;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-  margin: 0 0 1.25rem;
-}
-
-.hero-subtitle {
-  font-size: 1.05rem;
-  color: #475569;
-  line-height: 1.65;
-  max-width: 500px;
-  margin: 0 0 2.25rem;
-}
-
-.hero-actions {
-  display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.btn-hero-primary {
-  background-color: #4F46E5;
-  color: #ffffff;
-  padding: 0.85rem 1.6rem;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
-}
-
-.btn-hero-primary:hover {
-  background-color: #4338CA;
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
-  transform: translateY(-1px);
-}
-
-.btn-hero-secondary {
-  background-color: #FFFFFF;
-  color: #1E293B;
-  padding: 0.85rem 1.6rem;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border: 1px solid #CBD5E1;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.btn-hero-secondary:hover {
-  background-color: #F1F5F9;
-  border-color: #94A3B8;
-  color: #0F172A;
-}
-
-/* Right Hero Visual — Active Tracking Card */
-.hero-visual {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.hero-tracking-card {
   width: 100%;
-  max-width: 330px;
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* Main Search Card */
+.lookup-card {
+  width: 100%;
   background: #FFFFFF;
+  border: 1px solid #E2E8F0;
   border-radius: 16px;
-  padding: 2.75rem 2rem;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.02);
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hero-tracking-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.09);
-}
-
-.tracking-icon-circle {
-  width: 86px;
-  height: 86px;
-  border-radius: 50%;
-  background: #ECFDF5;
-  border: 4px solid #10B981;
-  margin: 0 auto 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.1);
-}
-
-.tracking-icon-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #059669;
-}
-
-.tracking-gavel-icon {
-  stroke-width: 1.8px;
-}
-
-.tracking-case-id {
-  display: block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #94A3B8;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 0.35rem;
-}
-
-.tracking-status-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #0F172A;
-  margin: 0;
-}
-
-/* ============================================================
-   2. STAT STRIP
-   ============================================================ */
-
-.stat-strip {
-  padding: 2.5rem 0 3.5rem;
-  background-color: #F8FAFC;
-}
-
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.75rem;
-}
-
-.stat-card {
-  background: #FFFFFF;
-  border-radius: 12px;
-  padding: 2rem 1.75rem;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.02);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-.stat-card-red-accent {
-  border-left: 4px solid #EF4444;
-}
-
-.stat-value {
-  font-size: 2.65rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-.stat-value-blue {
-  color: #4F46E5;
-}
-
-.stat-value-amber {
-  color: #D97706;
-}
-
-.stat-value-red {
-  color: #EF4444;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: #64748B;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* ============================================================
-   3. HOW GAVEL WORKS SECTION
-   ============================================================ */
-
-.how-it-works-section {
-  padding: 4rem 0 4.5rem;
-  background-color: #F8FAFC;
-}
-
-.section-header {
+  align-items: center;
   text-align: center;
-  margin-bottom: 3.5rem;
+  padding: 3rem 2.5rem !important;
 }
 
-.section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #0F172A;
-  margin: 0 0 0.5rem;
-}
-
-.section-subtitle {
-  font-size: 1rem;
-  color: #64748B;
-  margin: 0;
-}
-
-.steps-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.75rem;
-}
-
-.step-card {
-  background: #FFFFFF;
-  border-radius: 12px;
-  padding: 2rem 1.75rem;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+.lookup-card__header {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
+  align-items: center;
+  margin-bottom: 2rem;
 }
 
-.step-icon-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+.lookup-card__icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background-color: #EEF2FF;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
 }
 
-.step-icon-blue {
-  background-color: #EEF2FF;
+.lookup-card__icon {
   color: #4F46E5;
+  stroke-width: 1.75px;
 }
 
-.step-icon-orange {
-  background-color: #FEF3C7;
-  color: #D97706;
-}
-
-.step-icon-green {
-  background-color: #D1FAE5;
-  color: #059669;
-}
-
-.step-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #0F172A;
-  margin: 0 0 0.5rem;
-}
-
-.step-desc {
-  font-size: 0.875rem;
-  color: #64748B;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* ============================================================
-   4. MAP PREVIEW SECTION
-   ============================================================ */
-
-.map-preview-section {
-  padding-bottom: 5rem;
-  background-color: #F8FAFC;
-}
-
-.map-banner-card {
-  background: #FFFFFF;
-  border-radius: 16px;
-  border: 1px solid #E2E8F0;
-  overflow: hidden;
-  display: flex;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
-}
-
-.map-banner-info {
-  width: 48%;
-  background-color: #0A0F1D;
-  color: #FFFFFF;
-  padding: 3.5rem 3rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.map-banner-title {
+.lookup-card__title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #FFFFFF;
-  margin: 0 0 1rem;
-}
-
-.map-banner-subtitle {
-  font-size: 0.95rem;
-  color: #94A3B8;
-  line-height: 1.6;
-  margin: 0 0 2.25rem;
-  max-width: 380px;
-}
-
-.map-banner-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: transparent;
-  border: none;
-  color: #FFFFFF;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.2s ease;
-  width: fit-content;
-}
-
-.map-banner-link:hover {
-  color: #818CF8;
-  transform: translateX(4px);
-}
-
-.map-banner-graphic {
-  width: 52%;
-  background-color: #F8FAFC;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-left: 1px solid #E2E8F0;
-  overflow: hidden;
-}
-
-.nigeria-map-container {
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nigeria-choropleth-img {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  display: block;
-  object-fit: cover;
-}
-
-/* ============================================================
-   SEARCH LOOKUP MODAL
-   ============================================================ */
-
-.lookup-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  animation: fadeIn 0.2s ease-out;
-}
-
-.lookup-modal-container {
-  background-color: #FFFFFF;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 480px;
-  padding: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  position: relative;
-  animation: slideUp 0.25s ease-out;
-}
-
-.lookup-modal-close {
-  position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  background: transparent;
-  border: none;
-  color: #94A3B8;
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 6px;
-  transition: color 0.2s;
-}
-
-.lookup-modal-close:hover {
   color: #0F172A;
-  background-color: #F1F5F9;
-}
-
-.lookup-modal-header {
-  margin-bottom: 1.5rem;
-}
-
-.lookup-modal-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #0F172A;
-  margin: 0 0 0.35rem;
-}
-
-.lookup-modal-desc {
-  font-size: 0.875rem;
-  color: #64748B;
   margin: 0;
-  line-height: 1.5;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
 }
 
-.lookup-modal-form {
+/* Form Fields */
+.lookup-card__form {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.75rem;
+  text-align: left;
 }
 
-.lookup-input-wrapper {
+.lookup-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lookup-card__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1E293B;
+  margin-bottom: 0.25rem;
+}
+
+.lookup-card__input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
-.lookup-input-icon {
+.lookup-card__input-icon {
   position: absolute;
   left: 1rem;
-  color: #94A3B8;
+  color: #64748B;
   pointer-events: none;
 }
 
-.lookup-modal-input {
+.lookup-card__input {
   width: 100%;
   height: 48px;
+  min-height: 48px;
   padding-left: 2.75rem;
   padding-right: 1rem;
-  border-radius: 8px;
+  background-color: #FFFFFF;
   border: 1px solid #CBD5E1;
+  border-radius: 8px;
   font-size: 0.95rem;
   color: #0F172A;
-  background-color: #F8FAFC;
-  transition: all 0.2s ease;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.lookup-modal-input:focus {
+.lookup-card__input:focus {
   outline: none;
   border-color: #4F46E5;
-  background-color: #FFFFFF;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
-.lookup-modal-hints {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid #F1F5F9;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.lookup-card__input::placeholder {
+  color: #94A3B8;
 }
 
-.hint-label {
-  font-size: 0.8rem;
+.lookup-card__helper {
+  font-size: 0.8125rem;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 0.35rem 0 0;
+}
+
+.lookup-card__submit-btn {
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  background-color: #4F46E5 !important;
+  border-color: #4F46E5 !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+.lookup-card__submit-btn:hover:not(:disabled) {
+  background-color: #4338CA !important;
+  border-color: #4338CA !important;
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3) !important;
+}
+
+/* Below-the-fold Demo Hint */
+.lookup-card__demo-hint {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.demo-hint__text {
+  font-size: 0.875rem;
   color: #64748B;
 }
 
-.hint-chip {
+.demo-hint__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   background-color: #EEF2FF;
   color: #4F46E5;
   border: 1px solid #C7D2FE;
-  padding: 0.25rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-family: monospace;
+  padding: 0.4rem 0.85rem;
+  min-height: 44px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
-.hint-chip:hover {
+.demo-hint__chip:hover {
   background-color: #E0E7FF;
+  border-color: #A5B4FC;
+  transform: translateY(-1px);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+.demo-hint__chip:focus-visible {
+  outline: 2px solid #4F46E5;
+  outline-offset: 2px;
 }
 
 /* ============================================================
-   RESPONSIVE LAYOUT ADJUSTMENTS
+   RESPONSIVE LAYOUT (Mobile & Tablet Breakpoints)
    ============================================================ */
 
-@media (max-width: 992px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
+@media (max-width: 640px) {
+  .public-lookup-page {
+    padding: 1.5rem 1rem;
+    min-height: calc(100vh - 120px);
   }
 
-  .hero-visual {
-    justify-content: center;
+  .lookup-card {
+    padding: 2rem 1.25rem !important;
+    border-radius: 12px;
   }
 
-  .map-banner-card {
-    flex-direction: column;
+  .lookup-card__title {
+    font-size: 1.5rem;
   }
 
-  .map-banner-info, .map-banner-graphic {
-    width: 100%;
+  .lookup-card__icon-box {
+    width: 56px;
+    height: 56px;
   }
 
-  .map-banner-graphic {
-    border-left: none;
-    border-top: 1px solid #E2E8F0;
+  .lookup-card__demo-hint {
+    margin-top: 1.5rem;
   }
 }
 
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 2.25rem;
-  }
-
-  .stat-grid, .steps-grid {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-
-  .hero-actions {
-    width: 100%;
-  }
-
-  .btn-hero-primary, .btn-hero-secondary {
-    width: 100%;
-    text-align: center;
-  }
-}
