@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, FileSearch, Hash, Copy } from 'lucide-react';
-import Button from '../../components/Button.jsx';
-import Card from '../../components/Card.jsx';
+import { FileSearch, Hash, Search, Copy } from 'lucide-react';
 import { publicApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import './PublicLookupPage.css';
@@ -26,9 +24,7 @@ export default function PublicLookupPage() {
 
     setIsLoading(true);
     try {
-      // Call public API endpoint: GET /public/cases/:caseHashId
       const caseData = await publicApi.getCaseByHashId(cleanId);
-      // Navigate to detailed view on success
       const finalHash = caseData?.caseHashId || cleanId;
       navigate(`/lookup/${encodeURIComponent(finalHash)}`);
     } catch (err) {
@@ -46,15 +42,14 @@ export default function PublicLookupPage() {
   };
 
   return (
-    <div className="public-lookup-page">
-      <div className="container public-lookup-container">
-        <Card className="lookup-card" padding="lg">
-          <div className="lookup-card__header">
-            <div className="lookup-card__icon-box" aria-hidden="true">
-              <FileSearch size={32} className="lookup-card__icon" />
-            </div>
-            <h1 className="lookup-card__title">Check a Case Status</h1>
+    <div className="lookup-page">
+      <div className="lookup-container">
+        <div className="lookup-card">
+          <div className="lookup-card__icon" aria-hidden="true">
+            <FileSearch size={48} strokeWidth={1.5} />
           </div>
+
+          <h1 className="lookup-card__title">Check a Case Status</h1>
 
           <form onSubmit={handleSearch} className="lookup-card__form" noValidate>
             <div className="lookup-card__field">
@@ -62,7 +57,7 @@ export default function PublicLookupPage() {
                 Enter Case Hash ID
               </label>
               <div className="lookup-card__input-wrapper">
-                <Hash size={18} className="lookup-card__input-icon" aria-hidden="true" />
+                <Hash size={18} className="lookup-card__input-icon" />
                 <input
                   id="case-hash-id-input"
                   type="text"
@@ -72,43 +67,37 @@ export default function PublicLookupPage() {
                   onChange={(e) => setCaseHashId(e.target.value)}
                   disabled={isLoading}
                   autoComplete="off"
-                  aria-describedby="privacy-helper-text"
                   required
                 />
               </div>
-              <p id="privacy-helper-text" className="lookup-card__helper">
+              <p className="lookup-card__helper">
                 We never show names. Only the case number is needed to protect the privacy of everyone involved.
               </p>
             </div>
 
-            <Button
+            <button
               type="submit"
-              variant="primary"
-              size="lg"
-              loading={isLoading}
-              disabled={!caseHashId.trim()}
-              iconRight={Search}
               className="lookup-card__submit-btn"
+              disabled={isLoading || !caseHashId.trim()}
             >
-              Search
-            </Button>
+              <span>Search</span>
+              <Search size={18} />
+            </button>
           </form>
-        </Card>
+        </div>
 
-        <div className="lookup-card__demo-hint">
-          <span className="demo-hint__text">Try a sample case:</span>
+        <div className="lookup-sample-row">
+          <span>Try a sample case:</span>
           <button
             type="button"
-            className="demo-hint__chip"
+            className="lookup-sample-chip"
             onClick={handleSampleClick}
-            aria-label={`Use sample case ID ${SAMPLE_CASE_ID}`}
           >
             <span>{SAMPLE_CASE_ID}</span>
-            <Copy size={14} aria-hidden="true" />
+            <Copy size={14} />
           </button>
         </div>
       </div>
     </div>
   );
 }
-

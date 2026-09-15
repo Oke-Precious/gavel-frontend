@@ -1,0 +1,260 @@
+/* RegisterPage.css — Split layout registration page matching LoginPage aesthetics */
+
+.register-split-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #F8FAFC;
+  font-family: 'Inter', sans-serif;
+  color: #0F172A;
+}
+
+/* ================================================================== */
+/* LEFT SIDE: Visual Showcase Panel (Desktop >=1025px)                */
+/* ================================================================== */
+.register-showcase {
+  display: none;
+  width: 48%;
+  background: linear-gradient(145deg, #0B192C 0%, #1E3A8A 50%, #1E293B 100%);
+  color: #FFFFFF;
+  padding: 3.5rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 1025px) {
+  .register-showcase {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
+
+.register-showcase__content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  z-index: 2;
+  position: relative;
+}
+
+.register-showcase__logo-img {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+}
+
+.register-showcase__hero {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.register-showcase__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #38BDF8;
+  margin-bottom: 1.5rem;
+}
+
+.register-showcase__title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: #FFFFFF;
+  margin-bottom: 1rem;
+}
+
+.register-showcase__subtitle {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #94A3B8;
+  max-width: 480px;
+}
+
+.register-showcase__features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.register-showcase__feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  color: #E2E8F0;
+}
+
+.register-showcase__feature-icon {
+  color: #10B981;
+}
+
+.register-showcase__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #64748B;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1.5rem;
+}
+
+/* ================================================================== */
+/* RIGHT SIDE: Register Form Panel                                     */
+/* ================================================================== */
+.register-form-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5rem 1.5rem;
+  overflow-y: auto;
+}
+
+.register-form-panel__inner {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.register-form-panel__mobile-logo {
+  height: 40px;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 1025px) {
+  .register-form-panel__mobile-header {
+    display: none;
+  }
+}
+
+.register-card {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+.register-card__header {
+  margin-bottom: 1.5rem;
+}
+
+.register-card__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin-bottom: 0.375rem;
+}
+
+.register-card__subtitle {
+  font-size: 0.875rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.register-card__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.register-card__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .register-card__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.register-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.register-card__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.register-card__input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.register-card__input-icon {
+  position: absolute;
+  left: 0.875rem;
+  color: #94A3B8;
+  pointer-events: none;
+}
+
+.register-card__input,
+.register-card__select {
+  width: 100%;
+  padding: 0.625rem 0.875rem 0.625rem 2.5rem;
+  font-size: 0.875rem;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.register-card__select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.register-card__input:focus,
+.register-card__select:focus {
+  border-color: #1E3A8A;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.register-card__select-chevron {
+  position: absolute;
+  right: 0.875rem;
+  color: #94A3B8;
+  pointer-events: none;
+}
+
+.register-card__submit-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.register-card__footer-note {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #64748B;
+  margin-top: 1rem;
+}
+
+.register-card__login-link {
+  color: #1E3A8A;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-card__login-link:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,152 @@
+/* NewCasePage.css — Styles for New Case Creation Form */
+
+.new-case-page {
+  padding: 2rem 0 4rem;
+  font-family: 'Inter', sans-serif;
+  color: #0F172A;
+}
+
+.new-case-container {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.new-case-top-nav {
+  display: flex;
+  align-items: center;
+}
+
+.new-case-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748B;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.new-case-back-btn:hover {
+  color: #1E3A8A;
+}
+
+.new-case-card__header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #F1F5F9;
+  padding-bottom: 1.25rem;
+}
+
+.new-case-card__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #0F172A;
+  margin-bottom: 0.375rem;
+}
+
+.new-case-card__subtitle {
+  font-size: 0.875rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.new-case-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.new-case-form__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .new-case-form__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.new-case-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.new-case-field--full {
+  grid-column: 1 / -1;
+}
+
+.new-case-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.new-case-input,
+.new-case-select,
+.new-case-textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.new-case-select {
+  cursor: pointer;
+}
+
+.new-case-input:focus,
+.new-case-select:focus,
+.new-case-textarea:focus {
+  border-color: #1E3A8A;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.new-case-checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.new-case-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #1E3A8A;
+  cursor: pointer;
+}
+
+.new-case-checkbox-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.new-case-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #F1F5F9;
+}

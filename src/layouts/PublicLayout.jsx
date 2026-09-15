@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import './PublicLayout.css';
 
 /**
  * PublicLayout — wraps all public-facing pages.
- * Contains the Navbar, main content area, and a minimal footer.
+ * Contains the Navbar, main content area, and a single footer with logo image.
  */
 export default function PublicLayout() {
   const [persona, setPersona] = useState('public');
@@ -21,10 +21,10 @@ export default function PublicLayout() {
           <div className="public-layout__footer-top">
             <img src="/gavel%20blue%20logo.png" alt="GAVEL Logo" className="public-layout__footer-brand-img" />
             <div className="public-layout__footer-links">
-              <a href="/about" className="public-layout__footer-link">About</a>
-              <a href="/privacy" className="public-layout__footer-link">Privacy Policy</a>
-              <a href="/terms" className="public-layout__footer-link">Terms of Use</a>
-              <a href="/contact" className="public-layout__footer-link">Contact</a>
+              <Link to="/about" className="public-layout__footer-link">About</Link>
+              <Link to="/privacy" className="public-layout__footer-link">Privacy Policy</Link>
+              <Link to="/terms" className="public-layout__footer-link">Terms of Use</Link>
+              <Link to="/contact" className="public-layout__footer-link">Contact</Link>
             </div>
           </div>
           <div className="public-layout__footer-bottom">

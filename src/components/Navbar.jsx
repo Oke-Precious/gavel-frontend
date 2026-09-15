@@ -4,10 +4,9 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 import './Navbar.css';
 
 /**
- * Navbar — public-facing top navigation bar.
- *
- * @param {string} activePersona — current demo persona ('public'|'legal-aid'|'records'|'admin'|'lawyer')
- * @param {Function} onPersonaChange — callback when persona changes
+ * Navbar — Public Top Navigation Bar.
+ * Links match exact design in attached screenshots:
+ * About | Look Up a Case | Transparency | Volunteer | Login
  */
 
 const PERSONAS = [
@@ -16,12 +15,6 @@ const PERSONAS = [
   { id: 'records',    label: 'Records Officer' },
   { id: 'lawyer',     label: 'Volunteer Lawyer' },
   { id: 'admin',      label: 'Admin' },
-];
-
-const NAV_LINKS = [
-  { to: '/',          label: 'Look Up a Case' },
-  { to: '/backlog-map', label: 'National Backlog Map' },
-  { to: '/scorecard', label: 'Transparency' },
 ];
 
 export default function Navbar({ activePersona = 'public', onPersonaChange }) {
@@ -47,60 +40,56 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
     return () => document.removeEventListener('mousedown', handleOutside);
   }, []);
 
-  // Trap focus in mobile drawer
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const el = drawerRef.current;
-    if (!el) return;
-    const focusables = el.querySelectorAll(
-      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    );
-    if (focusables.length) focusables[0].focus();
-  }, [mobileOpen]);
-
-  // Close on Escape
-  useEffect(() => {
-    function onKey(e) {
-      if (e.key === 'Escape') {
-        setMobileOpen(false);
-        setPersonaOpen(false);
-      }
-    }
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, []);
-
   const currentPersona = PERSONAS.find((p) => p.id === activePersona) ?? PERSONAS[0];
+
+  const isAboutActive = location.pathname === '/' || location.pathname === '/about';
+  const isLookupActive = location.pathname.startsWith('/lookup');
+  const isScorecardActive = location.pathname === '/scorecard';
+  const isProBonoActive = location.pathname === '/pro-bono';
 
   return (
     <>
       <header className="navbar" role="banner">
         <div className="navbar__inner container">
           {/* Logo */}
-          <Link to="/" className="navbar__logo" aria-label="GAVEL — home">
-            <img src="/gavel%20white%20logo.png" alt="GAVEL Logo" className="navbar__logo-img" />
-            {/* <span className="navbar__logo-text">GAVEL</span> */}
+          <Link to="/" className="navbar__logo" aria-label="GAVEL — Home">
+            <img src="/gavel%20blue%20logo.png" alt="GAVEL Logo" className="navbar__logo-img" />
           </Link>
 
-          {/* Desktop nav */}
+          {/* Desktop Nav Links */}
           <nav className="navbar__nav" aria-label="Main navigation">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === '/'}
-                className={({ isActive }) =>
-                  `navbar__link${isActive ? ' navbar__link--active' : ''}`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
+            <Link
+              to="/about"
+              className={`navbar__link${isAboutActive ? ' navbar__link--active' : ''}`}
+            >
+              About
+            </Link>
+
+            <Link
+              to="/lookup"
+              className={`navbar__link${isLookupActive ? ' navbar__link--active' : ''}`}
+            >
+              Look Up a Case
+            </Link>
+
+            <Link
+              to="/scorecard"
+              className={`navbar__link${isScorecardActive ? ' navbar__link--active' : ''}`}
+            >
+              Transparency
+            </Link>
+
+            <Link
+              to="/pro-bono"
+              className={`navbar__link${isProBonoActive ? ' navbar__link--active' : ''}`}
+            >
+              Volunteer
+            </Link>
           </nav>
 
-          {/* Right slot — persona switcher + login */}
+          {/* Right Actions */}
           <div className="navbar__actions">
-            {/* Interactive demo persona switcher */}
+            {/* Persona Switcher */}
             <div className="persona-switcher" ref={personaRef}>
               <button
                 className="persona-switcher__trigger"
@@ -108,24 +97,14 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
                 aria-haspopup="listbox"
                 aria-expanded={personaOpen}
                 aria-label={`Demo persona: ${currentPersona.label}`}
-                id="persona-trigger"
               >
                 <span className="persona-switcher__dot" aria-hidden="true" />
                 <span className="persona-switcher__label">{currentPersona.label}</span>
-                <ChevronDown
-                  size={14}
-                  strokeWidth={2}
-                  aria-hidden="true"
-                  className={`persona-switcher__chevron${personaOpen ? ' persona-switcher__chevron--open' : ''}`}
-                />
+                <ChevronDown size={14} />
               </button>
 
               {personaOpen && (
-                <ul
-                  className="persona-switcher__dropdown"
-                  role="listbox"
-                  aria-labelledby="persona-trigger"
-                >
+                <ul className="persona-switcher__dropdown" role="listbox">
                   {PERSONAS.map((p) => (
                     <li
                       key={p.id}
@@ -136,13 +115,6 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
                         onPersonaChange?.(p.id);
                         setPersonaOpen(false);
                       }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          onPersonaChange?.(p.id);
-                          setPersonaOpen(false);
-                        }
-                      }}
-                      tabIndex={0}
                     >
                       {p.label}
                     </li>
@@ -152,18 +124,15 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
             </div>
 
             <Link to="/login" className="navbar__login-btn">
-              Sign in
+              Login
             </Link>
 
-            {/* Hamburger — mobile only */}
             <button
               className="navbar__hamburger"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
-              aria-expanded={mobileOpen}
-              aria-controls="mobile-drawer"
             >
-              <Menu size={22} strokeWidth={2} />
+              <Menu size={24} />
             </button>
           </div>
         </div>
@@ -174,71 +143,60 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
         <div
           className="navbar__overlay"
           onClick={() => setMobileOpen(false)}
-          aria-hidden="true"
         />
       )}
       <nav
-        id="mobile-drawer"
-        ref={drawerRef}
         className={`navbar__drawer${mobileOpen ? ' navbar__drawer--open' : ''}`}
         aria-label="Mobile navigation"
-        aria-hidden={!mobileOpen}
       >
         <div className="navbar__drawer-header">
-          <Link to="/" className="navbar__logo" onClick={() => setMobileOpen(false)}>
-            <img src="/gavel%20white%20logo.png" alt="GAVEL Logo" className="navbar__logo-img" />
-            <span className="navbar__logo-text">GAVEL</span>
+          <Link to="/" onClick={() => setMobileOpen(false)}>
+            <img src="/gavel%20blue%20logo.png" alt="GAVEL Logo" className="navbar__logo-img" />
           </Link>
           <button
             className="navbar__drawer-close"
             onClick={() => setMobileOpen(false)}
-            aria-label="Close menu"
           >
-            <X size={22} strokeWidth={2} />
+            <X size={24} />
           </button>
         </div>
 
         <div className="navbar__drawer-body">
-          {NAV_LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.to === '/'}
-              className={({ isActive }) =>
-                `navbar__drawer-link${isActive ? ' navbar__drawer-link--active' : ''}`
-              }
-              onClick={() => setMobileOpen(false)}
-              tabIndex={mobileOpen ? 0 : -1}
-            >
-              {link.label}
-            </NavLink>
-          ))}
-
-          <hr className="navbar__drawer-divider" />
-
-          <p className="navbar__drawer-section-label">Demo Persona</p>
-          {PERSONAS.map((p) => (
-            <button
-              key={p.id}
-              className={`navbar__drawer-persona${p.id === activePersona ? ' navbar__drawer-persona--active' : ''}`}
-              onClick={() => {
-                onPersonaChange?.(p.id);
-                setMobileOpen(false);
-              }}
-              tabIndex={mobileOpen ? 0 : -1}
-            >
-              <span className="persona-switcher__dot" aria-hidden="true" />
-              {p.label}
-            </button>
-          ))}
+          <Link
+            to="/about"
+            className={`navbar__drawer-link${isAboutActive ? ' navbar__drawer-link--active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            About
+          </Link>
+          <Link
+            to="/lookup"
+            className={`navbar__drawer-link${isLookupActive ? ' navbar__drawer-link--active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            Look Up a Case
+          </Link>
+          <Link
+            to="/scorecard"
+            className={`navbar__drawer-link${isScorecardActive ? ' navbar__drawer-link--active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            Transparency
+          </Link>
+          <Link
+            to="/pro-bono"
+            className={`navbar__drawer-link${isProBonoActive ? ' navbar__drawer-link--active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            Volunteer
+          </Link>
 
           <Link
             to="/login"
             className="navbar__drawer-login"
             onClick={() => setMobileOpen(false)}
-            tabIndex={mobileOpen ? 0 : -1}
           >
-            Sign in
+            Login
           </Link>
         </div>
       </nav>

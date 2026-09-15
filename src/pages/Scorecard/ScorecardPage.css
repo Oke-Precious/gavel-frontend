@@ -1,0 +1,220 @@
+/* ScorecardPage.css — Styles for Transparency Scorecard */
+
+.scorecard-page {
+  padding: 2.5rem 0 4rem;
+  font-family: 'Inter', sans-serif;
+  color: #0F172A;
+  background-color: #F8FAFC;
+  min-height: 80vh;
+}
+
+.scorecard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* Page Header */
+.scorecard-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.scorecard-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0F172A;
+  margin: 0;
+}
+
+.scorecard-subtitle {
+  font-size: 1.0625rem;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Stat Grid */
+.scorecard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.scorecard-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.scorecard-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.scorecard-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scorecard-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+}
+
+.scorecard-stat-icon--primary {
+  background-color: #EFF6FF;
+  color: #1E3A8A;
+}
+
+.scorecard-stat-icon--warning {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.scorecard-stat-icon--success {
+  background-color: #ECFDF5;
+  color: #059669;
+}
+
+.scorecard-stat-icon--danger {
+  background-color: #FEE2E2;
+  color: #DC2626;
+}
+
+.scorecard-stat-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748B;
+}
+
+.scorecard-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #0F172A;
+}
+
+.scorecard-stat-subtext {
+  font-size: 0.8125rem;
+  color: #94A3B8;
+}
+
+/* Trends Section */
+.scorecard-trends-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.scorecard-trends-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scorecard-trends-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+/* Custom CSS Trend Bar Chart Visualization */
+.trends-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  height: 220px;
+  padding-top: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #E2E8F0;
+  overflow-x: auto;
+}
+
+.trends-chart__col {
+  flex: 1;
+  min-width: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.trends-chart__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.375rem;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+}
+
+.trends-chart__bar {
+  width: 18px;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.4s ease;
+  position: relative;
+}
+
+.trends-chart__bar--filed {
+  background-color: #3B82F6;
+}
+
+.trends-chart__bar--resolved {
+  background-color: #10B981;
+}
+
+.trends-chart__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748B;
+}
+
+.trends-chart__legend {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.trends-chart__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.trends-chart__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.trends-chart__dot--filed {
+  background-color: #3B82F6;
+}
+
+.trends-chart__dot--resolved {
+  background-color: #10B981;
+}

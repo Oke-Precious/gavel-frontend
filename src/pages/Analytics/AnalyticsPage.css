@@ -1,0 +1,88 @@
+/* AnalyticsPage.css — Styles for Admin Analytics Dashboard */
+
+.analytics-page {
+  padding: 2rem 0 4rem;
+  font-family: 'Inter', sans-serif;
+  color: #0F172A;
+}
+
+.analytics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.analytics-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.analytics-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #0F172A;
+  margin: 0;
+}
+
+.analytics-subtitle {
+  font-size: 0.9375rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.analytics-card-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 1.25rem;
+}
+
+.heatmap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.heatmap-table th,
+.heatmap-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.heatmap-table th {
+  background-color: #F8FAFC;
+  font-weight: 600;
+  color: #475569;
+}
+
+.heatmap-intensity {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.8125rem;
+}
+
+.heatmap-intensity--high {
+  background-color: #FEE2E2;
+  color: #DC2626;
+}
+
+.heatmap-intensity--medium {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.heatmap-intensity--low {
+  background-color: #ECFDF5;
+  color: #059669;
+}

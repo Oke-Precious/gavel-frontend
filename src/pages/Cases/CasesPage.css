@@ -1,0 +1,218 @@
+/* CasesPage.css — Styles for Case Management Directory */
+
+.cases-page {
+  padding: 1.5rem 0 3rem;
+  font-family: 'Inter', sans-serif;
+  color: #0F172A;
+}
+
+.cases-page__container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* Page Header */
+.cases-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .cases-page__header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.cases-page__header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cases-page__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #0F172A;
+  margin: 0;
+}
+
+.cases-page__subtitle {
+  font-size: 0.9375rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.cases-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Filters */
+.cases-page__filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.cases-page__search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.cases-page__search-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94A3B8;
+  pointer-events: none;
+}
+
+.cases-page__search-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem 0.625rem 2.5rem;
+  font-size: 0.875rem;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cases-page__search-input:focus {
+  border-color: #1E3A8A;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.cases-page__select-wrap {
+  position: relative;
+  min-width: 160px;
+}
+
+.cases-page__select {
+  width: 100%;
+  padding: 0.625rem 2.25rem 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.cases-page__select:focus {
+  border-color: #1E3A8A;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.cases-page__select-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94A3B8;
+  pointer-events: none;
+}
+
+/* Table Custom Elements */
+.cases-table__hash {
+  font-family: monospace;
+  font-weight: 700;
+  color: #1E3A8A;
+}
+
+.cases-table__days {
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.cases-table__view-btn {
+  background: none;
+  border: 1px solid #CBD5E1;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1E3A8A;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cases-table__view-btn:hover {
+  background-color: #F1F5F9;
+  border-color: #1E3A8A;
+}
+
+/* Modal Form for CSV Upload */
+.import-modal__dropzone {
+  border: 2px dashed #CBD5E1;
+  border-radius: 12px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background-color: #F8FAFC;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.import-modal__dropzone:hover {
+  border-color: #1E3A8A;
+  background-color: #F1F5F9;
+}
+
+.import-modal__icon {
+  color: #1E3A8A;
+}
+
+.import-modal__text {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 0;
+}
+
+.import-modal__subtext {
+  font-size: 0.8125rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.import-modal__file-input {
+  display: none;
+}
+
+.import-modal__selected-file {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #ECFDF5;
+  border-radius: 6px;
+}
+
+.import-modal__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}

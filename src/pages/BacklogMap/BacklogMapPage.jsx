@@ -187,7 +187,7 @@ export default function BacklogMapPage() {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="backlog-map-page">
         <div className="container backlog-map-container">
