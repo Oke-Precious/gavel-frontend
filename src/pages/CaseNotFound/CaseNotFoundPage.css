@@ -1,0 +1,181 @@
+/* CaseNotFoundPage.css — Case Not Found Page */
+
+.case-not-found-page {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #F8FAFC;
+  color: #1E293B;
+  min-height: calc(100vh - 72px);
+  padding: 3rem 0 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.case-not-found-container {
+  max-width: 640px;
+  width: 100%;
+}
+
+.case-not-found-nav {
+  margin-bottom: 1.5rem;
+}
+
+.case-not-found-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03);
+  text-align: center;
+}
+
+.case-not-found-skeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 2rem;
+}
+
+.case-not-found-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  gap: 1rem;
+}
+
+@media (min-width: 641px) {
+  .case-not-found-content {
+    padding: 3.5rem 2.5rem;
+  }
+}
+
+.case-not-found-icon-wrap {
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.case-not-found-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 641px) {
+  .case-not-found-title {
+    font-size: 1.75rem;
+  }
+}
+
+.case-not-found-text {
+  font-size: 1rem;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 420px;
+}
+
+.case-not-found-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.case-not-found-form {
+  width: 100%;
+  max-width: 440px;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #F1F5F9;
+  text-align: left;
+}
+
+.case-not-found-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.case-not-found-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.case-not-found-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.case-not-found-input-icon {
+  position: absolute;
+  left: 12px;
+  color: #94A3B8;
+  pointer-events: none;
+}
+
+.case-not-found-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: #0F172A;
+  background-color: #FFFFFF;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.case-not-found-input:focus {
+  outline: none;
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.case-not-found-telemetry {
+  margin-top: 1.5rem;
+  padding: 0.875rem 1rem;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 440px;
+  text-align: left;
+}
+
+.case-not-found-tag {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: #4F46E5;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.case-not-found-endpoint {
+  font-size: 0.8125rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.case-not-found-api-msg {
+  font-size: 0.75rem;
+  color: #EF4444;
+  margin: 0.25rem 0 0;
+}
+
+/* Keyboard accessibility focus rings */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #4F46E5;
+  outline-offset: 2px;
+}
