@@ -1,147 +1,468 @@
-/* ProBonoPage.css — Styles for Pro-Bono Opportunity Directory */
+/* ProBonoPage.css — Volunteer as Pro-Bono Counsel Page */
 
 .pro-bono-page {
-  padding: 2rem 0 4rem;
-  font-family: 'Inter', sans-serif;
-  color: #0F172A;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: #F8FAFC;
-  min-height: 80vh;
+  color: #1E293B;
+  min-height: 100vh;
+  padding-bottom: 4rem;
 }
 
-.pro-bono-container {
+/* ============================================================ */
+/* 1. HERO SECTION                                              */
+/* ============================================================ */
+.pro-bono-hero {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 3.5rem 0 4rem;
+}
+
+.pro-bono-hero__container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+@media (min-width: 1025px) {
+  .pro-bono-hero__container {
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 3.5rem;
+  }
+}
+
+.pro-bono-hero__content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
-/* Header */
-.pro-bono-header {
+.pro-bono-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  background-color: #EEF2FF;
+  color: #4F46E5;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  width: fit-content;
+  letter-spacing: 0.02em;
+  border: 1px solid #C7D2FE;
+}
+
+.pro-bono-hero__title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #0F172A;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+@media (min-width: 641px) {
+  .pro-bono-hero__title {
+    font-size: 2.75rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .pro-bono-hero__title {
+    font-size: 3.25rem;
+  }
+}
+
+.pro-bono-hero__subtitle {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #64748B;
+  margin: 0;
+  max-width: 640px;
+}
+
+.pro-bono-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.pro-bono-hero__visual {
+  display: flex;
+  justify-content: center;
+}
+
+.pro-bono-hero__stat-card {
+  width: 100%;
+  max-width: 380px;
+  background-color: #0F172A;
+  color: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  border: 1px solid #1E293B;
+}
+
+.pro-bono-hero__stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: rgba(79, 70, 229, 0.2);
+  color: #818CF8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(129, 140, 248, 0.3);
+}
+
+.pro-bono-hero__stat-number {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.pro-bono-hero__stat-label {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #F8FAFC;
+  line-height: 1.3;
+}
+
+.pro-bono-hero__stat-sub {
+  font-size: 0.8125rem;
+  color: #94A3B8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ============================================================ */
+/* SECTION REUSABLE LAYOUT                                      */
+/* ============================================================ */
+.pro-bono-section {
+  padding: 4rem 0;
+}
+
+.pro-bono-section__header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 2.5rem;
+}
+
+.pro-bono-section__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #4F46E5;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.pro-bono-section__title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 641px) {
+  .pro-bono-section__title {
+    font-size: 2.25rem;
+  }
+}
+
+.pro-bono-section__lead {
+  font-size: 1rem;
+  color: #64748B;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ============================================================ */
+/* 2. HOW MATCHING WORKS                                        */
+/* ============================================================ */
+.pro-bono-matching-section {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.pro-bono-matching-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 641px) {
+  .pro-bono-matching-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.pro-bono-matching-card {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  position: relative;
+  border: 1px solid #E2E8F0;
 }
 
-@media (min-width: 768px) {
-  .pro-bono-header {
+.pro-bono-matching-card__step {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #CBD5E1;
+  line-height: 1;
+}
+
+.pro-bono-matching-card__icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background-color: #EEF2FF;
+  color: #4F46E5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pro-bono-matching-card__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.pro-bono-matching-card__desc {
+  font-size: 0.9375rem;
+  color: #64748B;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ============================================================ */
+/* 3. AVAILABLE PRO-BONO ROSTER & FILTERS                      */
+/* ============================================================ */
+.pro-bono-roster-section {
+  background-color: #F8FAFC;
+}
+
+.pro-bono-filter-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 641px) {
+  .pro-bono-filter-bar {
     flex-direction: row;
-    align-items: center;
     justify-content: space-between;
   }
 }
 
-.pro-bono-header__left {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.pro-bono-title {
-  font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  color: #0F172A;
-  margin: 0;
-}
-
-.pro-bono-subtitle {
-  font-size: 0.9375rem;
-  color: #64748B;
-  margin: 0;
-}
-
-/* Tabs */
-.pro-bono-tabs {
+.pro-bono-duration-filters {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 2px solid #E2E8F0;
-  padding-bottom: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.pro-bono-tab {
-  background: none;
-  border: none;
-  font-size: 0.9375rem;
+.pro-bono-filter-label {
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #64748B;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  margin-right: 0.25rem;
+}
+
+.pro-bono-filter-chip {
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid #CBD5E1;
+  background-color: #FFFFFF;
+  color: #475569;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
 }
 
-.pro-bono-tab:hover {
-  color: #1E3A8A;
-  background-color: #F1F5F9;
+.pro-bono-filter-chip:hover {
+  border-color: #4F46E5;
+  color: #4F46E5;
 }
 
-.pro-bono-tab--active {
-  color: #1E3A8A;
-  background-color: #EFF6FF;
-  font-weight: 700;
+.pro-bono-filter-chip--active {
+  background-color: #4F46E5;
+  color: #FFFFFF;
+  border-color: #4F46E5;
 }
 
-/* Grid of Cards */
+.pro-bono-filter-chip--active:hover {
+  background-color: #4338CA;
+  color: #FFFFFF;
+}
+
 .pro-bono-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.5rem;
+}
+
+@media (min-width: 641px) {
+  .pro-bono-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .pro-bono-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .pro-bono-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 1.25rem;
   height: 100%;
 }
 
 .pro-bono-card__top {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.875rem;
 }
 
 .pro-bono-card__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
 }
 
 .pro-bono-card__hash {
   font-family: monospace;
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
   font-weight: 700;
-  color: #1E3A8A;
-}
-
-.pro-bono-card__meta-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.84375rem;
-  color: #475569;
-}
-
-.pro-bono-card__meta-icon {
-  color: #94A3B8;
+  color: #0F172A;
 }
 
 .pro-bono-card__days-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background-color: #FEF2F2;
-  border: 1px solid #FECACA;
-  border-radius: 6px;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #DC2626;
+  color: #EF4444;
+  background-color: #FEF2F2;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  border: 1px solid #FECACA;
   width: fit-content;
+}
+
+.pro-bono-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748B;
+}
+
+.pro-bono-card__meta-icon {
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.pro-bono-card__footer {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #F1F5F9;
 }
 
 .pro-bono-card__action-btn {
   width: 100%;
+  justify-content: center;
+}
+
+.pro-bono-error-card {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================================ */
+/* 4. CTA BANNER                                                 */
+/* ============================================================ */
+.pro-bono-cta-section {
+  padding: 4rem 0 1rem;
+}
+
+.pro-bono-cta-card {
+  background-color: #0F172A;
+  color: #FFFFFF;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.2);
+}
+
+@media (min-width: 641px) {
+  .pro-bono-cta-card {
+    padding: 3.5rem 3rem;
+  }
+}
+
+.pro-bono-cta-card__content {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.pro-bono-cta-card__title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 641px) {
+  .pro-bono-cta-card__title {
+    font-size: 2.25rem;
+  }
+}
+
+.pro-bono-cta-card__desc {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #94A3B8;
+  margin: 0;
+}
+
+.pro-bono-cta-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+/* Keyboard accessibility focus outlines */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #4F46E5;
+  outline-offset: 2px;
 }
