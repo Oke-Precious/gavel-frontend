@@ -42,7 +42,7 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
 
   const currentPersona = PERSONAS.find((p) => p.id === activePersona) ?? PERSONAS[0];
 
-  const isAboutActive = location.pathname === '/' || location.pathname === '/about';
+  const isAboutActive = location.pathname === '/about';
   const isLookupActive = location.pathname.startsWith('/lookup');
   const isScorecardActive = location.pathname === '/scorecard';
   const isProBonoActive = location.pathname === '/pro-bono';
