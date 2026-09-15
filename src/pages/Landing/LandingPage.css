@@ -1,0 +1,354 @@
+/* LandingPage.css — Landing Page (Route /) */
+
+.landing-page {
+  font-family: 'Inter', sans-serif;
+  color: #0F172A;
+  background-color: #F8FAFC;
+}
+
+/* 1. HERO SECTION */
+.landing-hero-section {
+  padding: 4.5rem 0 3.5rem;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.landing-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 992px) {
+  .landing-hero-grid {
+    grid-template-columns: 1.25fr 0.75fr;
+  }
+}
+
+.landing-hero__left {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.landing-hero__title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  color: #0F172A;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .landing-hero__title {
+    font-size: 3.25rem;
+  }
+}
+
+.landing-hero__subtitle {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #64748B;
+  max-width: 580px;
+  margin: 0;
+}
+
+.landing-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.landing-hero__btn-primary {
+  background-color: #4F46E5;
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.landing-hero__btn-primary:hover {
+  background-color: #4338CA;
+  transform: translateY(-1px);
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+.landing-hero__btn-secondary {
+  background-color: #FFFFFF;
+  color: #334155;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #CBD5E1;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.landing-hero__btn-secondary:hover {
+  background-color: #F8FAFC;
+  border-color: #94A3B8;
+  color: #0F172A;
+  text-decoration: none;
+}
+
+/* Hero Right Visual Card */
+.landing-hero__right {
+  display: flex;
+  justify-content: center;
+}
+
+.landing-hero__card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.landing-hero__icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid #10B981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ECFDF5;
+  color: #059669;
+}
+
+.landing-hero__case-id {
+  font-family: monospace;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #64748B;
+  letter-spacing: 0.05em;
+}
+
+.landing-hero__status-text {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+/* 2. STATS BANNER */
+.landing-stats-section {
+  padding: 3rem 0;
+}
+
+.landing-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.landing-stat-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 1.75rem 1.5rem;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.landing-stat-card--accent-red {
+  border-left: 4px solid #EF4444;
+}
+
+.landing-stat-value {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #4F46E5;
+}
+
+.landing-stat-card--accent-red .landing-stat-value {
+  color: #EF4444;
+}
+
+.landing-stat-desc {
+  font-size: 0.875rem;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 3. HOW GAVEL WORKS */
+.landing-works-section {
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.landing-works__header {
+  margin-bottom: 2.5rem;
+}
+
+.landing-works__title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin-bottom: 0.5rem;
+}
+
+.landing-works__subtitle {
+  font-size: 1rem;
+  color: #64748B;
+}
+
+.landing-works-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.landing-works-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.landing-works-card__icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-works-card__icon-box--purple {
+  background-color: #EEF2FF;
+  color: #4F46E5;
+}
+
+.landing-works-card__icon-box--amber {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.landing-works-card__icon-box--green {
+  background-color: #D1FAE5;
+  color: #059669;
+}
+
+.landing-works-card__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.landing-works-card__desc {
+  font-size: 0.875rem;
+  color: #64748B;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 4. NATIONAL PICTURE BANNER */
+.landing-picture-section {
+  padding: 3rem 0 5rem;
+}
+
+.landing-picture-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  background-color: #0B192C;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 992px) {
+  .landing-picture-card {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.landing-picture__content {
+  padding: 3.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.25rem;
+  color: #FFFFFF;
+}
+
+.landing-picture__title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.landing-picture__subtitle {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #94A3B8;
+  margin: 0;
+}
+
+.landing-picture__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  text-decoration: none;
+  margin-top: 0.5rem;
+  transition: gap 0.2s;
+}
+
+.landing-picture__link:hover {
+  gap: 0.75rem;
+  text-decoration: underline;
+  color: #FFFFFF;
+}
+
+.landing-picture__visual {
+  background-color: #F8FAFC;
+  padding: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-picture__map-graphic {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  object-fit: contain;
+}

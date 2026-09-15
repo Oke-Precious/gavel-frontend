@@ -16,6 +16,7 @@ import './App.css';
 // Public pages
 const StyleGuidePage     = lazy(() => import('./pages/StyleGuide/StyleGuidePage.jsx'));
 const PublicLookupPage   = lazy(() => import('./pages/PublicLookup/PublicLookupPage.jsx'));
+const LandingPage        = lazy(() => import('./pages/Landing/LandingPage.jsx'));
 const AboutPage          = lazy(() => import('./pages/About/AboutPage.jsx'));
 const CasePublicPage     = lazy(() => import('./pages/CasePublic/CasePublicPage.jsx'));
 const ScorecardPage      = lazy(() => import('./pages/Scorecard/ScorecardPage.jsx'));
@@ -90,7 +91,7 @@ export default function App() {
                 {/* Public routes                                       */}
                 {/* ------------------------------------------------- */}
                 <Route element={<PublicLayout />}>
-                  <Route index element={<AboutPage />} />
+                  <Route index element={<LandingPage />} />
                   <Route path="about" element={<AboutPage />} />
                   <Route path="lookup" element={<PublicLookupPage />} />
                   <Route path="lookup/:caseHashId" element={<CasePublicPage />} />
