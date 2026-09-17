@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import {
   Mail,
   Lock,
+  Eye,
+  EyeOff,
   User,
   ShieldCheck,
   Phone,
@@ -10,32 +12,23 @@ import {
   ArrowRight,
   CheckCircle,
   Activity,
-  ChevronDown,
 } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import { authApi } from '../../services/api.js';
-import { useAuth } from '../../hooks/useAuth.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { validateEmail, validatePassword } from '../../utils/validators.js';
 import './RegisterPage.css';
-
-const ROLES = [
-  { value: 'lawyer', label: 'Volunteer Lawyer (Pro-Bono Advocate)' },
-  { value: 'judge', label: 'Legal Aid Officer' },
-  { value: 'clerk', label: 'Records Officer' },
-  { value: 'public', label: 'Public Observer' },
-];
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const { toast } = useToast();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('lawyer');
+  const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [barNumber, setBarNumber] = useState('');
 
@@ -53,8 +46,10 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      toast.warning('Password must be at least 6 characters long.');
+    const emailError = validateEmail(cleanEmail);
+    const passwordError = validatePassword(password);
+    if (emailError || passwordError) {
+      toast.warning(emailError || passwordError);
       return;
     }
 
@@ -67,20 +62,13 @@ export default function RegisterPage() {
         lastName: cleanLastName,
         email: cleanEmail,
         password,
-        role,
+        role: 'lawyer',
         phoneNumber: phoneNumber.trim() || undefined,
-        barNumber: role === 'lawyer' ? barNumber.trim() : undefined,
+        barNumber: barNumber.trim() || undefined,
       });
 
-      toast.success('Account created successfully! Logging you in...');
-
-      // 2. Perform silent login with newly registered credentials
-      try {
-        await login(cleanEmail, password);
-        navigate('/cases');
-      } catch {
-        navigate('/login');
-      }
+      toast.success('Account created. Check your email to verify your account, then sign in.');
+      navigate('/login');
     } catch (err) {
       const msg =
         err.response?.data?.message ||
@@ -116,7 +104,7 @@ export default function RegisterPage() {
             </h1>
 
             <p className="register-showcase__subtitle">
-              Join thousands of legal practitioners, legal aid officers, and observers tracking pre-trial cases to protect fundamental human rights.
+              Join the volunteer legal network helping awaiting-trial cases move toward representation and resolution.
             </p>
 
             <div className="register-showcase__features">
@@ -137,7 +125,7 @@ export default function RegisterPage() {
 
           <div className="register-showcase__footer">
             <Activity size={16} />
-            <span>Secure, encrypted judicial record network</span>
+            <span>Privacy-first access to non-confidential case records</span>
           </div>
         </div>
       </div>
@@ -159,7 +147,7 @@ export default function RegisterPage() {
             <div className="register-card__header">
               <h2 className="register-card__title">Create an Account</h2>
               <p className="register-card__subtitle">
-                Select your role and enter your details to get started.
+                Enter your details to register as a volunteer lawyer.
               </p>
             </div>
 
@@ -225,50 +213,23 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Role Selector */}
               <div className="register-card__field">
-                <label htmlFor="reg-role" className="register-card__label">
-                  Primary Role *
+                <label htmlFor="reg-bar-number" className="register-card__label">
+                  Bar Credential Number
                 </label>
                 <div className="register-card__input-wrapper">
                   <Briefcase size={18} className="register-card__input-icon" />
-                  <select
-                    id="reg-role"
-                    className="register-card__select"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
+                  <input
+                    id="reg-bar-number"
+                    type="text"
+                    className="register-card__input"
+                    placeholder="e.g. SCN-123456"
+                    value={barNumber}
+                    onChange={(e) => setBarNumber(e.target.value)}
                     disabled={isLoading}
-                  >
-                    {ROLES.map((r) => (
-                      <option key={r.value} value={r.value}>
-                        {r.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="register-card__select-chevron" />
+                  />
                 </div>
               </div>
-
-              {/* Conditional Bar Number for Lawyers */}
-              {role === 'lawyer' && (
-                <div className="register-card__field">
-                  <label htmlFor="reg-bar-number" className="register-card__label">
-                    NBA Bar Enrollment Number
-                  </label>
-                  <div className="register-card__input-wrapper">
-                    <Briefcase size={18} className="register-card__input-icon" />
-                    <input
-                      id="reg-bar-number"
-                      type="text"
-                      className="register-card__input"
-                      placeholder="e.g. SCN-123456"
-                      value={barNumber}
-                      onChange={(e) => setBarNumber(e.target.value)}
-                      disabled={isLoading}
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* Phone Number */}
               <div className="register-card__field">
@@ -292,20 +253,34 @@ export default function RegisterPage() {
               {/* Password */}
               <div className="register-card__field">
                 <label htmlFor="reg-password" className="register-card__label">
-                  Password * (min. 6 characters)
+                  Password * (minimum 8 characters)
                 </label>
                 <div className="register-card__input-wrapper">
                   <Lock size={18} className="register-card__input-icon" />
                   <input
                     id="reg-password"
-                    type="password"
-                    className="register-card__input"
+                    type={showPassword ? 'text' : 'password'}
+                    className="register-card__input register-card__input--password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isLoading}
                     required
                   />
+                  <button
+                    type="button"
+                    className="register-card__password-toggle"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    disabled={isLoading}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
+                  >
+                    {showPassword ? (
+                      <EyeOff size={18} aria-hidden="true" />
+                    ) : (
+                      <Eye size={18} aria-hidden="true" />
+                    )}
+                  </button>
                 </div>
               </div>
 

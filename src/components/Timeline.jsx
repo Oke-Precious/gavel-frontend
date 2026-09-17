@@ -33,8 +33,6 @@ export default function Timeline({
       {stages.map((stage, i) => {
         const isCompleted = i < currentStageIndex;
         const isActive    = i === currentStageIndex;
-        const isPending   = i > currentStageIndex;
-
         let stateClass = 'timeline__step--pending';
         if (isCompleted) stateClass = 'timeline__step--completed';
         if (isActive)    stateClass = 'timeline__step--active';

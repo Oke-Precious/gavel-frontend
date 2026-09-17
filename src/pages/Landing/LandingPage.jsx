@@ -5,7 +5,7 @@ import './LandingPage.css';
 
 export default function LandingPage() {
   return (
-    <main id="main-content" className="landing-page">
+    <div className="landing-page">
       {/* ============================================================ */}
       {/* 1. HERO SECTION                                              */}
       {/* ============================================================ */}
@@ -33,7 +33,7 @@ export default function LandingPage() {
               <div className="landing-hero__icon-circle" aria-hidden="true">
                 <Scale size={32} />
               </div>
-              <div className="landing-hero__case-id">CASE ID: 58925-42</div>
+              <div className="landing-hero__case-id">CASE HASH ID: GAV-26-8A3F9</div>
               <div className="landing-hero__status-text">Active Tracking</div>
             </div>
           </div>
@@ -145,6 +145,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

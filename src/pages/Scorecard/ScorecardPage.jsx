@@ -1,66 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import {
-  BarChart3,
-  TrendingUp,
   CheckCircle2,
   Clock,
   AlertOctagon,
   Scale,
-  Calendar,
 } from 'lucide-react';
 import Card from '../../components/Card.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
+import EmptyState from '../../components/EmptyState.jsx';
 import { publicApi } from '../../services/api.js';
 import './ScorecardPage.css';
 
-const DEFAULT_SCORECARD = {
-  totalCases: 51955,
-  activeCases: 34120,
-  resolvedCases: 12485,
-  stalledCases: 5350,
-  resolutionRate: '24.0%',
-};
-
-const DEFAULT_TRENDS = [
-  { period: 'Oct 2025', filed: 1200, resolved: 840 },
-  { period: 'Nov 2025', filed: 1450, resolved: 990 },
-  { period: 'Dec 2025', filed: 1100, resolved: 1050 },
-  { period: 'Jan 2026', filed: 1600, resolved: 1220 },
-  { period: 'Feb 2026', filed: 1850, resolved: 1410 },
-  { period: 'Mar 2026', filed: 1720, resolved: 1530 },
-];
-
 export default function ScorecardPage() {
-  const [data, setData] = useState(DEFAULT_SCORECARD);
-  const [trends, setTrends] = useState(DEFAULT_TRENDS);
+  const [data, setData] = useState(null);
+  const [trends, setTrends] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadScorecardData() {
       setLoading(true);
+      setError(null);
       try {
         const [scoreRes, trendRes] = await Promise.all([
-          publicApi.scorecard().catch(() => null),
-          publicApi.trends().catch(() => null),
+          publicApi.scorecard(),
+          publicApi.trends(),
         ]);
 
         if (!cancelled) {
-          if (scoreRes) {
-            setData({
-              totalCases: scoreRes.totalCases ?? DEFAULT_SCORECARD.totalCases,
-              activeCases: scoreRes.activeCases ?? DEFAULT_SCORECARD.activeCases,
-              resolvedCases: scoreRes.resolvedCases ?? DEFAULT_SCORECARD.resolvedCases,
-              stalledCases: scoreRes.stalledCases ?? DEFAULT_SCORECARD.stalledCases,
-              resolutionRate: scoreRes.resolutionRate
-                ? `${scoreRes.resolutionRate}%`
-                : DEFAULT_SCORECARD.resolutionRate,
-            });
-          }
-          if (trendRes && Array.isArray(trendRes) && trendRes.length > 0) {
-            setTrends(trendRes);
-          }
+          setData({
+            totalCases: Number(scoreRes.totalCases ?? 0),
+            activeCases: Number(scoreRes.activeCases ?? 0),
+            resolvedCases: Number(scoreRes.resolvedCases ?? 0),
+            stalledCases: Number(scoreRes.stalledCases ?? 0),
+            resolutionRate: `${Number(scoreRes.resolutionRate ?? 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}%`,
+          });
+          setTrends(Array.isArray(trendRes) ? trendRes : (trendRes?.trends ?? []));
+        }
+      } catch (requestError) {
+        if (!cancelled) {
+          setError(!requestError?.response
+            ? 'Network error — check your connection and try again.'
+            : requestError.response.status >= 500
+              ? 'Something went wrong on our end. Please try again in a moment.'
+              : requestError.response?.data?.message ?? 'Unable to load the transparency scorecard.');
         }
       } finally {
         if (!cancelled) {
@@ -97,6 +82,24 @@ export default function ScorecardPage() {
     );
   }
 
+  if (error || !data) {
+    return (
+      <div className="scorecard-page">
+        <div className="container scorecard-container">
+          <Card padding="lg">
+            <EmptyState
+              icon="error"
+              message="Transparency Data Unavailable"
+              subtext={error}
+              actionLabel="Try Again"
+              onAction={() => window.location.reload()}
+            />
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="scorecard-page">
       <div className="container scorecard-container">
@@ -104,7 +107,7 @@ export default function ScorecardPage() {
         <div className="scorecard-header">
           <h1 className="scorecard-title">National Transparency Scorecard</h1>
           <p className="scorecard-subtitle">
-            Real-time aggregate data on awaiting-trial case progression, statutory compliance rates, and judicial resolution efficiency across Nigeria.
+            Current aggregate data on awaiting-trial case progression and judicial resolution across records in GAVEL.
           </p>
         </div>
 
@@ -121,7 +124,7 @@ export default function ScorecardPage() {
             <div className="scorecard-stat-value">
               {data.totalCases.toLocaleString()}
             </div>
-            <div className="scorecard-stat-subtext">Across 36 states & FCT</div>
+            <div className="scorecard-stat-subtext">Across records currently in GAVEL</div>
           </div>
 
           {/* Card 2: Active Pre-Trial */}
@@ -141,7 +144,7 @@ export default function ScorecardPage() {
           {/* Card 3: Stalled Cases */}
           <div className="scorecard-stat-card">
             <div className="scorecard-stat-header">
-              <span className="scorecard-stat-label">Stalled Cases (&gt;28 days)</span>
+              <span className="scorecard-stat-label">Stalled Cases</span>
               <div className="scorecard-stat-icon scorecard-stat-icon--danger">
                 <AlertOctagon size={20} />
               </div>

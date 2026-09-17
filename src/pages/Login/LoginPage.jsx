@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, ShieldCheck, Activity } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, Activity } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { validateEmail } from '../../utils/validators.js';
 import './LoginPage.css';
 
 export default function LoginPage() {
@@ -14,23 +15,25 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const cleanEmail = email.trim();
 
-    if (!cleanEmail || !password) {
-      toast.warning('Please enter both email and password.');
+    const emailError = validateEmail(cleanEmail);
+    if (emailError || !password) {
+      toast.warning(emailError || 'Password is required.');
       return;
     }
 
     setIsLoading(true);
     try {
       // Wire to real backend endpoint: POST /auth/login via AuthContext
-      await login(cleanEmail, password);
+      const signedInUser = await login(cleanEmail, password);
       toast.success('Signed in successfully.');
-      navigate('/cases');
+      navigate(signedInUser?.role === 'lawyer' ? '/pro-bono' : '/dashboard');
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
@@ -82,13 +85,13 @@ export default function LoginPage() {
             </div>
             <div className="login-showcase__stat-value">51,955+</div>
             <p className="login-showcase__stat-desc">
-              awaiting-trial individuals currently tracked across Nigeria's judicial centers.
+              people reported to be awaiting trial in Nigeria's custodial centres.
             </p>
           </div>
 
           <div className="login-showcase__footer">
             <Activity size={16} />
-            <span>Real-time auditable legal tracking system</span>
+            <span>Auditable legal case tracking</span>
           </div>
         </div>
       </div>
@@ -154,8 +157,8 @@ export default function LoginPage() {
                   <Lock size={18} className="login-form-card__input-icon" aria-hidden="true" />
                   <input
                     id="login-password"
-                    type="password"
-                    className="login-form-card__input"
+                    type={showPassword ? 'text' : 'password'}
+                    className="login-form-card__input login-form-card__input--password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -163,6 +166,20 @@ export default function LoginPage() {
                     autoComplete="current-password"
                     required
                   />
+                  <button
+                    type="button"
+                    className="login-form-card__password-toggle"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    disabled={isLoading}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
+                  >
+                    {showPassword ? (
+                      <EyeOff size={18} aria-hidden="true" />
+                    ) : (
+                      <Eye size={18} aria-hidden="true" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -212,5 +229,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-

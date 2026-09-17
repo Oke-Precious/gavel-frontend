@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import './Navbar.css';
 
 /**
@@ -9,43 +9,14 @@ import './Navbar.css';
  * About | Look Up a Case | Transparency | Volunteer | Login
  */
 
-const PERSONAS = [
-  { id: 'public', label: 'Public Observer' },
-  { id: 'legal-aid', label: 'Legal Aid Officer' },
-  { id: 'records', label: 'Records Officer' },
-  { id: 'lawyer', label: 'Volunteer Lawyer' },
-  { id: 'admin', label: 'Admin' },
-];
-
-export default function Navbar({ activePersona = 'public', onPersonaChange }) {
+export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [personaOpen, setPersonaOpen] = useState(false);
-  const drawerRef = useRef(null);
-  const personaRef = useRef(null);
   const location = useLocation();
-
-  // Close mobile drawer on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location]);
-
-  // Close persona dropdown on outside click
-  useEffect(() => {
-    function handleOutside(e) {
-      if (personaRef.current && !personaRef.current.contains(e.target)) {
-        setPersonaOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, []);
-
-  const currentPersona = PERSONAS.find((p) => p.id === activePersona) ?? PERSONAS[0];
 
   const isAboutActive = location.pathname === '/' || location.pathname === '/about';
   const isLookupActive = location.pathname.startsWith('/lookup');
   const isScorecardActive = location.pathname === '/scorecard';
-  const isProBonoActive = location.pathname === '/pro-bono';
+  const isProBonoActive = location.pathname === '/register';
 
   return (
     <>
@@ -80,7 +51,7 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
             </Link>
 
             <Link
-              to="/pro-bono"
+              to="/register"
               className={`navbar__link${isProBonoActive ? ' navbar__link--active' : ''}`}
             >
               Volunteer
@@ -89,40 +60,6 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
 
           {/* Right Actions */}
           <div className="navbar__actions">
-            {/* Persona Switcher */}
-            <div className="persona-switcher" ref={personaRef}>
-              <button
-                className="persona-switcher__trigger"
-                onClick={() => setPersonaOpen((v) => !v)}
-                aria-haspopup="listbox"
-                aria-expanded={personaOpen}
-                aria-label={`Demo persona: ${currentPersona.label}`}
-              >
-                <span className="persona-switcher__dot" aria-hidden="true" />
-                <span className="persona-switcher__label">{currentPersona.label}</span>
-                <ChevronDown size={14} />
-              </button>
-
-              {personaOpen && (
-                <ul className="persona-switcher__dropdown" role="listbox">
-                  {PERSONAS.map((p) => (
-                    <li
-                      key={p.id}
-                      role="option"
-                      aria-selected={p.id === activePersona}
-                      className={`persona-switcher__option${p.id === activePersona ? ' persona-switcher__option--active' : ''}`}
-                      onClick={() => {
-                        onPersonaChange?.(p.id);
-                        setPersonaOpen(false);
-                      }}
-                    >
-                      {p.label}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
             <Link to="/login" className="navbar__login-btn">
               Login
             </Link>
@@ -184,7 +121,7 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
             Transparency
           </Link>
           <Link
-            to="/pro-bono"
+            to="/register"
             className={`navbar__drawer-link${isProBonoActive ? ' navbar__drawer-link--active' : ''}`}
             onClick={() => setMobileOpen(false)}
           >

@@ -7,6 +7,7 @@ import { ToastContainer } from './components/Toast.jsx';
 import PublicLayout from './layouts/PublicLayout.jsx';
 import InternalLayout from './layouts/InternalLayout.jsx';
 import Skeleton from './components/Skeleton.jsx';
+import RequireRole from './components/RequireRole.jsx';
 import './App.css';
 
 /* ------------------------------------------------------------------ */
@@ -44,14 +45,7 @@ const NotFoundPage    = lazy(() => import('./pages/NotFound/NotFoundPage.jsx'));
 /* ------------------------------------------------------------------ */
 function PageLoader() {
   return (
-    <div style={{
-      padding: '4rem 2rem',
-      maxWidth: 640,
-      margin: '0 auto',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '1rem',
-    }}>
+    <div className="page-loader">
       <Skeleton variant="text" width="40%" />
       <Skeleton variant="text" lines={3} />
       <Skeleton variant="card" height={160} />
@@ -78,7 +72,7 @@ export default function App() {
                   <Route index element={<LandingPage />} />
                   <Route path="about" element={<AboutPage />} />
                   <Route path="lookup" element={<PublicLookupPage />} />
-                  <Route path="lookup/not-found" element={<CaseNotFoundPage />} />
+                  <Route path="lookup/not-found/:caseHashId?" element={<CaseNotFoundPage />} />
                   <Route path="lookup/:caseHashId" element={<CasePublicPage />} />
                   <Route path="scorecard" element={<ScorecardPage />} />
                   <Route path="backlog-map" element={<BacklogMapPage />} />
@@ -96,13 +90,31 @@ export default function App() {
                 {/* Internal / authenticated routes                    */}
                 {/* ------------------------------------------------- */}
                 <Route element={<InternalLayout />}>
-                  <Route path="dashboard"  element={<DashboardPage />} />
-                  <Route path="cases"      element={<CasesPage />} />
-                  <Route path="cases/new"  element={<NewCasePage />} />
-                  <Route path="cases/:id"  element={<CaseDetailPage />} />
-                  <Route path="analytics"  element={<AnalyticsPage />} />
-                  <Route path="pro-bono"   element={<ProBonoPage />} />
-                  <Route path="users"      element={<UsersPage />} />
+                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route
+                    path="cases"
+                    element={<RequireRole roles={['admin', 'judge', 'clerk', 'lawyer']}><CasesPage /></RequireRole>}
+                  />
+                  <Route
+                    path="cases/new"
+                    element={<RequireRole roles={['admin', 'clerk']}><NewCasePage /></RequireRole>}
+                  />
+                  <Route
+                    path="cases/:id"
+                    element={<RequireRole roles={['admin', 'judge', 'clerk', 'lawyer']}><CaseDetailPage /></RequireRole>}
+                  />
+                  <Route
+                    path="analytics"
+                    element={<RequireRole roles={['admin']}><AnalyticsPage /></RequireRole>}
+                  />
+                  <Route
+                    path="pro-bono"
+                    element={<RequireRole roles={['lawyer']}><ProBonoPage /></RequireRole>}
+                  />
+                  <Route
+                    path="users"
+                    element={<RequireRole roles={['admin']}><UsersPage /></RequireRole>}
+                  />
                 </Route>
 
                 {/* ------------------------------------------------- */}

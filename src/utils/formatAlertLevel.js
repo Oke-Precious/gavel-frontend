@@ -2,10 +2,10 @@
  * Alert level classification for GAVEL.
  *
  * Thresholds (days in custody):
- *   0  – 27   → Compliant
- *   28 – 89   → Warning
- *   90 – 179  → Severe Warning
- *   180+      → Critical
+ *   0  – 28   → Compliant
+ *   29 – 90   → Warning
+ *   91 – 180  → Severe Warning
+ *   181+      → Critical
  *
  * NOTE: These thresholds match the spec. The 28-day figure is Nigeria's
  * constitutional remand limit (ACJA s.293). Every case beyond it is a
@@ -24,21 +24,21 @@ const THRESHOLDS = [
     label: 'Critical',
     cssVar: 'var(--color-critical)',
     bgVar: 'var(--color-critical-bg)',
-    minDays: 180,
+    minDays: 181,
   },
   {
     level: 'severe',
     label: 'Severe Warning',
     cssVar: 'var(--color-severe)',
     bgVar: 'var(--color-severe-bg)',
-    minDays: 90,
+    minDays: 91,
   },
   {
     level: 'warning',
     label: 'Warning',
     cssVar: 'var(--color-warning)',
     bgVar: 'var(--color-warning-bg)',
-    minDays: 28,
+    minDays: 29,
   },
   {
     level: 'compliant',

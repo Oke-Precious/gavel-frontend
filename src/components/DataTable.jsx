@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import Skeleton from './Skeleton.jsx';
 import EmptyState from './EmptyState.jsx';
@@ -105,9 +105,9 @@ export default function DataTable({
                       ))}
                     </tr>
                   ))
-                : data.map((row) => (
+                : data.map((row, rowIndex) => (
                     <tr
-                      key={row[rowIdKey] ?? Math.random()}
+                      key={row[rowIdKey] ?? `row-${rowIndex}`}
                       className={`datatable__row${onRowClick ? ' datatable__row--clickable' : ''}`}
                       onClick={onRowClick ? () => onRowClick(row) : undefined}
                       tabIndex={onRowClick ? 0 : undefined}
@@ -145,9 +145,9 @@ export default function DataTable({
       {/* Mobile: stacked cards */}
       {!loading && !error && data.length > 0 && (
         <div className="datatable__cards">
-          {data.map((row) => (
+          {data.map((row, rowIndex) => (
             <div
-              key={row[rowIdKey] ?? Math.random()}
+              key={row[rowIdKey] ?? `card-${rowIndex}`}
               className={`datatable__card${onRowClick ? ' datatable__card--clickable' : ''}`}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
               tabIndex={onRowClick ? 0 : undefined}

@@ -5,6 +5,7 @@ import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import { authApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { validateEmail } from '../../utils/validators.js';
 import './ForgotPasswordPage.css';
 
 export default function ForgotPasswordPage() {
@@ -17,8 +18,9 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     const cleanEmail = email.trim();
 
-    if (!cleanEmail) {
-      toast.warning('Please enter your email address.');
+    const emailError = validateEmail(cleanEmail);
+    if (emailError) {
+      toast.warning(emailError);
       return;
     }
 
@@ -130,4 +132,3 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
-

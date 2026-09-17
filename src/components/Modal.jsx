@@ -33,6 +33,13 @@ export default function Modal({
 }) {
   const dialogRef = useRef(null);
   const triggerRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+
+  // Keep the latest close handler available without restarting the focus trap
+  // whenever a parent form re-renders while the user is typing.
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   // Capture the trigger element before open
   useEffect(() => {
@@ -80,7 +87,7 @@ export default function Modal({
       }
 
       if (e.key === 'Escape') {
-        onClose?.();
+        onCloseRef.current?.();
       }
     }
 
@@ -98,7 +105,7 @@ export default function Modal({
         triggerRef.current.focus();
       }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -106,7 +113,6 @@ export default function Modal({
     <div
       className="modal-overlay"
       onClick={closeOnBackdrop ? onClose : undefined}
-      aria-hidden="true"
     >
       <div
         role="dialog"
@@ -115,7 +121,6 @@ export default function Modal({
         className={`modal modal--${size}`}
         ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
-        aria-hidden="false"
       >
         {/* Header */}
         {(title || showCloseButton) && (

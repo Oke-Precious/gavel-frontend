@@ -5,7 +5,7 @@
 /* --- Container --- */
 .toast-container {
   position: fixed;
-  bottom: var(--space-3);
+  top: var(--space-3);
   right: var(--space-3);
   z-index: var(--z-toast);
   display: flex;
@@ -121,7 +121,6 @@
 @media (max-width: 640px) {
   .toast-container {
     top: var(--space-2);
-    bottom: auto;
     right: var(--space-2);
     left: var(--space-2);
     max-width: none;

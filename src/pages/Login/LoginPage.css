@@ -293,6 +293,39 @@
   color: #94A3B8;
 }
 
+.login-form-card__input--password {
+  padding-right: 3.25rem;
+}
+
+.login-form-card__password-toggle {
+  position: absolute;
+  right: 0.25rem;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.login-form-card__password-toggle:hover:not(:disabled) {
+  color: var(--color-indigo);
+}
+
+.login-form-card__password-toggle:focus-visible {
+  outline: 2px solid var(--color-indigo);
+  outline-offset: -2px;
+}
+
+.login-form-card__password-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .login-form-card__submit-btn {
   width: 100%;
   height: 48px;

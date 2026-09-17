@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FileX, Search, ArrowLeft, Hash } from 'lucide-react';
 import Button from '../../components/Button.jsx';
@@ -15,8 +15,8 @@ export default function CaseNotFoundPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [networkError, setNetworkError] = useState(null);
 
-  const handleFetchCase = async (idToFetch) => {
-    const cleanId = (idToFetch || searchQuery).trim();
+  const handleFetchCase = useCallback(async (idToFetch) => {
+    const cleanId = String(idToFetch ?? '').trim();
     if (!cleanId) return;
 
     setIsLoading(true);
@@ -24,9 +24,8 @@ export default function CaseNotFoundPage() {
 
     try {
       const data = await publicApi.getCaseByHashId(cleanId);
-      navigate(`/lookup/${encodeURIComponent(data?.caseHashId || cleanId)}`);
+      navigate(`/lookup/${encodeURIComponent(data?.hashId || cleanId)}`);
     } catch (err) {
-      console.error('API Error fetching case by hash ID:', err);
       setNetworkError(
         err.response?.data?.message ||
           `No public case record found matching ID "${cleanId}".`
@@ -34,13 +33,15 @@ export default function CaseNotFoundPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     if (caseHashId && caseHashId !== 'not-found') {
-      handleFetchCase(caseHashId);
+      const loadTimer = window.setTimeout(() => handleFetchCase(caseHashId), 0);
+      return () => window.clearTimeout(loadTimer);
     }
-  }, [caseHashId]);
+    return undefined;
+  }, [caseHashId, handleFetchCase]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -50,7 +51,7 @@ export default function CaseNotFoundPage() {
   };
 
   return (
-    <main id="main-content" className="case-not-found-page">
+    <div className="case-not-found-page">
       <div className="container case-not-found-container">
         <div className="case-not-found-nav">
           <Link to="/lookup">
@@ -104,7 +105,7 @@ export default function CaseNotFoundPage() {
                       id="retry-hash-input"
                       type="text"
                       className="case-not-found-input"
-                      placeholder="e.g. LA-2026-0483"
+                      placeholder="e.g. GAV-26-8A3F9"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       disabled={isLoading}
@@ -122,21 +123,11 @@ export default function CaseNotFoundPage() {
                 </div>
               </form>
 
-              <div className="case-not-found-telemetry">
-                <span className="case-not-found-tag">BACKEND TELEMETRY</span>
-                <p className="case-not-found-endpoint">
-                  Endpoint: <code className="about-code">GET /public/cases/{encodeURIComponent(caseHashId || searchQuery || ':caseHashId')}</code>
-                </p>
-                {networkError && (
-                  <p className="case-not-found-api-msg">
-                    API Response: <em>{networkError}</em>
-                  </p>
-                )}
-              </div>
+              {networkError && <p className="case-not-found-api-msg" role="alert">{networkError}</p>}
             </div>
           </Card>
         )}
       </div>
-    </main>
+    </div>
   );
 }

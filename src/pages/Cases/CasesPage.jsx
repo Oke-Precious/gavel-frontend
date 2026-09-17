@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  FolderOpen,
   Plus,
   Upload,
   Download,
@@ -17,6 +16,9 @@ import StatusPill from '../../components/StatusPill.jsx';
 import Modal from '../../components/Modal.jsx';
 import { casesApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { useAuth } from '../../hooks/useAuth.js';
+import { daysInCustody } from '../../utils/formatDate.js';
+import { getAlertLevel } from '../../utils/formatAlertLevel.js';
 import './CasesPage.css';
 
 const STAGE_OPTIONS = [
@@ -35,64 +37,6 @@ const ALERT_OPTIONS = [
   { value: 'critical', label: 'Critical' },
 ];
 
-const SAMPLE_CASES = [
-  {
-    _id: 'LA-2026-0483',
-    caseHashId: 'LA-2026-0483',
-    offense: 'Theft',
-    court: 'Ikeja Magistrate Court',
-    state: 'Lagos',
-    stage: 'DPP Advice / Adjournment',
-    daysInCustody: 142,
-    alertLevel: 'severe',
-    nextHearing: 'Mar 12, 2026',
-  },
-  {
-    _id: 'KN-2025-1187',
-    caseHashId: 'KN-2025-1187',
-    offense: 'Assault',
-    court: 'Kano High Court',
-    state: 'Kano',
-    stage: 'Charge & Remand',
-    daysInCustody: 31,
-    alertLevel: 'warning',
-    nextHearing: 'Feb 20, 2026',
-  },
-  {
-    _id: 'RV-2026-0092',
-    caseHashId: 'RV-2026-0092',
-    offense: 'Drug Possession',
-    court: 'Port Harcourt Magistrate',
-    state: 'Rivers',
-    stage: 'Arrest',
-    daysInCustody: 6,
-    alertLevel: 'compliant',
-    nextHearing: 'Feb 28, 2026',
-  },
-  {
-    _id: 'EN-2024-2201',
-    caseHashId: 'EN-2024-2201',
-    offense: 'Fraud',
-    court: 'Enugu High Court',
-    state: 'Enugu',
-    stage: 'DPP Advice / Adjournment',
-    daysInCustody: 210,
-    alertLevel: 'critical',
-    nextHearing: 'Pending',
-  },
-  {
-    _id: 'KD-2026-0112',
-    caseHashId: 'KD-2026-0112',
-    offense: 'Burglary',
-    court: 'Kaduna Magistrate',
-    state: 'Kaduna',
-    stage: 'Charge & Remand',
-    daysInCustody: 68,
-    alertLevel: 'warning',
-    nextHearing: 'Mar 5, 2026',
-  },
-];
-
 function normalizeAlert(raw) {
   if (!raw) return 'compliant';
   const s = String(raw).toLowerCase();
@@ -107,6 +51,7 @@ const PAGE_SIZE = 10;
 export default function CasesPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { hasRole } = useAuth();
 
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -131,30 +76,40 @@ export default function CasesPage() {
       const data = await casesApi.list({ limit: 200 });
       const items = Array.isArray(data) ? data : (data?.cases ?? data?.items ?? []);
       if (items.length === 0) {
-        setCases(SAMPLE_CASES);
+        setCases([]);
       } else {
         const normalized = items.map((c) => ({
-          _id: c._id ?? c.caseHashId ?? c.caseNumber,
-          caseHashId: c.caseHashId ?? c.caseNumber ?? '—',
+          _id: c._id,
+          caseHashId: c.hashId ?? '—',
           offense: c.offenseCategory ?? c.offense ?? c.title ?? '—',
-          court: c.court ?? 'Magistrate Court',
-          state: c.state ?? 'Lagos',
-          stage: c.stage ?? c.status ?? 'Charge & Remand',
-          daysInCustody: c.daysInCustody ?? c.detentionDays ?? 0,
-          alertLevel: normalizeAlert(c.alertLevel ?? c.alert),
+          court: c.court ?? 'Not provided',
+          state: c.state ?? 'Not provided',
+          stage: c.stage ?? 'Not provided',
+          daysInCustody: c.detentionDate ? daysInCustody(c.detentionDate) : null,
+          alertLevel: c.detentionDate
+            ? getAlertLevel(daysInCustody(c.detentionDate)).level
+            : c.alertLevel ? normalizeAlert(c.alertLevel) : null,
           nextHearing: c.nextHearingDate ?? c.nextHearing ?? '—',
         }));
         setCases(normalized);
       }
-    } catch {
-      setCases(SAMPLE_CASES);
+    } catch (requestError) {
+      setCases([]);
+      setError({
+        message: !requestError?.response
+          ? 'Network error — check your connection and try again.'
+          : requestError.response.status >= 500
+            ? 'Something went wrong on our end. Please try again in a moment.'
+            : requestError.response?.data?.message ?? 'Unable to load cases.',
+      });
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadCases();
+    const loadTimer = window.setTimeout(loadCases, 0);
+    return () => window.clearTimeout(loadTimer);
   }, [loadCases]);
 
   // Filtered dataset
@@ -184,10 +139,6 @@ export default function CasesPage() {
   const safePage = Math.min(page, totalPages);
   const pageRows = filteredCases.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  useEffect(() => {
-    setPage(1);
-  }, [search, stageFilter, alertFilter]);
-
   // CSV Bulk Import Handler
   const handleImportSubmit = async (e) => {
     e.preventDefault();
@@ -204,10 +155,10 @@ export default function CasesPage() {
       setImportFile(null);
       loadCases();
     } catch (err) {
-      const msg = err.response?.data?.message || 'Imported sample cases successfully.';
-      toast.success(msg);
-      setIsImportModalOpen(false);
-      setImportFile(null);
+      const msg = !err.response
+        ? 'Network error — check your connection and try again.'
+        : err.response?.data?.message || 'Unable to import cases.';
+      toast.error(msg);
     } finally {
       setIsImporting(false);
     }
@@ -218,16 +169,20 @@ export default function CasesPage() {
     try {
       toast.info('Preparing CSV export download...');
       const blob = await casesApi.export('csv');
-      const url = window.URL.createObjectURL(new Blob([blob]));
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'gavel_cases_export.csv');
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
       toast.success('CSV Export downloaded successfully.');
-    } catch {
-      toast.success('Export initiated. Demo CSV generated.');
+    } catch (err) {
+      const msg = !err.response
+        ? 'Network error — check your connection and try again.'
+        : err.response?.data?.message || 'Unable to export cases.';
+      toast.error(msg);
     }
   };
 
@@ -248,12 +203,16 @@ export default function CasesPage() {
     {
       key: 'daysInCustody',
       label: 'Days in Custody',
-      render: (val) => <span className="cases-table__days">{val} days</span>,
+      render: (val) => (
+        <span className="cases-table__days">
+          {val == null ? '—' : `${val} ${val === 1 ? 'day' : 'days'}`}
+        </span>
+      ),
     },
     {
       key: 'alertLevel',
       label: 'Alert Level',
-      render: (val) => <StatusPill level={val} />,
+      render: (val) => val ? <StatusPill level={val} /> : '—',
     },
     { key: 'nextHearing', label: 'Next Hearing' },
     {
@@ -282,7 +241,7 @@ export default function CasesPage() {
           className="cases-page__search-input"
           placeholder="Search by ID, offense, or court..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
       </div>
 
@@ -290,7 +249,7 @@ export default function CasesPage() {
         <select
           className="cases-page__select"
           value={stageFilter}
-          onChange={(e) => setStageFilter(e.target.value)}
+          onChange={(e) => { setStageFilter(e.target.value); setPage(1); }}
         >
           {STAGE_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -303,7 +262,7 @@ export default function CasesPage() {
         <select
           className="cases-page__select"
           value={alertFilter}
-          onChange={(e) => setAlertFilter(e.target.value)}
+          onChange={(e) => { setAlertFilter(e.target.value); setPage(1); }}
         >
           {ALERT_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -336,30 +295,21 @@ export default function CasesPage() {
           </div>
 
           <div className="cases-page__header-actions">
-            <Button
-              variant="secondary"
-              size="md"
-              iconLeft={Upload}
-              onClick={() => setIsImportModalOpen(true)}
-            >
-              Import CSV
-            </Button>
-            <Button
-              variant="secondary"
-              size="md"
-              iconLeft={Download}
-              onClick={handleExportCSV}
-            >
-              Export
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              iconLeft={Plus}
-              onClick={() => navigate('/cases/new')}
-            >
-              New Case
-            </Button>
+            {hasRole('admin', 'clerk') && (
+              <Button variant="secondary" size="md" iconLeft={Upload} onClick={() => setIsImportModalOpen(true)}>
+                Import Cases
+              </Button>
+            )}
+            {hasRole('admin', 'judge') && (
+              <Button variant="secondary" size="md" iconLeft={Download} onClick={handleExportCSV}>
+                Export CSV
+              </Button>
+            )}
+            {hasRole('admin', 'clerk') && (
+              <Button variant="primary" size="md" iconLeft={Plus} onClick={() => navigate('/cases/new')}>
+                Add New Case
+              </Button>
+            )}
           </div>
         </div>
 
@@ -394,7 +344,7 @@ export default function CasesPage() {
           size="md"
         >
           <form onSubmit={handleImportSubmit} noValidate>
-            <p style={{ fontSize: '0.875rem', color: '#64748B', marginBottom: '1rem' }}>
+            <p className="import-modal__description">
               Upload a standard GAVEL CSV case manifest to create or update multiple case records at once.
             </p>
 
@@ -412,7 +362,7 @@ export default function CasesPage() {
             </label>
 
             {importFile && (
-              <div className="import-modal__selected-file" style={{ marginTop: '1rem' }}>
+              <div className="import-modal__selected-file">
                 <CheckCircle size={16} />
                 <span>Selected: {importFile.name} ({(importFile.size / 1024).toFixed(1)} KB)</span>
               </div>

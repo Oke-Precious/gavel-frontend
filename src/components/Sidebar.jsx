@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
-  Scale,
   LayoutDashboard,
   FolderOpen,
   BarChart2,
@@ -50,7 +49,7 @@ const NAV_ITEMS = [
     to: '/pro-bono',
     label: 'Pro-Bono',
     Icon: Heart,
-    roles: ['admin', 'lawyer'],
+    roles: ['lawyer'],
   },
   {
     to: '/users',
@@ -65,12 +64,6 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const drawerRef = useRef(null);
-  const location = useLocation();
-
-  // Close mobile on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location]);
 
   // Escape to close mobile
   useEffect(() => {
@@ -91,7 +84,7 @@ export default function Sidebar() {
     ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
     : '??';
 
-  function SidebarContent() {
+  function renderSidebarContent() {
     return (
       <>
         {/* Logo */}
@@ -116,6 +109,7 @@ export default function Sidebar() {
               }
               title={collapsed ? label : undefined}
               aria-label={collapsed ? label : undefined}
+              onClick={() => setMobileOpen(false)}
             >
               <Icon size={20} strokeWidth={1.75} aria-hidden="true" className="sidebar__link-icon" />
               {!collapsed && <span className="sidebar__link-label">{label}</span>}
@@ -187,7 +181,7 @@ export default function Sidebar() {
         >
           <X size={20} strokeWidth={2} />
         </button>
-        <SidebarContent />
+        {renderSidebarContent()}
       </aside>
 
       {/* Desktop sidebar */}
@@ -195,7 +189,7 @@ export default function Sidebar() {
         className={`sidebar sidebar--desktop${collapsed ? ' sidebar--collapsed' : ''}`}
         aria-label="Navigation"
       >
-        <SidebarContent />
+        {renderSidebarContent()}
 
         {/* Collapse toggle */}
         <button

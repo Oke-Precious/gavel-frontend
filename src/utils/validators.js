@@ -58,8 +58,7 @@ export function validatePasswordConfirm(password, confirmPassword) {
 /**
  * Validate a GAVEL Case Hash ID.
  * Backend format: GAV-YY-XXXXXX (e.g. GAV-26-8A3F9)
- * The design brief also uses display aliases like LA-2026-0483 — we validate
- * both formats loosely so the public lookup works with either.
+ * The live backend accepts only its canonical GAV-YY-XXXXXX format.
  * @param {string} hashId
  * @returns {string|null}
  */
@@ -68,9 +67,7 @@ export function validateCaseHashId(hashId) {
   const normalized = String(hashId).trim().toUpperCase();
   // Backend canonical format
   const backendFormat = /^GAV-\d{2}-[A-Z0-9]+$/;
-  // Display alias format used in sample data
-  const displayFormat = /^[A-Z]{2}-\d{4}-\d{4,}$/;
-  if (!backendFormat.test(normalized) && !displayFormat.test(normalized)) {
+  if (!backendFormat.test(normalized)) {
     return 'Please enter a valid Case Hash ID (e.g. GAV-26-8A3F9).';
   }
   return null;

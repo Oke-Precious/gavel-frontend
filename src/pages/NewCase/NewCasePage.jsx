@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, FilePlus } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import { casesApi } from '../../services/api.js';
@@ -19,8 +19,12 @@ const OFFENSES = [
 ];
 
 const STATES = [
-  'Lagos', 'Kano', 'Rivers', 'Enugu', 'Kaduna', 'Ogun', 'Oyo',
-  'FCT Abuja', 'Edo', 'Delta', 'Anambra', 'Imo', 'Borno',
+  'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa',
+  'Benue', 'Borno', 'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti',
+  'Enugu', 'FCT Abuja', 'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano',
+  'Katsina', 'Kebbi', 'Kogi', 'Kwara', 'Lagos', 'Nasarawa', 'Niger',
+  'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto',
+  'Taraba', 'Yobe', 'Zamfara',
 ];
 
 export default function NewCasePage() {
@@ -44,7 +48,7 @@ export default function NewCasePage() {
     const cleanTitle = title.trim();
     const cleanCourt = court.trim();
 
-    if (!cleanCaseNumber || !cleanTitle || !cleanCourt) {
+    if (!cleanCaseNumber || !cleanTitle || !cleanCourt || !detentionDate) {
       toast.warning('Please complete all required fields.');
       return;
     }
@@ -54,22 +58,31 @@ export default function NewCasePage() {
     try {
       const created = await casesApi.create({
         caseNumber: cleanCaseNumber,
-        title: cleanTitle,
-        offenseCategory,
+        title: offenseCategory,
         court: cleanCourt,
-        state,
-        detentionDate: detentionDate || new Date().toISOString().split('T')[0],
+        detentionDate,
         isProBono,
-        description,
+        description: [
+          cleanTitle,
+          `State jurisdiction: ${state}`,
+          description.trim(),
+        ].filter(Boolean).join('\n\n'),
       });
 
+      const createdCase = created?.case ?? created;
+      const targetId = createdCase?._id;
+      if (!targetId) {
+        throw new Error('The server created the case but did not return its record ID.');
+      }
       toast.success(`Case record "${cleanCaseNumber}" created successfully!`);
-      const targetId = created?._id || created?.caseHashId || cleanCaseNumber;
       navigate(`/cases/${targetId}`);
     } catch (err) {
-      const msg = err.response?.data?.message || 'New case created (saved to local repository).';
-      toast.success(msg);
-      navigate('/cases');
+      const msg = !err.response
+        ? err.message || 'Network error — check your connection and try again.'
+        : err.response.status >= 500
+          ? 'Something went wrong on our end. Please try again in a moment.'
+          : err.response?.data?.message || 'Unable to create this case.';
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -104,13 +117,13 @@ export default function NewCasePage() {
               {/* Case Hash ID / Number */}
               <div className="new-case-field">
                 <label htmlFor="case-number" className="new-case-label">
-                  Case Hash / Number *
+                  Court Case Number *
                 </label>
                 <input
                   id="case-number"
                   type="text"
                   className="new-case-input"
-                  placeholder="e.g. LA-2026-0912"
+                  placeholder="e.g. FHC/001/2026"
                   value={caseNumber}
                   onChange={(e) => setCaseNumber(e.target.value)}
                   disabled={isLoading}
@@ -195,7 +208,7 @@ export default function NewCasePage() {
               {/* Initial Detention Date */}
               <div className="new-case-field">
                 <label htmlFor="detention-date" className="new-case-label">
-                  Initial Arrest / Remand Date
+                  Initial Arrest / Remand Date *
                 </label>
                 <input
                   id="detention-date"
@@ -204,6 +217,8 @@ export default function NewCasePage() {
                   value={detentionDate}
                   onChange={(e) => setDetentionDate(e.target.value)}
                   disabled={isLoading}
+                  max={new Date().toISOString().split('T')[0]}
+                  required
                 />
               </div>
 
@@ -257,7 +272,7 @@ export default function NewCasePage() {
                 loading={isLoading}
                 iconLeft={Save}
               >
-                Save & Track Case
+                Create Case
               </Button>
             </div>
           </form>

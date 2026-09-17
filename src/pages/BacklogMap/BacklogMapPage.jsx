@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MapPin, AlertTriangle, ArrowRight, Shield, Clock, FileText, CheckCircle, AlertOctagon, XCircle } from 'lucide-react';
+import { MapPin, AlertTriangle, Clock, FileText } from 'lucide-react';
 import Card from '../../components/Card.jsx';
 import Button from '../../components/Button.jsx';
 import StatusPill from '../../components/StatusPill.jsx';
@@ -9,64 +8,6 @@ import EmptyState from '../../components/EmptyState.jsx';
 import { publicApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import './BacklogMapPage.css';
-
-// State data dictionary with required sample values
-const STATE_DATA = {
-  Lagos: {
-    name: 'Lagos',
-    totalCases: 312,
-    avgWaitDays: 96,
-    topStallReason: 'Court Adjournment',
-    alertLevel: 'severe', // Orange #F97316
-    court: 'Ikeja Magistrate Court',
-    caseHashId: 'LA-2026-0483',
-  },
-  Kano: {
-    name: 'Kano',
-    totalCases: 184,
-    avgWaitDays: 54,
-    topStallReason: 'File in Transit',
-    alertLevel: 'warning', // Amber #F59E0B
-    court: 'Kano State High Court',
-    caseHashId: 'KN-2025-1187',
-  },
-  Rivers: {
-    name: 'Rivers',
-    totalCases: 95,
-    avgWaitDays: 22,
-    topStallReason: 'Awaiting DPP Advice',
-    alertLevel: 'compliant', // Emerald #10B981
-    court: 'Port Harcourt Magistrate Court',
-    caseHashId: 'RV-2026-0092',
-  },
-  Enugu: {
-    name: 'Enugu',
-    totalCases: 420,
-    avgWaitDays: 215,
-    topStallReason: 'Missing Counsel',
-    alertLevel: 'critical', // Crimson #EF4444
-    court: 'Enugu State High Court',
-    caseHashId: 'EN-2024-2201',
-  },
-  Kaduna: {
-    name: 'Kaduna',
-    totalCases: 160,
-    avgWaitDays: 68,
-    topStallReason: 'Court Adjournment',
-    alertLevel: 'warning', // Amber #F59E0B
-    court: 'Kaduna Magistrate Court',
-    caseHashId: 'KD-2026-0112',
-  },
-  Ogun: {
-    name: 'Ogun',
-    totalCases: 88,
-    avgWaitDays: 19,
-    topStallReason: 'Awaiting DPP Advice',
-    alertLevel: 'compliant', // Emerald #10B981
-    court: 'Abeokuta High Court',
-    caseHashId: 'OG-2026-0044',
-  },
-};
 
 // All 36 States + FCT for map rendering
 const NIGERIA_STATES = [
@@ -110,17 +51,15 @@ const NIGERIA_STATES = [
 ];
 
 export default function BacklogMapPage() {
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const [selectedState, setSelectedState] = useState('Lagos');
   const [hoveredState, setHoveredState] = useState(null);
-  const [mapData, setMapData] = useState(STATE_DATA);
+  const [mapData, setMapData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [simulateError, setSimulateError] = useState(false);
 
-  // Fetch Backlog Map API with fallback
+  // Fetch the court-grouped totals exposed by the public API.
   useEffect(() => {
     let cancelled = false;
 
@@ -128,31 +67,39 @@ export default function BacklogMapPage() {
       setLoading(true);
       setError(null);
 
-      if (simulateError) {
-        setLoading(false);
-        setError('Failed to connect to national backlog service (HTTP 503).');
-        return;
-      }
-
       try {
         const res = await publicApi.backlogMap();
         if (!cancelled && res && Array.isArray(res) && res.length > 0) {
-          const merged = { ...STATE_DATA };
+          const merged = {};
           res.forEach((item) => {
-            if (item.state && merged[item.state]) {
-              merged[item.state] = {
-                ...merged[item.state],
-                totalCases: item.activeCases ?? item.totalCases ?? merged[item.state].totalCases,
-                avgWaitDays: item.avgWaitDays ?? merged[item.state].avgWaitDays,
-              };
-            }
+            const courtName = String(item.court ?? '').toLowerCase();
+            const matchedState = (courtName.includes('ikeja') ? 'Lagos' : null) ?? NIGERIA_STATES.find((state) =>
+              courtName.includes(state.id.toLowerCase()) ||
+              (state.id === 'FCT' && (courtName.includes('abuja') || courtName.includes('fct'))),
+            )?.id;
+            if (!matchedState) return;
+            const previousTotal = merged[matchedState]?.totalCases ?? 0;
+            merged[matchedState] = {
+              name: matchedState,
+              totalCases: previousTotal + Number(
+                item.totalBacklog ??
+                (Number(item.activeCount ?? item.activeCases ?? 0) + Number(item.stalledCount ?? item.stalledCases ?? 0)),
+              ),
+              avgWaitDays: '—',
+              topStallReason: 'Not provided by the public backlog API',
+              alertLevel: null,
+            };
           });
           setMapData(merged);
         }
-      } catch {
+      } catch (requestError) {
         if (!cancelled) {
-          // Graceful fallback to default STATE_DATA
-          setMapData(STATE_DATA);
+          setMapData({});
+          setError(!requestError?.response
+            ? 'Network error — check your connection and try again.'
+            : requestError.response.status >= 500
+              ? 'Something went wrong on our end. Please try again in a moment.'
+              : requestError.response?.data?.message ?? 'Unable to load national backlog data.');
         }
       } finally {
         if (!cancelled) {
@@ -165,16 +112,14 @@ export default function BacklogMapPage() {
     return () => {
       cancelled = true;
     };
-  }, [simulateError]);
+  }, []);
 
   const activeData = mapData[selectedState] || {
     name: selectedState,
     totalCases: 'No Data',
     avgWaitDays: '—',
     topStallReason: 'No data recorded for this state',
-    alertLevel: 'compliant',
-    court: `${selectedState} State Court`,
-    caseHashId: 'LA-2026-0483',
+    alertLevel: null,
   };
 
   const getAlertColor = (alertLevel) => {
@@ -218,9 +163,7 @@ export default function BacklogMapPage() {
               message="National Backlog Overview Unavailable"
               subtext={error || 'Unable to render the state backlog choropleth map.'}
               actionLabel="Try Again"
-              onAction={() => {
-                setSimulateError(false);
-              }}
+              onAction={() => window.location.reload()}
             />
           </Card>
         </div>
@@ -236,19 +179,10 @@ export default function BacklogMapPage() {
           <div className="backlog-map-header__title-group">
             <h2 className="backlog-map-title">National Backlog Overview</h2>
             <p className="backlog-map-subheading">
-              Each state's color reflects the average alert severity of its awaiting-trial cases.
+              Court backlog totals are mapped only where the public API's court name identifies a state. Wait-time and severity data are not exposed by this endpoint.
             </p>
           </div>
 
-          <button
-            type="button"
-            className={`backlog-map-test-toggle ${simulateError ? 'is-active' : ''}`}
-            onClick={() => setSimulateError(!simulateError)}
-            title="Test network error state"
-          >
-            <AlertTriangle size={14} aria-hidden="true" />
-            <span>{simulateError ? 'Error Active' : 'Simulate Error State'}</span>
-          </button>
         </div>
 
         {/* 2-Column Responsive Layout: Interactive Map + Side Stat Panel */}
@@ -267,9 +201,9 @@ export default function BacklogMapPage() {
                   value={selectedState}
                   onChange={(e) => setSelectedState(e.target.value)}
                 >
-                  {Object.keys(STATE_DATA).map((st) => (
-                    <option key={st} value={st}>
-                      {st} ({STATE_DATA[st].totalCases} cases — {STATE_DATA[st].alertLevel.toUpperCase()})
+                  {NIGERIA_STATES.map((state) => (
+                    <option key={state.id} value={state.id}>
+                      {state.name}
                     </option>
                   ))}
                 </select>
@@ -431,17 +365,8 @@ export default function BacklogMapPage() {
 
               {/* Action Link: View [State] Cases */}
               <div className="stat-panel-footer">
-                <Button
-                  variant="primary"
-                  size="md"
-                  iconRight={ArrowRight}
-                  onClick={() => {
-                    const targetId = activeData.caseHashId || 'LA-2026-0483';
-                    navigate(`/cases/${targetId}`);
-                  }}
-                  className="stat-panel-cta"
-                >
-                  View {activeData.name} Cases
+                <Button variant="secondary" size="md" disabled className="stat-panel-cta">
+                  State Case List Unavailable
                 </Button>
               </div>
             </Card>

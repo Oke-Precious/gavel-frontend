@@ -38,6 +38,31 @@
   gap: 1.25rem;
 }
 
+.analytics-stat-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+}
+
+.analytics-stat-header svg {
+  color: var(--color-indigo);
+}
+
+.analytics-stat-value {
+  color: var(--color-navy);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+}
+
+.analytics-stat-caption {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
 .analytics-card-title {
   font-size: 1.125rem;
   font-weight: 700;

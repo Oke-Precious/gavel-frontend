@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import './PublicLayout.css';
@@ -8,13 +8,11 @@ import './PublicLayout.css';
  * Contains the Navbar, main content area, and a single footer with logo image.
  */
 export default function PublicLayout() {
-  const [persona, setPersona] = useState('public');
-
   return (
     <div className="public-layout">
-      <Navbar activePersona={persona} onPersonaChange={setPersona} />
+      <Navbar />
       <main className="public-layout__main" id="main-content" tabIndex={-1}>
-        <Outlet context={{ persona }} />
+        <Outlet />
       </main>
       <footer className="public-layout__footer">
         <div className="container public-layout__footer-inner">

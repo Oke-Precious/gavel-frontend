@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { getAlertLevel } from '../utils/formatAlertLevel.js';
-import { formatDays } from '../utils/formatDate.js';
 import './RemandClock.css';
 
 /**
@@ -60,8 +59,6 @@ export default function RemandClock({
       });
     });
   }, [animated, circumference, dashOffset]);
-
-  const label = days >= limit ? `${days} days` : `${days} / ${limit}d`;
 
   return (
     <div

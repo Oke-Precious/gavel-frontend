@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   RefreshCw,
@@ -24,62 +24,12 @@ import Timeline from '../../components/Timeline.jsx';
 import Modal from '../../components/Modal.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
-import { casesApi, publicApi, documentsApi } from '../../services/api.js';
+import { casesApi, documentsApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { useAuth } from '../../hooks/useAuth.js';
+import { daysInCustody, formatDate, formatDateTime } from '../../utils/formatDate.js';
+import { getAlertLevel } from '../../utils/formatAlertLevel.js';
 import './CaseDetailPage.css';
-
-// Default mock case data for LA-2026-0483 matching prompt requirements
-const SAMPLE_CASE = {
-  id: 'LA-2026-0483',
-  caseHashId: 'LA-2026-0483',
-  state: 'Lagos',
-  court: 'Ikeja Magistrate Court',
-  offenseCategory: 'Theft',
-  arrestDate: 'Jan 5, 2026',
-  remandStart: 'Jan 19, 2026',
-  assignedCounsel: 'Unassigned',
-  fileLocation: 'Ikeja Records Office',
-  alertLevel: 'severe',
-  currentStageIndex: 2,
-  daysInStage: 84,
-  expectedDays: 30,
-  stages: [
-    { label: 'Arrest', date: 'Jan 5, 2026' },
-    { label: 'Charge & Remand', date: 'Jan 19, 2026' },
-    {
-      label: 'DPP Advice / Adjournment',
-      date: 'Jan 19, 2026',
-      stallReason: '84 Days in stage (Exceeds 30d expected)',
-    },
-    { label: 'Trial or Discharge', date: 'Pending' },
-  ],
-  documents: [
-    {
-      id: 'doc-1',
-      name: 'Arrest Report.pdf',
-      uploadedAt: 'Jan 6, 2026',
-      size: '2.4 MB',
-    },
-  ],
-  auditLogs: [
-    {
-      id: 'log-1',
-      type: 'flag',
-      title: 'System Flag',
-      date: 'Apr 12, 2026',
-      message: 'System flagged case as Severe Warning',
-      actor: 'System',
-    },
-    {
-      id: 'log-2',
-      type: 'update',
-      title: 'Status Update',
-      date: 'Jan 19, 2026',
-      message: 'Ibrahim Musa changed stage to DPP Advice / Adjournment',
-      actor: 'Ibrahim Musa',
-    },
-  ],
-};
 
 const STALL_REASONS = [
   'Awaiting DPP Advice',
@@ -96,18 +46,50 @@ const STAGES = [
   'Trial or Discharge',
 ];
 
+function stageIndex(stage) {
+  const normalized = String(stage ?? '').toLowerCase();
+  if (normalized.includes('trial') || normalized.includes('discharge') || normalized.includes('closed')) return 3;
+  if (normalized.includes('dpp') || normalized.includes('adjourn')) return 2;
+  if (normalized.includes('charge') || normalized.includes('remand') || normalized.includes('pre-trial')) return 1;
+  return 0;
+}
+
+function normalizeDocuments(payload) {
+  const documents = Array.isArray(payload) ? payload : (payload?.documents ?? []);
+  return documents.map((document) => ({
+    id: document._id ?? document.id,
+    name: document.originalName ?? document.filename ?? document.fileName ?? document.name ?? 'Document',
+    uploadedAt: formatDate(document.uploadedAt ?? document.createdAt),
+    size: (document.size ?? document.fileSize)
+      ? `${Math.ceil((document.size ?? document.fileSize) / 1024)} KB`
+      : '',
+    fileUrl: document.fileUrl,
+  }));
+}
+
+function normalizeAuditLogs(payload) {
+  const logs = Array.isArray(payload) ? payload : (payload?.history ?? payload?.auditLog ?? []);
+  return logs.map((log) => ({
+    id: log._id ?? log.id,
+    type: log.type === 'flag' ? 'flag' : 'update',
+    title: log.action ?? 'Status Update',
+    date: formatDateTime(log.timestamp ?? log.createdAt),
+    message: log.comments ?? log.note ?? `${log.previousStage ?? 'Previous stage'} → ${log.newStage ?? log.stage ?? 'Updated'}`,
+  }));
+}
+
 export default function CaseDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { hasRole } = useAuth();
 
-  const caseId = id || 'LA-2026-0483';
+  const caseId = id;
 
   // Core State
   const [caseData, setCaseData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [simulateError, setSimulateError] = useState(false);
 
   // Update Status Modal State
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -123,70 +105,52 @@ export default function CaseDetailPage() {
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
 
   // Fetch Case Data
-  const fetchCase = async () => {
+  const fetchCase = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
-    // If explicit error simulation requested
-    if (simulateError || caseId === 'ERROR-TEST') {
-      setIsLoading(false);
-      setError('Failed to retrieve case details. Server returned HTTP 500.');
-      return;
-    }
-
     try {
-      // Attempt backend call
-      let data = null;
-      try {
-        data = await casesApi.getById(caseId);
-      } catch {
-        // Fallback to public endpoint
-        data = await publicApi.getCaseByHashId(caseId);
-      }
-
-      if (data) {
-        // Map backend payload to UI structure
-        const stageIdx = typeof data.currentStageIndex === 'number'
-          ? data.currentStageIndex
-          : 2;
-
-        setCaseData({
-          id: data.id || data._id || caseId,
-          caseHashId: data.caseHashId || data.caseNumber || caseId,
-          state: data.state || 'Lagos',
-          court: data.court || 'Ikeja Magistrate Court',
-          offenseCategory: data.offenseCategory || data.title || 'Theft',
-          arrestDate: data.arrestDate || 'Jan 5, 2026',
-          remandStart: data.remandStart || 'Jan 19, 2026',
-          assignedCounsel: data.assignedCounsel || 'Unassigned',
-          fileLocation: data.fileLocation || 'Ikeja Records Office',
-          alertLevel: data.alertLevel || 'severe',
-          currentStageIndex: stageIdx,
-          daysInStage: data.daysInStage || 84,
-          expectedDays: data.expectedDays || 30,
-          stages: data.stages || SAMPLE_CASE.stages,
-          documents: data.documents || SAMPLE_CASE.documents,
-          auditLogs: data.auditLogs || SAMPLE_CASE.auditLogs,
-        });
-      } else {
-        setCaseData(SAMPLE_CASE);
-      }
-    } catch {
-      // Fallback to sample data for LA-2026-0483
-      if (caseId === 'LA-2026-0483' || !id) {
-        setCaseData(SAMPLE_CASE);
-      } else {
-        setError(`Case record "${caseId}" was not found or is currently inaccessible.`);
-      }
+      const [data, documentPayload, auditPayload] = await Promise.all([
+        casesApi.getById(caseId),
+        documentsApi.list(caseId).catch(() => []),
+        casesApi.auditLog(caseId).catch(() => []),
+      ]);
+      const custodyDays = data.detentionDate ? daysInCustody(data.detentionDate) : null;
+      const lawyers = Array.isArray(data.lawyers) ? data.lawyers : [];
+      setCaseData({
+        id: data._id ?? caseId,
+        caseHashId: data.hashId ?? data.caseNumber ?? '—',
+        state: data.state ?? 'Not provided',
+        court: data.court ?? 'Not provided',
+        offenseCategory: data.offenseCategory ?? data.title ?? 'Not provided',
+        arrestDate: formatDate(data.arrestDate ?? data.detentionDate),
+        remandStart: formatDate(data.remandStartDate ?? data.detentionDate),
+        assignedCounsel: lawyers.length
+          ? lawyers.map((lawyer) => `${lawyer.firstName ?? ''} ${lawyer.lastName ?? ''}`.trim()).join(', ')
+          : 'Unassigned',
+        fileLocation: data.fileLocation ?? 'Not provided',
+        alertLevel: custodyDays == null ? null : getAlertLevel(custodyDays).level,
+        currentStageIndex: stageIndex(data.stage),
+        stages: STAGES.map((label) => ({ label })),
+        documents: normalizeDocuments(documentPayload),
+        auditLogs: normalizeAuditLogs(auditPayload),
+      });
+    } catch (requestError) {
+      setCaseData(null);
+      setError(!requestError?.response
+        ? 'Network error — check your connection and try again.'
+        : requestError.response.status >= 500
+          ? 'Something went wrong on our end. Please try again in a moment.'
+          : requestError.response?.data?.message ?? `Case record "${caseId}" was not found.`);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [caseId]);
 
   useEffect(() => {
-    fetchCase();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, simulateError]);
+    const loadTimer = window.setTimeout(fetchCase, 0);
+    return () => window.clearTimeout(loadTimer);
+  }, [fetchCase]);
 
   // Open Status Update Modal
   const handleOpenUpdateModal = () => {
@@ -200,84 +164,63 @@ export default function CaseDetailPage() {
   // Submit Status Update
   const handleStatusSubmit = async (e) => {
     e.preventDefault();
+    if (!updateComments.trim()) {
+      toast.warning('Note is required for every status update.');
+      return;
+    }
     setIsUpdatingStatus(true);
-
-    const stageIdx = STAGES.indexOf(selectedStage);
-    const newAuditLog = {
-      id: `log-${Date.now()}`,
-      type: 'update',
-      title: 'Status Update',
-      date: new Date().toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-      message: `Stage updated to ${selectedStage} — Reason: ${selectedStallReason}`,
-      actor: 'Current Officer',
-    };
 
     try {
       await casesApi.updateStatus(caseData.id, {
         stage: selectedStage,
         stallReason: selectedStallReason,
-        comments: updateComments,
+        comments: updateComments.trim(),
       });
+      await fetchCase();
       toast.success('Case status updated successfully.');
-    } catch {
-      toast.success('Case status updated (local demo update recorded).');
-    } finally {
-      // Apply update to local state
-      setCaseData((prev) => ({
-        ...prev,
-        currentStageIndex: stageIdx >= 0 ? stageIdx : prev.currentStageIndex,
-        auditLogs: [newAuditLog, ...prev.auditLogs],
-      }));
-      setIsUpdatingStatus(false);
       setIsUpdateModalOpen(false);
+    } catch (requestError) {
+      const message = !requestError?.response
+        ? 'Network error — check your connection and try again.'
+        : requestError.response.status >= 500
+          ? 'Something went wrong on our end. Please try again in a moment.'
+          : requestError.response?.data?.message ?? 'Unable to update this case.';
+      toast.error(message);
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
   // Submit Document Upload
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedFile && !fileDescription) {
+    if (!selectedFile) {
       toast.warning('Please select a file to upload.');
       return;
     }
 
     setIsUploadingDocument(true);
     const fileName = selectedFile ? selectedFile.name : 'Court_Document.pdf';
-    const fileSize = selectedFile
-      ? `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB`
-      : '1.2 MB';
-
-    const newDoc = {
-      id: `doc-${Date.now()}`,
-      name: fileName,
-      uploadedAt: new Date().toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-      size: fileSize,
-    };
-
     try {
-      if (selectedFile) {
-        await documentsApi.upload(caseData.id, selectedFile, fileDescription);
-      }
+      const uploaded = await documentsApi.upload(caseData.id, selectedFile, fileDescription.trim());
+      const [newDoc] = normalizeDocuments([uploaded?.document ?? uploaded]);
       toast.success(`Document "${fileName}" uploaded successfully.`);
-    } catch {
-      toast.success(`Document "${fileName}" attached successfully.`);
-    } finally {
       setCaseData((prev) => ({
         ...prev,
-        documents: [newDoc, ...prev.documents],
+        documents: newDoc ? [newDoc, ...prev.documents] : prev.documents,
       }));
-      setIsUploadingDocument(false);
       setIsUploadModalOpen(false);
       setSelectedFile(null);
       setFileDescription('');
+    } catch (requestError) {
+      const message = !requestError?.response
+        ? 'Network error — check your connection and try again.'
+        : requestError.response.status >= 500
+          ? 'Something went wrong on our end. Please try again in a moment.'
+          : requestError.response?.data?.message ?? 'Unable to upload this document.';
+      toast.error(message);
+    } finally {
+      setIsUploadingDocument(false);
     }
   };
 
@@ -321,22 +264,8 @@ export default function CaseDetailPage() {
                   `The case record "${caseId}" could not be retrieved from the server.`
                 }
                 actionLabel="Try Again"
-                onAction={() => {
-                  setSimulateError(false);
-                  fetchCase();
-                }}
+                onAction={fetchCase}
               />
-              {simulateError && (
-                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSimulateError(false)}
-                  >
-                    Reset Error Simulation
-                  </Button>
-                </div>
-              )}
             </Card>
           </div>
         </div>
@@ -358,18 +287,6 @@ export default function CaseDetailPage() {
             <ArrowLeft size={16} aria-hidden="true" />
             <span>Back to Cases</span>
           </button>
-
-          <div className="case-detail-top-actions">
-            <button
-              type="button"
-              className={`case-detail-test-toggle ${simulateError ? 'is-active' : ''}`}
-              onClick={() => setSimulateError(!simulateError)}
-              title="Test network error state"
-            >
-              <AlertTriangle size={14} aria-hidden="true" />
-              <span>{simulateError ? 'Error Mode Active' : 'Simulate Error State'}</span>
-            </button>
-          </div>
         </div>
 
         {/* Case Header */}
@@ -377,7 +294,7 @@ export default function CaseDetailPage() {
           <div className="case-detail-header__info">
             <div className="case-detail-header__title-row">
               <h1 className="case-detail-header__title">{caseData.caseHashId}</h1>
-              <StatusPill level={caseData.alertLevel} size="md" />
+              {caseData.alertLevel && <StatusPill level={caseData.alertLevel} size="md" />}
             </div>
             <p className="case-detail-header__subtitle">
               <MapPin size={16} className="case-detail-header__icon" aria-hidden="true" />
@@ -387,15 +304,17 @@ export default function CaseDetailPage() {
             </p>
           </div>
 
-          <Button
-            variant="primary"
-            size="md"
-            iconLeft={RefreshCw}
-            onClick={handleOpenUpdateModal}
-            className="case-detail-update-btn"
-          >
-            Update Status
-          </Button>
+          {hasRole('admin', 'clerk', 'judge') && (
+            <Button
+              variant="primary"
+              size="md"
+              iconLeft={RefreshCw}
+              onClick={handleOpenUpdateModal}
+              className="case-detail-update-btn"
+            >
+              Update Status
+            </Button>
+          )}
         </div>
 
         {/* Case Progression Card (Horizontal Stepper) */}
@@ -484,14 +403,11 @@ export default function CaseDetailPage() {
                   <File size={18} className="case-detail-card__icon" aria-hidden="true" />
                   <h2 className="case-detail-card__title">Documents</h2>
                 </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  iconLeft={Upload}
-                  onClick={() => setIsUploadModalOpen(true)}
-                >
-                  Upload
-                </Button>
+                {hasRole('admin', 'clerk', 'lawyer') && (
+                  <Button variant="secondary" size="sm" iconLeft={Upload} onClick={() => setIsUploadModalOpen(true)}>
+                    Upload
+                  </Button>
+                )}
               </div>
 
               <div className="case-detail-docs-list">
@@ -501,7 +417,18 @@ export default function CaseDetailPage() {
                       <File size={20} />
                     </div>
                     <div className="case-detail-doc-info">
-                      <span className="case-detail-doc-name">{doc.name}</span>
+                      {doc.fileUrl ? (
+                        <a
+                          className="case-detail-doc-name"
+                          href={documentsApi.fileUrl(doc.fileUrl)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {doc.name}
+                        </a>
+                      ) : (
+                        <span className="case-detail-doc-name">{doc.name}</span>
+                      )}
                       <span className="case-detail-doc-meta">
                         Uploaded {doc.uploadedAt} · {doc.size}
                       </span>
@@ -558,7 +485,7 @@ export default function CaseDetailPage() {
             {/* Stage Selector */}
             <div className="case-detail-form-group">
               <label htmlFor="stage-select" className="case-detail-form-label">
-                Lifecycle Stage
+                New Stage
               </label>
               <select
                 id="stage-select"
@@ -578,7 +505,7 @@ export default function CaseDetailPage() {
             {/* Stall Reason Dropdown */}
             <div className="case-detail-form-group">
               <label htmlFor="stall-reason-select" className="case-detail-form-label">
-                Stall / Primary Reason
+                Stall Reason
               </label>
               <select
                 id="stall-reason-select"
@@ -598,7 +525,7 @@ export default function CaseDetailPage() {
             {/* Comments Area */}
             <div className="case-detail-form-group">
               <label htmlFor="update-comments" className="case-detail-form-label">
-                Action / Progress Notes (Optional)
+                Note
               </label>
               <textarea
                 id="update-comments"
@@ -608,6 +535,7 @@ export default function CaseDetailPage() {
                 value={updateComments}
                 onChange={(e) => setUpdateComments(e.target.value)}
                 disabled={isUpdatingStatus}
+                required
               />
             </div>
 

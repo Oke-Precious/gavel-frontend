@@ -7,17 +7,17 @@ import {
   XCircle,
   Search,
   ChevronDown,
-  Bell,
   RefreshCw,
 } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import DataTable from '../../components/DataTable.jsx';
 import StatusPill from '../../components/StatusPill.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
-import EmptyState from '../../components/EmptyState.jsx';
 import { casesApi } from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { daysInCustody } from '../../utils/formatDate.js';
+import { getAlertLevel } from '../../utils/formatAlertLevel.js';
 import './DashboardPage.css';
 
 /* ─────────────────────────────────────────────
@@ -39,55 +39,7 @@ const ALERT_OPTIONS = [
   { value: 'critical', label: 'Critical' },
 ];
 
-const PERSONA_OPTIONS = [
-  { value: 'judge', label: 'Legal Aid Officer' },
-  { value: 'clerk', label: 'Records Officer' },
-  { value: 'admin', label: 'Admin' },
-  { value: 'lawyer', label: 'Volunteer Lawyer' },
-  { value: 'public', label: 'Public Observer' },
-];
-
 const PAGE_SIZE = 10;
-
-/* Fallback sample rows shown when the backend has no data or returns an error */
-const SAMPLE_ROWS = [
-  {
-    _id: 'LA-2026-0483',
-    caseHashId: 'LA-2026-0483',
-    offense: 'Theft',
-    stage: 'DPP Advice / Adjournment',
-    daysInCustody: 142,
-    alertLevel: 'severe',
-    nextHearing: 'Mar 12, 2026',
-  },
-  {
-    _id: 'KN-2025-1187',
-    caseHashId: 'KN-2025-1187',
-    offense: 'Assault',
-    stage: 'Charge & Remand',
-    daysInCustody: 31,
-    alertLevel: 'warning',
-    nextHearing: 'Feb 20, 2026',
-  },
-  {
-    _id: 'RV-2026-0092',
-    caseHashId: 'RV-2026-0092',
-    offense: 'Drug Possession',
-    stage: 'Arrest',
-    daysInCustody: 6,
-    alertLevel: 'compliant',
-    nextHearing: 'Feb 28, 2026',
-  },
-  {
-    _id: 'EN-2024-2201',
-    caseHashId: 'EN-2024-2201',
-    offense: 'Fraud',
-    stage: 'DPP Advice / Adjournment',
-    daysInCustody: 210,
-    alertLevel: 'critical',
-    nextHearing: null,
-  },
-];
 
 /* Map raw backend alert level → StatusPill level key */
 function normalizeAlert(raw) {
@@ -135,9 +87,10 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { user, roleLabel } = useAuth();
   const { toast } = useToast();
+  const toastRef = useRef(toast);
 
   /* ── State ── */
-  const [allRows, setAllRows] = useState([]);         // full dataset from backend (or sample)
+  const [allRows, setAllRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -145,12 +98,6 @@ export default function DashboardPage() {
   const [stageFilter, setStageFilter] = useState('');
   const [alertFilter, setAlertFilter] = useState('');
   const [page, setPage] = useState(1);
-
-  const [personaOpen, setPersonaOpen] = useState(false);
-  const [personaLabel, setPersonaLabel] = useState('Legal Aid Officer');
-  const personaRef = useRef(null);
-
-  const [notifCount] = useState(3); // mocked
 
   /* ── Fetch cases from backend ── */
   const fetchCases = useCallback(async (silent = false) => {
@@ -161,45 +108,39 @@ export default function DashboardPage() {
       const data = await casesApi.list({ limit: 200 });
       const items = Array.isArray(data) ? data : (data?.cases ?? data?.items ?? []);
       if (items.length === 0) {
-        // Fall back to sample data for demo/portfolio viewing
-        setAllRows(SAMPLE_ROWS);
+        setAllRows([]);
       } else {
         const normalized = items.map((c) => ({
-          _id: c._id ?? c.caseHashId ?? c.caseNumber,
-          caseHashId: c.caseHashId ?? c.caseNumber ?? '—',
-          offense: c.offenseCategory ?? c.offense ?? '—',
+          _id: c._id,
+          caseHashId: c.hashId ?? '—',
+          offense: c.offenseCategory ?? c.title ?? '—',
           stage: stageLabel(c.stage ?? c.status),
-          daysInCustody: c.daysInCustody ?? c.detentionDays ?? 0,
-          alertLevel: normalizeAlert(c.alertLevel ?? c.alert),
+          daysInCustody: c.detentionDate ? daysInCustody(c.detentionDate) : null,
+          alertLevel: c.detentionDate
+            ? getAlertLevel(daysInCustody(c.detentionDate)).level
+            : c.alertLevel ? normalizeAlert(c.alertLevel) : null,
           nextHearing: fmtDate(c.nextHearingDate ?? c.nextHearing),
         }));
         setAllRows(normalized);
       }
     } catch (err) {
-      // If network/auth error — show sample data + toast so the UI is never a dead end
-      setAllRows(SAMPLE_ROWS);
-      const msg = err?.response?.data?.message ?? err?.message ?? 'Could not load cases.';
+      setAllRows([]);
+      const msg = !err?.response
+        ? 'Network error — check your connection and try again.'
+        : err.response.status >= 500
+          ? 'Something went wrong on our end. Please try again in a moment.'
+          : err.response?.data?.message ?? 'Could not load cases.';
       setError(msg);
-      if (!silent) toast.error(`Network error: ${msg} — showing sample data.`);
+      if (!silent) toastRef.current.error(msg);
     } finally {
       setLoading(false);
     }
-  }, [toast]);
-
-  useEffect(() => {
-    fetchCases();
-  }, [fetchCases]);
-
-  /* ── Close persona dropdown on outside click ── */
-  useEffect(() => {
-    function handleClick(e) {
-      if (personaRef.current && !personaRef.current.contains(e.target)) {
-        setPersonaOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  useEffect(() => {
+    const loadTimer = window.setTimeout(fetchCases, 0);
+    return () => window.clearTimeout(loadTimer);
+  }, [fetchCases]);
 
   /* ── Derived: filtered + paginated rows ── */
   const filtered = useMemo(() => {
@@ -226,11 +167,6 @@ export default function DashboardPage() {
   const safePage = Math.min(page, totalPages);
   const pageRows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  /* Reset to page 1 whenever filters change */
-  useEffect(() => {
-    setPage(1);
-  }, [search, stageFilter, alertFilter]);
-
   /* ── Stats (from full allRows, not filtered) ── */
   const stats = useMemo(() => deriveSummary(allRows), [allRows]);
 
@@ -249,14 +185,16 @@ export default function DashboardPage() {
       label: 'Days in Custody',
       sortable: false,
       render: (val) => (
-        <span className="dash-table__days">{val} {val === 1 ? 'day' : 'days'}</span>
+        <span className="dash-table__days">
+          {val == null ? '—' : `${val} ${val === 1 ? 'day' : 'days'}`}
+        </span>
       ),
     },
     {
       key: 'alertLevel',
       label: 'Alert Level',
       sortable: false,
-      render: (val) => <StatusPill level={val} />,
+      render: (val) => val ? <StatusPill level={val} /> : '—',
     },
     {
       key: 'nextHearing',
@@ -295,7 +233,7 @@ export default function DashboardPage() {
           className="dash__search-input"
           placeholder="Search by Case Hash ID"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           aria-label="Search cases by Case Hash ID"
         />
       </div>
@@ -306,7 +244,7 @@ export default function DashboardPage() {
           id="dash-stage-filter"
           className="dash__select"
           value={stageFilter}
-          onChange={(e) => setStageFilter(e.target.value)}
+          onChange={(e) => { setStageFilter(e.target.value); setPage(1); }}
           aria-label="Filter by stage"
         >
           {STAGE_OPTIONS.map((o) => (
@@ -322,7 +260,7 @@ export default function DashboardPage() {
           id="dash-alert-filter"
           className="dash__select"
           value={alertFilter}
-          onChange={(e) => setAlertFilter(e.target.value)}
+          onChange={(e) => { setAlertFilter(e.target.value); setPage(1); }}
           aria-label="Filter by alert level"
         >
           {ALERT_OPTIONS.map((o) => (
@@ -355,68 +293,12 @@ export default function DashboardPage() {
           <h1 className="dash__title">My Caseload</h1>
         </div>
         <div className="dash__header-right">
-          {/* Persona Switcher */}
-          <div className="dash__persona" ref={personaRef}>
-            <button
-              id="persona-switcher-btn"
-              className="dash__persona-btn"
-              onClick={() => setPersonaOpen((v) => !v)}
-              aria-haspopup="listbox"
-              aria-expanded={personaOpen}
-              aria-label="Switch persona"
-            >
+          <div className="dash__persona" aria-label={`Current role: ${roleLabel}`}>
+            <div className="dash__persona-btn">
               <span className="dash__persona-label-text">Viewing as:</span>
-              <span className="dash__persona-current">{personaLabel}</span>
-              <ChevronDown
-                size={14}
-                strokeWidth={2}
-                className={`dash__persona-chevron${personaOpen ? ' dash__persona-chevron--open' : ''}`}
-                aria-hidden="true"
-              />
-            </button>
-            {personaOpen && (
-              <ul
-                className="dash__persona-menu"
-                role="listbox"
-                aria-label="Select persona"
-              >
-                {PERSONA_OPTIONS.map((p) => (
-                  <li
-                    key={p.value}
-                    role="option"
-                    aria-selected={personaLabel === p.label}
-                    className={`dash__persona-option${personaLabel === p.label ? ' dash__persona-option--active' : ''}`}
-                    onClick={() => {
-                      setPersonaLabel(p.label);
-                      setPersonaOpen(false);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        setPersonaLabel(p.label);
-                        setPersonaOpen(false);
-                      }
-                    }}
-                    tabIndex={0}
-                  >
-                    {p.label}
-                  </li>
-                ))}
-              </ul>
-            )}
+              <span className="dash__persona-current">{roleLabel}</span>
+            </div>
           </div>
-
-          {/* Notification bell */}
-          <button
-            className="dash__notif-btn"
-            aria-label={`${notifCount} unread notifications`}
-          >
-            <Bell size={20} strokeWidth={1.75} />
-            {notifCount > 0 && (
-              <span className="dash__notif-badge" aria-hidden="true">
-                {notifCount}
-              </span>
-            )}
-          </button>
 
           {/* User chip */}
           <div className="dash__user-chip">

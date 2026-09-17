@@ -85,14 +85,15 @@
 /* --- Responsive: full-screen on mobile --- */
 @media (max-width: 640px) {
   .modal-overlay {
-    align-items: flex-end;
+    align-items: stretch;
     padding: 0;
   }
 
   .modal {
     max-width: 100%;
-    max-height: 92dvh;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
     animation: slide-up-fade-in 250ms ease-out;
   }
 }

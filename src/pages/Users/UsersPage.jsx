@@ -1,36 +1,75 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Users, UserPlus, Mail, Shield, Trash2, CheckCircle } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { AlertTriangle, RotateCcw, UserPlus } from 'lucide-react';
+import Badge from '../../components/Badge.jsx';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import DataTable from '../../components/DataTable.jsx';
 import Modal from '../../components/Modal.jsx';
 import { usersApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { validateEmail } from '../../utils/validators.js';
 import './UsersPage.css';
 
-const SAMPLE_USERS = [
-  { _id: 'u1', firstName: 'Amaka', lastName: 'Eze', email: 'amaka.eze@gavel.ng', role: 'judge', court: 'Ikeja Magistrate Court', createdAt: 'Jan 10, 2026' },
-  { _id: 'u2', firstName: 'Ibrahim', lastName: 'Musa', email: 'ibrahim.musa@gavel.ng', role: 'clerk', court: 'Kano High Court', createdAt: 'Jan 15, 2026' },
-  { _id: 'u3', firstName: 'Chidi', lastName: 'Okafor', email: 'chidi.law@gavel.ng', role: 'lawyer', court: 'Port Harcourt Magistrate', createdAt: 'Feb 01, 2026' },
-  { _id: 'u4', firstName: 'Precious', lastName: 'Abioye', email: 'admin@gavel.ng', role: 'admin', court: 'National Headquarters', createdAt: 'Jan 01, 2026' },
-];
-
-const ROLE_LABELS = {
-  admin: 'Admin',
-  judge: 'Legal Aid Officer',
-  clerk: 'Records Officer',
-  lawyer: 'Volunteer Lawyer',
-  public: 'Public Observer',
+const ROLE_CONFIG = {
+  admin: { label: 'Admin', tone: 'indigo' },
+  judge: { label: 'Legal Aid Officer', tone: 'navy' },
+  clerk: { label: 'Records Officer', tone: 'neutral' },
+  lawyer: { label: 'Volunteer Lawyer', tone: 'indigo' },
+  litigant: { label: 'Public Observer', tone: 'neutral' },
+  public: { label: 'Public Observer', tone: 'neutral' },
 };
+
+function normalizeUser(user) {
+  const explicitStatus = String(user.accountStatus ?? user.status ?? '').toLowerCase();
+  return {
+    ...user,
+    _id: user._id ?? user.id,
+    firstName: user.firstName ?? '',
+    lastName: user.lastName ?? '',
+    email: user.email ?? '—',
+    role: user.role ?? 'public',
+    state: user.assignedState ?? user.state ?? '—',
+    isActive: typeof user.isActive === 'boolean'
+      ? user.isActive
+      : explicitStatus !== 'suspended',
+  };
+}
+
+function activeCaseCount(user) {
+  const possibleCounts = [
+    user?.activeCaseCount,
+    user?.activeAssignedCases,
+    user?.assignedActiveCases,
+    user?.activeCasesCount,
+  ];
+  const count = possibleCounts.find((value) => Number.isFinite(Number(value)));
+  if (count != null) return Number(count);
+  if (Array.isArray(user?.activeCases)) return user.activeCases.length;
+  return 0;
+}
+
+function requestErrorMessage(error, fallback) {
+  if (!error?.response) {
+    return 'Network error — check your connection and try again.';
+  }
+  if (error.response.status >= 500) {
+    return 'Something went wrong on our end. Please try again in a moment.';
+  }
+  return error.response.data?.message ?? fallback;
+}
 
 export default function UsersPage() {
   const { toast } = useToast();
-
+  const toastRef = useRef(toast);
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [suspensionReason, setSuspensionReason] = useState('');
+  const [isUpdatingAccount, setIsUpdatingAccount] = useState(false);
 
-  // Invite Form state
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteFirstName, setInviteFirstName] = useState('');
   const [inviteLastName, setInviteLastName] = useState('');
@@ -40,113 +79,169 @@ export default function UsersPage() {
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
-      const data = await usersApi.list();
+      const data = await usersApi.list({ limit: 100 });
       const items = Array.isArray(data) ? data : (data?.users ?? data?.items ?? []);
-      if (items.length > 0) {
-        setUsersList(items);
-      } else {
-        setUsersList(SAMPLE_USERS);
-      }
-    } catch {
-      setUsersList(SAMPLE_USERS);
+      setUsersList(items.map(normalizeUser));
+    } catch (error) {
+      const message = requestErrorMessage(error, 'Unable to load user accounts.');
+      setUsersList([]);
+      setLoadError({ message });
+      toastRef.current.error(message);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadUsers();
+    const loadTimer = window.setTimeout(loadUsers, 0);
+    return () => window.clearTimeout(loadTimer);
   }, [loadUsers]);
 
-  const handleInviteSubmit = async (e) => {
-    e.preventDefault();
+  function openAccountAction(user, action) {
+    setSelectedUser(user);
+    setPendingAction(action);
+    setSuspensionReason('');
+  }
+
+  function closeAccountAction() {
+    if (isUpdatingAccount) return;
+    setSelectedUser(null);
+    setPendingAction(null);
+    setSuspensionReason('');
+  }
+
+  async function handleAccountAction(event) {
+    event.preventDefault();
+    if (!selectedUser || !pendingAction) return;
+
+    const name = `${selectedUser.firstName} ${selectedUser.lastName}`.trim();
+    setIsUpdatingAccount(true);
+    try {
+      let actionResult;
+      if (pendingAction === 'suspend') {
+        actionResult = await usersApi.suspend(selectedUser._id, suspensionReason.trim());
+      } else {
+        actionResult = await usersApi.reactivate(selectedUser._id);
+      }
+
+      const isNowActive = pendingAction === 'reactivate';
+      setUsersList((current) => current.map((user) => (
+        user._id === selectedUser._id ? { ...user, isActive: isNowActive } : user
+      )));
+      toast.success(`${name} has been ${isNowActive ? 'reactivated' : 'suspended'}`);
+      const returnedActiveCases = activeCaseCount(actionResult);
+      if (!isNowActive && returnedActiveCases > 0) {
+        toast.info(`${name} had ${returnedActiveCases} active case${returnedActiveCases === 1 ? '' : 's'} assigned at suspension.`);
+      }
+      setSelectedUser(null);
+      setPendingAction(null);
+      setSuspensionReason('');
+    } catch (error) {
+      const fallback = pendingAction === 'suspend'
+        ? `Unable to suspend ${name}.`
+        : `Unable to reactivate ${name}.`;
+      toast.error(requestErrorMessage(error, fallback));
+    } finally {
+      setIsUpdatingAccount(false);
+    }
+  }
+
+  async function handleInviteSubmit(event) {
+    event.preventDefault();
     if (!inviteEmail.trim() || !inviteFirstName.trim() || !inviteLastName.trim()) {
-      toast.warning('Please enter all required fields.');
+      toast.warning('Please enter the first name, last name, and email address.');
+      return;
+    }
+    const emailError = validateEmail(inviteEmail);
+    if (emailError) {
+      toast.warning(emailError);
       return;
     }
 
     setIsSubmittingInvite(true);
     try {
-      await usersApi.invite({
+      const created = await usersApi.invite({
         email: inviteEmail.trim(),
         firstName: inviteFirstName.trim(),
         lastName: inviteLastName.trim(),
         role: inviteRole,
         court: inviteCourt.trim() || undefined,
       });
+      const newUser = normalizeUser(created?.user ?? created);
+      if (newUser._id) {
+        setUsersList((current) => [newUser, ...current]);
+      } else {
+        await loadUsers();
+      }
       toast.success(`Invitation email sent to ${inviteEmail.trim()}`);
-    } catch {
-      toast.success(`Invitation sent to ${inviteEmail.trim()} (added to user registry).`);
-    } finally {
-      const newUser = {
-        _id: `u-${Date.now()}`,
-        firstName: inviteFirstName.trim(),
-        lastName: inviteLastName.trim(),
-        email: inviteEmail.trim(),
-        role: inviteRole,
-        court: inviteCourt.trim() || 'Judicial Center',
-        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      };
-      setUsersList((prev) => [newUser, ...prev]);
-      setIsSubmittingInvite(false);
       setIsInviteModalOpen(false);
       setInviteEmail('');
       setInviteFirstName('');
       setInviteLastName('');
-    }
-  };
-
-  const handleDeleteUser = async (userId, userEmail) => {
-    try {
-      await usersApi.delete(userId);
-      toast.success(`User ${userEmail} removed.`);
-    } catch {
-      toast.success(`User ${userEmail} removed.`);
+      setInviteRole('judge');
+      setInviteCourt('');
+    } catch (error) {
+      toast.error(requestErrorMessage(error, 'Unable to invite this user.'));
     } finally {
-      setUsersList((prev) => prev.filter((u) => u._id !== userId));
+      setIsSubmittingInvite(false);
     }
-  };
+  }
 
   const columns = [
     {
       key: 'firstName',
       label: 'Name',
-      render: (val, row) => <strong>{row.firstName} {row.lastName}</strong>,
+      render: (_, row) => <span className="users-name">{row.firstName} {row.lastName}</span>,
     },
     { key: 'email', label: 'Email' },
     {
       key: 'role',
       label: 'Role',
-      render: (val) => <span className="users-role-badge">{ROLE_LABELS[val] || val}</span>,
+      render: (role) => {
+        const config = ROLE_CONFIG[role] ?? { label: role, tone: 'neutral' };
+        return <Badge tone={config.tone}>{config.label}</Badge>;
+      },
     },
-    { key: 'court', label: 'Assigned Center' },
-    { key: 'createdAt', label: 'Registered On' },
+    { key: 'state', label: 'State' },
+    {
+      key: 'isActive',
+      label: 'Account Status',
+      render: (isActive) => (
+        <Badge tone={isActive ? 'compliant' : 'critical'}>
+          {isActive ? 'Active' : 'Suspended'}
+        </Badge>
+      ),
+    },
     {
       key: '_id',
-      label: 'Actions',
-      render: (val, row) => (
-        <button
-          style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}
-          onClick={() => handleDeleteUser(row._id, row.email)}
-          title="Remove User"
+      label: 'Action',
+      render: (_, row) => (
+        <Button
+          variant={row.isActive ? 'danger' : 'secondary'}
+          size="md"
+          onClick={() => openAccountAction(row, row.isActive ? 'suspend' : 'reactivate')}
         >
-          <Trash2 size={16} />
-        </button>
+          {row.isActive ? 'Suspend' : 'Reactivate'}
+        </Button>
       ),
     },
   ];
 
+  const selectedName = selectedUser
+    ? `${selectedUser.firstName} ${selectedUser.lastName}`.trim()
+    : '';
+  const selectedActiveCases = activeCaseCount(selectedUser);
+  const isSuspending = pendingAction === 'suspend';
+
   return (
     <div className="users-page">
-      <div className="container users-container">
-        {/* Header Bar */}
+      <div className="users-container">
         <div className="users-header">
-          <div>
-            <h1 className="users-title">User Account Management</h1>
-            <p className="users-subtitle">
-              Manage judicial officers, court clerks, volunteer lawyers, and system administrators.
-            </p>
+          <div className="users-header__copy">
+            <h1 className="users-title">User Management</h1>
+            <p className="users-subtitle">Manage officer and volunteer access across GAVEL.</p>
           </div>
           <Button
             variant="primary"
@@ -154,95 +249,129 @@ export default function UsersPage() {
             iconLeft={UserPlus}
             onClick={() => setIsInviteModalOpen(true)}
           >
-            Invite Officer
+            Invite User
           </Button>
         </div>
 
-        {/* Data Table */}
-        <DataTable
-          columns={columns}
-          data={usersList}
-          loading={loading}
-          rowIdKey="_id"
-          emptyMessage="No registered users found."
-        />
+        {loadError && (
+          <Card padding="md" className="users-retry" role="status">
+            <span>{loadError.message}</span>
+            <Button variant="secondary" size="md" iconLeft={RotateCcw} onClick={loadUsers}>
+              Try Again
+            </Button>
+          </Card>
+        )}
 
-        {/* Invite User Modal */}
+        {!loadError && (
+          <DataTable
+            columns={columns}
+            data={usersList}
+            loading={loading}
+            rowIdKey="_id"
+            emptyMessage="No user accounts found. Invite a user to get started."
+          />
+        )}
+
+        <Modal
+          isOpen={Boolean(pendingAction && selectedUser)}
+          onClose={closeAccountAction}
+          title={isSuspending ? 'Suspend User' : 'Reactivate User'}
+          size="sm"
+          closeOnBackdrop={!isUpdatingAccount}
+          showCloseButton={!isUpdatingAccount}
+        >
+          <form onSubmit={handleAccountAction} className="account-action-form">
+            <p className="account-action-form__message">
+              {isSuspending
+                ? `Are you sure you want to suspend ${selectedName}? They will be logged out immediately and unable to sign in until reactivated.`
+                : `Are you sure you want to reactivate ${selectedName}? They'll regain access immediately.`}
+            </p>
+
+            {isSuspending && selectedActiveCases > 0 && (
+              <div className="account-action-form__warning" role="note">
+                <AlertTriangle size={20} aria-hidden="true" />
+                <span>
+                  This officer has {selectedActiveCases} active case{selectedActiveCases === 1 ? '' : 's'} assigned.
+                </span>
+              </div>
+            )}
+
+            {isSuspending && (
+              <div className="users-form-field">
+                <label htmlFor="suspension-reason" className="users-form-label">
+                  Reason <span className="users-form-optional">(optional)</span>
+                </label>
+                <textarea
+                  id="suspension-reason"
+                  className="users-form-textarea"
+                  rows={4}
+                  value={suspensionReason}
+                  onChange={(event) => setSuspensionReason(event.target.value)}
+                  placeholder="Add context for the audit log"
+                  disabled={isUpdatingAccount}
+                />
+              </div>
+            )}
+
+            <div className="users-modal-actions">
+              <Button type="button" variant="ghost" size="md" onClick={closeAccountAction} disabled={isUpdatingAccount}>
+                Cancel
+              </Button>
+              <Button type="submit" variant={isSuspending ? 'danger' : 'primary'} size="md" loading={isUpdatingAccount}>
+                {isSuspending ? 'Suspend User' : 'Reactivate User'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
+
         <Modal
           isOpen={isInviteModalOpen}
           onClose={() => setIsInviteModalOpen(false)}
-          title="Invite New Officer / Lawyer"
+          title="Invite User"
           size="md"
+          closeOnBackdrop={!isSubmittingInvite}
+          showCloseButton={!isSubmittingInvite}
         >
           <form onSubmit={handleInviteSubmit} className="invite-modal-form" noValidate>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>First Name *</label>
-                <input
-                  type="text"
-                  className="new-case-input"
-                  placeholder="First name"
-                  value={inviteFirstName}
-                  onChange={(e) => setInviteFirstName(e.target.value)}
-                  required
-                />
+            <div className="invite-modal-form__name-row">
+              <div className="users-form-field">
+                <label htmlFor="invite-first-name" className="users-form-label">First Name</label>
+                <input id="invite-first-name" type="text" className="users-form-input" value={inviteFirstName} onChange={(event) => setInviteFirstName(event.target.value)} disabled={isSubmittingInvite} required />
               </div>
-              <div>
-                <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>Last Name *</label>
-                <input
-                  type="text"
-                  className="new-case-input"
-                  placeholder="Last name"
-                  value={inviteLastName}
-                  onChange={(e) => setInviteLastName(e.target.value)}
-                  required
-                />
+              <div className="users-form-field">
+                <label htmlFor="invite-last-name" className="users-form-label">Last Name</label>
+                <input id="invite-last-name" type="text" className="users-form-input" value={inviteLastName} onChange={(event) => setInviteLastName(event.target.value)} disabled={isSubmittingInvite} required />
               </div>
             </div>
 
-            <div>
-              <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>Email Address *</label>
-              <input
-                type="email"
-                className="new-case-input"
-                placeholder="officer@gavel.ng"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                required
-              />
+            <div className="users-form-field">
+              <label htmlFor="invite-email" className="users-form-label">Email</label>
+              <input id="invite-email" type="email" className="users-form-input" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} disabled={isSubmittingInvite} required />
             </div>
 
-            <div>
-              <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>Assign Role *</label>
-              <select
-                className="new-case-select"
-                value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value)}
-              >
+            <div className="users-form-field">
+              <label htmlFor="invite-role" className="users-form-label">Role</label>
+              <select id="invite-role" className="users-form-input" value={inviteRole} onChange={(event) => setInviteRole(event.target.value)} disabled={isSubmittingInvite}>
                 <option value="judge">Legal Aid Officer</option>
                 <option value="clerk">Records Officer</option>
                 <option value="lawyer">Volunteer Lawyer</option>
-                <option value="admin">System Admin</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
 
-            <div>
-              <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>Assigned Court / Jurisdiction</label>
-              <input
-                type="text"
-                className="new-case-input"
-                placeholder="e.g. Ikeja Magistrate Court"
-                value={inviteCourt}
-                onChange={(e) => setInviteCourt(e.target.value)}
-              />
+            <div className="users-form-field">
+              <label htmlFor="invite-court" className="users-form-label">
+                Assigned Court <span className="users-form-optional">(optional)</span>
+              </label>
+              <input id="invite-court" type="text" className="users-form-input" value={inviteCourt} onChange={(event) => setInviteCourt(event.target.value)} disabled={isSubmittingInvite} placeholder="e.g. Ikeja Magistrate Court" />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
-              <Button type="button" variant="ghost" size="md" onClick={() => setIsInviteModalOpen(false)}>
+            <div className="users-modal-actions">
+              <Button type="button" variant="ghost" size="md" onClick={() => setIsInviteModalOpen(false)} disabled={isSubmittingInvite}>
                 Cancel
               </Button>
               <Button type="submit" variant="primary" size="md" loading={isSubmittingInvite}>
-                Send Invitation
+                Invite User
               </Button>
             </div>
           </form>

@@ -5,6 +5,7 @@ import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import { authApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { validatePassword, validatePasswordConfirm } from '../../utils/validators.js';
 import './ResetPasswordPage.css';
 
 export default function ResetPasswordPage() {
@@ -20,18 +21,10 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!password || !confirmPassword) {
-      toast.warning('Please fill in both password fields.');
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.warning('Password must be at least 6 characters long.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match.');
+    const passwordError = validatePassword(password);
+    const confirmError = validatePasswordConfirm(password, confirmPassword);
+    if (passwordError || confirmError) {
+      toast.warning(passwordError || confirmError);
       return;
     }
 
@@ -136,7 +129,7 @@ export default function ResetPasswordPage() {
                 </Button>
               </form>
 
-              <div style={{ textAlign: 'center' }}>
+              <div className="reset-card__back-row">
                 <Link to="/login" className="reset-card__back-link">
                   <ArrowLeft size={15} />
                   <span>Back to Login</span>

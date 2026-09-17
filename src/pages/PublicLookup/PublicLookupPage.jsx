@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { FileSearch, Hash, Search, Copy } from 'lucide-react';
 import { publicApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { validateCaseHashId } from '../../utils/validators.js';
 import './PublicLookupPage.css';
 
-const SAMPLE_CASE_ID = 'LA-2026-0483';
+const SAMPLE_CASE_ID = import.meta.env.VITE_SAMPLE_CASE_HASH_ID ?? '';
 
 export default function PublicLookupPage() {
   const navigate = useNavigate();
@@ -16,22 +17,25 @@ export default function PublicLookupPage() {
   const handleSearch = async (e) => {
     e.preventDefault();
     const cleanId = caseHashId.trim();
-
-    if (!cleanId) {
-      toast.warning('Please enter a valid Case Hash ID.');
+    const validationError = validateCaseHashId(cleanId);
+    if (validationError) {
+      toast.warning(validationError);
       return;
     }
 
     setIsLoading(true);
     try {
       const caseData = await publicApi.getCaseByHashId(cleanId);
-      const finalHash = caseData?.caseHashId || cleanId;
+      const finalHash = caseData?.hashId || cleanId;
       navigate(`/lookup/${encodeURIComponent(finalHash)}`);
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message ||
-        `No case record found matching "${cleanId}". Please check the ID and try again.`;
-      toast.error(errorMessage);
+      if (err.response?.status === 404) {
+        navigate(`/lookup/not-found/${encodeURIComponent(cleanId)}`);
+      } else if (!err.response) {
+        toast.error('Network error — check your connection and try again.');
+      } else {
+        toast.error(err.response?.data?.message || 'Unable to look up this case right now.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +66,7 @@ export default function PublicLookupPage() {
                   id="case-hash-id-input"
                   type="text"
                   className="lookup-card__input"
-                  placeholder="e.g. LA-2026-0483"
+                  placeholder="e.g. GAV-26-8A3F9"
                   value={caseHashId}
                   onChange={(e) => setCaseHashId(e.target.value)}
                   disabled={isLoading}
@@ -71,7 +75,7 @@ export default function PublicLookupPage() {
                 />
               </div>
               <p className="lookup-card__helper">
-                We never show names. Only the case number is needed to protect the privacy of everyone involved.
+                We never show names. Only the Case Hash ID is needed to protect the privacy of everyone involved.
               </p>
             </div>
 
@@ -86,17 +90,15 @@ export default function PublicLookupPage() {
           </form>
         </div>
 
-        <div className="lookup-sample-row">
-          <span>Try a sample case:</span>
-          <button
-            type="button"
-            className="lookup-sample-chip"
-            onClick={handleSampleClick}
-          >
-            <span>{SAMPLE_CASE_ID}</span>
-            <Copy size={14} />
-          </button>
-        </div>
+        {SAMPLE_CASE_ID && (
+          <div className="lookup-sample-row">
+            <span>Try a sample case:</span>
+            <button type="button" className="lookup-sample-chip" onClick={handleSampleClick}>
+              <span>{SAMPLE_CASE_ID}</span>
+              <Copy size={14} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

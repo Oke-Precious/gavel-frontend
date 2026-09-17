@@ -24,6 +24,11 @@ function unwrap(response) {
   return response.data?.data ?? response.data;
 }
 
+function unwrapKey(response, key) {
+  const data = unwrap(response);
+  return data?.[key] ?? data;
+}
+
 /* ================================================================== */
 /* 1. Auth                                                              */
 /* ================================================================== */
@@ -80,7 +85,7 @@ export const casesApi = {
 
   /** @param {string} id — MongoDB _id */
   getById: (id) =>
-    axiosClient.get(`/cases/${id}`).then(unwrap),
+    axiosClient.get(`/cases/${id}`).then((response) => unwrapKey(response, 'case')),
 
   /** @param {string} id, @param {object} updates */
   update: (id, updates) =>
@@ -99,7 +104,7 @@ export const casesApi = {
 
   /** @param {string} id */
   auditLog: (id) =>
-    axiosClient.get(`/cases/${id}/audit-log`).then(unwrap),
+    axiosClient.get(`/cases/${id}/audit-log`).then((response) => unwrapKey(response, 'logs')),
 
   /** @param {string} id — returns base64 PNG QR data URI */
   qrSlip: (id) =>
@@ -113,7 +118,7 @@ export const casesApi = {
     axiosClient.get('/cases/export', {
       params: { format, ...(caseId ? { caseId } : {}) },
       responseType: 'blob',
-    }),
+    }).then((response) => response.data),
 
   /**
    * Bulk import via CSV file.
@@ -134,7 +139,7 @@ export const casesApi = {
 export const documentsApi = {
   /** @param {string} caseId */
   list: (caseId) =>
-    axiosClient.get(`/cases/${caseId}/documents`).then(unwrap),
+    axiosClient.get(`/cases/${caseId}/documents`).then((response) => unwrapKey(response, 'documents')),
 
   /**
    * @param {string} caseId
@@ -172,19 +177,28 @@ export const documentsApi = {
 export const publicApi = {
   /** @param {string} caseHashId — e.g. GAV-26-8A3F9 */
   getCaseByHashId: (caseHashId) =>
-    axiosClient.get(`/public/cases/${encodeURIComponent(caseHashId)}`).then(unwrap),
+    axiosClient.get(`/public/cases/${encodeURIComponent(caseHashId)}`).then((response) => unwrapKey(response, 'case')),
 
   /** @returns {{ totalCases, activeCases, resolvedCases, stalledCases, resolutionRate }} */
   scorecard: () =>
-    axiosClient.get('/public/scorecard').then(unwrap),
+    axiosClient.get('/public/scorecard').then((response) => {
+      const data = unwrap(response);
+      return data?.scorecard ?? data;
+    }),
 
   /** @returns {Array<{ court, activeCases, stalledCases }>} */
   backlogMap: () =>
-    axiosClient.get('/public/backlog-map').then(unwrap),
+    axiosClient.get('/public/backlog-map').then((response) => {
+      const data = unwrap(response);
+      return data?.backlog ?? data;
+    }),
 
   /** @returns {Array<{ period: string, filed: number, resolved: number }>} */
   trends: () =>
-    axiosClient.get('/public/trends').then(unwrap),
+    axiosClient.get('/public/trends').then((response) => {
+      const data = unwrap(response);
+      return data?.trends ?? data;
+    }),
 };
 
 /* ================================================================== */
@@ -210,7 +224,7 @@ export const watchApi = {
 export const proBonoApi = {
   /** @param {{ minDetentionDays?: number }} params */
   listAvailable: (params = {}) =>
-    axiosClient.get('/pro-bono/cases', { params }).then(unwrap),
+    axiosClient.get('/pro-bono/cases', { params }).then((response) => unwrapKey(response, 'cases')),
 
   /** @param {string} caseId */
   claim: (caseId) =>
@@ -218,7 +232,7 @@ export const proBonoApi = {
 
   /** Returns all cases claimed by the current lawyer */
   myClaimed: () =>
-    axiosClient.get('/pro-bono/my-claimed').then(unwrap),
+    axiosClient.get('/pro-bono/my-claimed').then((response) => unwrapKey(response, 'cases')),
 };
 
 /* ================================================================== */
@@ -226,13 +240,13 @@ export const proBonoApi = {
 /* ================================================================== */
 export const analyticsApi = {
   overview: () =>
-    axiosClient.get('/analytics/overview').then(unwrap),
+    axiosClient.get('/analytics/overview').then((response) => unwrapKey(response, 'overview')),
 
   heatmap: () =>
-    axiosClient.get('/analytics/heatmap').then(unwrap),
+    axiosClient.get('/analytics/heatmap').then((response) => unwrapKey(response, 'heatmap')),
 
   trends: () =>
-    axiosClient.get('/analytics/trends').then(unwrap),
+    axiosClient.get('/analytics/trends').then((response) => unwrapKey(response, 'trends')),
 };
 
 /* ================================================================== */
@@ -253,9 +267,17 @@ export const usersApi = {
   update: (id, updates) =>
     axiosClient.patch(`/users/${id}`, updates).then(unwrap),
 
+  /**
+   * Suspends a user, invalidates their sessions, and records the action.
+   * @param {string} id
+   * @param {string} [reason]
+   */
+  suspend: (id, reason = '') =>
+    axiosClient.patch(`/users/${id}/suspend`, reason ? { reason } : {}).then(unwrap),
+
   /** @param {string} id */
-  delete: (id) =>
-    axiosClient.delete(`/users/${id}`).then(unwrap),
+  reactivate: (id) =>
+    axiosClient.patch(`/users/${id}/reactivate`).then(unwrap),
 };
 
 /* ================================================================== */

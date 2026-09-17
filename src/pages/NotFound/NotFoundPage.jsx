@@ -1,43 +1,25 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Scale, ArrowLeft } from 'lucide-react';
+import { SearchX } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import Button from '../../components/Button.jsx';
+import './NotFoundPage.css';
 
 export default function NotFoundPage() {
+  const navigate = useNavigate();
+
   return (
-    <div style={{
-      minHeight: '100dvh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'var(--color-bg)',
-      fontFamily: 'Inter, sans-serif',
-      padding: '2rem',
-    }}>
-      <div style={{ textAlign: 'center', maxWidth: 440 }}>
-        <Scale size={48} strokeWidth={1.25} style={{ color: 'var(--color-border)', margin: '0 auto 1.5rem' }} />
-        <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '0.5rem' }}>
-          Page not found
-        </h1>
-        <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem', lineHeight: 1.6 }}>
-          The page you're looking for doesn't exist or may have moved.
+    <div className="not-found-page">
+      <div className="not-found-page__content">
+        <SearchX className="not-found-page__icon" size={64} strokeWidth={1.5} aria-hidden="true" />
+        <h1 className="not-found-page__code">404</h1>
+        <h3>This page doesn't exist</h3>
+        <p className="not-found-page__message">
+          The page you're looking for may have moved, or the link might be outdated.
         </p>
-        <Link
-          to="/"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            backgroundColor: 'var(--color-indigo)',
-            color: '#ffffff',
-            padding: '0.625rem 1.25rem',
-            borderRadius: '8px',
-            fontWeight: 600,
-            textDecoration: 'none',
-          }}
-        >
-          <ArrowLeft size={16} strokeWidth={2} />
-          Back to home
-        </Link>
+        <div className="not-found-page__actions">
+          <Button variant="primary" size="md" onClick={() => navigate('/')}>Back to Home</Button>
+          <Button variant="ghost" size="md" onClick={() => navigate('/lookup')}>Look Up a Case</Button>
+        </div>
       </div>
     </div>
   );

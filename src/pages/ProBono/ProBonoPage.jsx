@@ -6,9 +6,7 @@ import {
   Clock,
   Landmark,
   FileText,
-  CheckCircle,
   UserCheck,
-  ShieldAlert,
 } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
@@ -17,40 +15,28 @@ import Skeleton from '../../components/Skeleton.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import { proBonoApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { daysInCustody } from '../../utils/formatDate.js';
+import { getAlertLevel } from '../../utils/formatAlertLevel.js';
 import './ProBonoPage.css';
 
-const SAMPLE_PRO_BONO = [
-  {
-    _id: 'LA-2026-0483',
-    caseHashId: 'LA-2026-0483',
-    offense: 'Theft',
-    court: 'Ikeja Magistrate Court',
-    state: 'Lagos',
-    detentionDays: 142,
-    alertLevel: 'severe',
-    isClaimed: false,
-  },
-  {
-    _id: 'EN-2024-2201',
-    caseHashId: 'EN-2024-2201',
-    offense: 'Fraud / Alleged Financial Crime',
-    court: 'Enugu High Court',
-    state: 'Enugu',
-    detentionDays: 210,
-    alertLevel: 'critical',
-    isClaimed: false,
-  },
-  {
-    _id: 'KD-2026-0112',
-    caseHashId: 'KD-2026-0112',
-    offense: 'Burglary',
-    court: 'Kaduna Magistrate',
-    state: 'Kaduna',
-    detentionDays: 68,
-    alertLevel: 'warning',
-    isClaimed: false,
-  },
-];
+function normalizeCase(caseRecord) {
+  const detentionDays = Number.isFinite(Number(caseRecord.detentionDays))
+    ? Number(caseRecord.detentionDays)
+    : caseRecord.detentionDate
+      ? daysInCustody(caseRecord.detentionDate)
+      : null;
+
+  return {
+    ...caseRecord,
+    _id: caseRecord._id ?? caseRecord.id,
+    caseHashId: caseRecord.hashId ?? caseRecord.caseHashId ?? '—',
+    offense: caseRecord.title ?? caseRecord.offenseCategory ?? 'Not provided',
+    court: caseRecord.court ?? 'Not provided',
+    state: caseRecord.state ?? 'Not provided',
+    detentionDays,
+    alertLevel: detentionDays == null ? null : getAlertLevel(detentionDays).level,
+  };
+}
 
 export default function ProBonoPage() {
   const navigate = useNavigate();
@@ -60,57 +46,62 @@ export default function ProBonoPage() {
   const [availableCases, setAvailableCases] = useState([]);
   const [claimedCases, setClaimedCases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [claimingId, setClaimingId] = useState(null);
 
   const loadProBonoData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const [availRes, claimedRes] = await Promise.all([
-        proBonoApi.listAvailable().catch(() => null),
-        proBonoApi.myClaimed().catch(() => null),
+        proBonoApi.listAvailable(),
+        proBonoApi.myClaimed(),
       ]);
-
-      if (availRes && Array.isArray(availRes) && availRes.length > 0) {
-        setAvailableCases(availRes);
-      } else {
-        setAvailableCases(SAMPLE_PRO_BONO);
-      }
-
-      if (claimedRes && Array.isArray(claimedRes)) {
-        setClaimedCases(claimedRes);
-      }
-    } catch {
-      setAvailableCases(SAMPLE_PRO_BONO);
+      const available = Array.isArray(availRes) ? availRes : (availRes?.cases ?? []);
+      const claimed = Array.isArray(claimedRes) ? claimedRes : (claimedRes?.cases ?? []);
+      setAvailableCases(available.map(normalizeCase));
+      setClaimedCases(claimed.map(normalizeCase));
+    } catch (requestError) {
+      setAvailableCases([]);
+      setClaimedCases([]);
+      setError(!requestError?.response
+        ? 'Network error — check your connection and try again.'
+        : requestError.response.status >= 500
+          ? 'Something went wrong on our end. Please try again in a moment.'
+          : requestError.response?.data?.message ?? 'Unable to load pro-bono cases.');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadProBonoData();
+    const loadTimer = window.setTimeout(loadProBonoData, 0);
+    return () => window.clearTimeout(loadTimer);
   }, [loadProBonoData]);
 
   const handleClaimCase = async (caseId, caseHash) => {
     setClaimingId(caseId);
     try {
-      await proBonoApi.claim(caseId);
+      const claimResult = await proBonoApi.claim(caseId);
       toast.success(`Case "${caseHash}" claimed successfully! Added to your representation roster.`);
-    } catch {
-      toast.success(`Case "${caseHash}" claimed! Added to your active pro-bono portfolio.`);
+      // Move from available to claimed only after the backend confirms the claim.
+      const target = availableCases.find((c) => c._id === caseId);
+      const claimedRecord = claimResult?.case
+        ? normalizeCase(claimResult.case)
+        : target;
+      setAvailableCases((prev) => prev.filter((c) => c._id !== caseId));
+      if (claimedRecord) {
+        setClaimedCases((prev) => [claimedRecord, ...prev.filter((c) => c._id !== caseId)]);
+      } else {
+        await loadProBonoData();
+      }
+    } catch (requestError) {
+      const message = !requestError?.response
+        ? 'Network error — check your connection and try again.'
+        : requestError.response?.data?.message ?? `Unable to claim case "${caseHash}".`;
+      toast.error(message);
     } finally {
       setClaimingId(null);
-      // Move from available to claimed in local state
-      const target = availableCases.find((c) => c._id === caseId) || {
-        _id: caseId,
-        caseHashId: caseHash,
-        offense: 'Theft',
-        court: 'Magistrate Court',
-        state: 'Lagos',
-        detentionDays: 100,
-        alertLevel: 'severe',
-      };
-      setAvailableCases((prev) => prev.filter((c) => c._id !== caseId));
-      setClaimedCases((prev) => [target, ...prev]);
     }
   };
 
@@ -154,6 +145,16 @@ export default function ProBonoPage() {
               </Card>
             ))}
           </div>
+        ) : error ? (
+          <Card padding="xl">
+            <EmptyState
+              icon="error"
+              message="Unable to Load Pro-Bono Cases"
+              subtext={error}
+              actionLabel="Try Again"
+              onAction={loadProBonoData}
+            />
+          </Card>
         ) : displayedCases.length === 0 ? (
           <Card padding="xl">
             <EmptyState
@@ -179,12 +180,16 @@ export default function ProBonoPage() {
                 <div className="pro-bono-card__top">
                   <div className="pro-bono-card__header">
                     <span className="pro-bono-card__hash">{c.caseHashId}</span>
-                    <StatusPill level={c.alertLevel || 'severe'} size="sm" />
+                    {c.alertLevel && <StatusPill level={c.alertLevel} size="sm" />}
                   </div>
 
                   <div className="pro-bono-card__days-badge">
                     <Clock size={14} />
-                    <span>{c.detentionDays || 90} Days Unrepresented</span>
+                    <span>
+                      {c.detentionDays == null
+                        ? 'Detention duration unavailable'
+                        : `${c.detentionDays} ${c.detentionDays === 1 ? 'Day' : 'Days'} Unrepresented`}
+                    </span>
                   </div>
 
                   <div className="pro-bono-card__meta-item">
@@ -213,7 +218,7 @@ export default function ProBonoPage() {
                       onClick={() => handleClaimCase(c._id, c.caseHashId)}
                       className="pro-bono-card__action-btn"
                     >
-                      Take Pro-Bono Case
+                      Claim Case
                     </Button>
                   ) : (
                     <Button
@@ -223,7 +228,7 @@ export default function ProBonoPage() {
                       onClick={() => navigate(`/cases/${c._id}`)}
                       className="pro-bono-card__action-btn"
                     >
-                      View Case Workspace
+                      View Case
                     </Button>
                   )}
                 </div>
