@@ -60,23 +60,6 @@ function PageLoader() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Placeholder — for pages not yet built                               */
-/* ------------------------------------------------------------------ */
-function Placeholder({ title }) {
-  return (
-    <div style={{
-      padding: '4rem 2rem',
-      textAlign: 'center',
-      fontFamily: 'Inter, sans-serif',
-      color: '#64748B',
-    }}>
-      <h1 style={{ color: '#0F172A', marginBottom: '0.5rem' }}>{title}</h1>
-      <p>This page is coming soon.</p>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* App                                                                  */
 /* ------------------------------------------------------------------ */
 export default function App() {

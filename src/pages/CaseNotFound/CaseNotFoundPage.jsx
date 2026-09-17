@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FileX, Search, ArrowLeft, RefreshCw, Hash } from 'lucide-react';
+import { FileX, Search, ArrowLeft, Hash } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
-import EmptyState from '../../components/EmptyState.jsx';
 import { publicApi } from '../../services/api.js';
 import './CaseNotFoundPage.css';
 
@@ -15,7 +14,6 @@ export default function CaseNotFoundPage() {
   const [searchQuery, setSearchQuery] = useState(caseHashId || '');
   const [isLoading, setIsLoading] = useState(false);
   const [networkError, setNetworkError] = useState(null);
-  const [caseFound, setCaseFound] = useState(null);
 
   const handleFetchCase = async (idToFetch) => {
     const cleanId = (idToFetch || searchQuery).trim();
@@ -23,17 +21,12 @@ export default function CaseNotFoundPage() {
 
     setIsLoading(true);
     setNetworkError(null);
-    setCaseFound(null);
 
     try {
-      // Call real backend endpoint GET /public/cases/:caseHashId
       const data = await publicApi.getCaseByHashId(cleanId);
-      setCaseFound(data);
-      // If found, navigate to the public case detail view
       navigate(`/lookup/${encodeURIComponent(data?.caseHashId || cleanId)}`);
     } catch (err) {
       console.error('API Error fetching case by hash ID:', err);
-      // Backend returns 404 or error response envelope
       setNetworkError(
         err.response?.data?.message ||
           `No public case record found matching ID "${cleanId}".`
@@ -59,7 +52,6 @@ export default function CaseNotFoundPage() {
   return (
     <main id="main-content" className="case-not-found-page">
       <div className="container case-not-found-container">
-        {/* Navigation back action */}
         <div className="case-not-found-nav">
           <Link to="/lookup">
             <Button variant="ghost" size="sm" iconLeft={ArrowLeft}>
@@ -68,7 +60,6 @@ export default function CaseNotFoundPage() {
           </Link>
         </div>
 
-        {/* LOADING STATE */}
         {isLoading && (
           <Card padding="lg" className="case-not-found-card">
             <div className="case-not-found-skeleton" aria-busy="true" aria-label="Searching backend for case ID">
@@ -79,26 +70,21 @@ export default function CaseNotFoundPage() {
           </Card>
         )}
 
-        {/* NOT FOUND / ERROR STATE (Exact specification) */}
         {!isLoading && (
           <Card padding="lg" className="case-not-found-card">
             <div className="case-not-found-content">
-              {/* Lucide FileX icon */}
               <div className="case-not-found-icon-wrap" aria-hidden="true">
                 <FileX size={56} strokeWidth={1.25} />
               </div>
 
-              {/* Exact H3 specified */}
               <h3 className="case-not-found-title">
                 No case found with that ID
               </h3>
 
-              {/* Exact Text specified */}
               <p className="case-not-found-text">
                 Double-check the Case Hash ID and try again.
               </p>
 
-              {/* Action Buttons */}
               <div className="case-not-found-actions">
                 <Link to="/lookup">
                   <Button variant="primary" size="md" iconLeft={Search}>
@@ -107,7 +93,6 @@ export default function CaseNotFoundPage() {
                 </Link>
               </div>
 
-              {/* In-line Quick Search Bar for instant retry */}
               <form onSubmit={handleSearchSubmit} className="case-not-found-form" noValidate>
                 <div className="case-not-found-field">
                   <label htmlFor="retry-hash-input" className="case-not-found-label">
@@ -137,7 +122,6 @@ export default function CaseNotFoundPage() {
                 </div>
               </form>
 
-              {/* Backend Endpoint Telemetry Note */}
               <div className="case-not-found-telemetry">
                 <span className="case-not-found-tag">BACKEND TELEMETRY</span>
                 <p className="case-not-found-endpoint">

@@ -1,12 +1,12 @@
 import React from 'react';
-import { FileSearch, Inbox, AlertCircle, FileX } from 'lucide-react';
+import { FileSearch, Inbox, AlertCircle } from 'lucide-react';
 import Button from './Button.jsx';
 import './EmptyState.css';
 
 /**
  * EmptyState — shown when there's no content to display.
  *
- * @param {'search'|'inbox'|'error'|'file-x'|React.Component} icon
+ * @param {'search'|'inbox'|'error'} icon
  * @param {string} message    — primary message (short)
  * @param {string} [subtext]  — secondary explanation
  * @param {string} [actionLabel] — CTA button label
@@ -16,10 +16,8 @@ import './EmptyState.css';
 
 const ICONS = {
   search: FileSearch,
-  inbox:  Inbox,
-  error:  AlertCircle,
-  'file-x': FileX,
-  fileX: FileX,
+  inbox: Inbox,
+  error: AlertCircle,
 };
 
 export default function EmptyState({
@@ -30,7 +28,7 @@ export default function EmptyState({
   onAction,
   size = 'md',
 }) {
-  const Icon = typeof icon === 'function' ? icon : (ICONS[icon] ?? Inbox);
+  const Icon = ICONS[icon] ?? Inbox;
   const iconSize = size === 'sm' ? 32 : size === 'lg' ? 56 : 44;
 
   return (

@@ -166,11 +166,11 @@ export default function CasePublicPage() {
         <div className="container case-public-container">
           <Card padding="lg" className="case-public-error-card">
             <EmptyState
-              icon="file-x"
-              message="No case found with that ID"
-              subtext="Double-check the Case Hash ID and try again."
-              actionLabel="Try Again"
-              onAction={() => navigate('/lookup')}
+              icon="search"
+              message="Case Not Found"
+              subtext={error || `No public case record found for ID "${caseHashId}".`}
+              actionLabel="Back to Search"
+              onAction={() => navigate('/')}
             />
           </Card>
         </div>

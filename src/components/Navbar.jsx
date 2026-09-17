@@ -10,11 +10,11 @@ import './Navbar.css';
  */
 
 const PERSONAS = [
-  { id: 'public',     label: 'Public Observer' },
-  { id: 'legal-aid',  label: 'Legal Aid Officer' },
-  { id: 'records',    label: 'Records Officer' },
-  { id: 'lawyer',     label: 'Volunteer Lawyer' },
-  { id: 'admin',      label: 'Admin' },
+  { id: 'public', label: 'Public Observer' },
+  { id: 'legal-aid', label: 'Legal Aid Officer' },
+  { id: 'records', label: 'Records Officer' },
+  { id: 'lawyer', label: 'Volunteer Lawyer' },
+  { id: 'admin', label: 'Admin' },
 ];
 
 export default function Navbar({ activePersona = 'public', onPersonaChange }) {
@@ -42,7 +42,7 @@ export default function Navbar({ activePersona = 'public', onPersonaChange }) {
 
   const currentPersona = PERSONAS.find((p) => p.id === activePersona) ?? PERSONAS[0];
 
-  const isAboutActive = location.pathname === '/about';
+  const isAboutActive = location.pathname === '/' || location.pathname === '/about';
   const isLookupActive = location.pathname.startsWith('/lookup');
   const isScorecardActive = location.pathname === '/scorecard';
   const isProBonoActive = location.pathname === '/pro-bono';
