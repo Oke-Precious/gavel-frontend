@@ -21,6 +21,7 @@ const CaseNotFoundPage   = lazy(() => import('./pages/CaseNotFound/CaseNotFoundP
 const LandingPage        = lazy(() => import('./pages/Landing/LandingPage.jsx'));
 const AboutPage          = lazy(() => import('./pages/About/AboutPage.jsx'));
 const CasePublicPage     = lazy(() => import('./pages/CasePublic/CasePublicPage.jsx'));
+const WatchConfirmationPage = lazy(() => import('./pages/WatchConfirmation/WatchConfirmationPage.jsx'));
 const ScorecardPage      = lazy(() => import('./pages/Scorecard/ScorecardPage.jsx'));
 const BacklogMapPage     = lazy(() => import('./pages/BacklogMap/BacklogMapPage.jsx'));
 const LoginPage          = lazy(() => import('./pages/Login/LoginPage.jsx'));
@@ -73,6 +74,7 @@ export default function App() {
                   <Route path="about" element={<AboutPage />} />
                   <Route path="lookup" element={<PublicLookupPage />} />
                   <Route path="lookup/not-found/:caseHashId?" element={<CaseNotFoundPage />} />
+                  <Route path="lookup/:caseHashId/watch-confirmation" element={<WatchConfirmationPage />} />
                   <Route path="lookup/:caseHashId" element={<CasePublicPage />} />
                   <Route path="scorecard" element={<ScorecardPage />} />
                   <Route path="backlog-map" element={<BacklogMapPage />} />

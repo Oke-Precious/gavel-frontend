@@ -115,9 +115,11 @@ export default function CasePublicPage() {
 
     try {
       await watchApi.subscribe(currentId, cleanEmail);
-      toast.success(`Subscribed! We'll email you if ${currentId}'s status changes.`);
-      setIsWatchModalOpen(false);
-      setWatchEmail('');
+      navigate(`/lookup/${encodeURIComponent(currentId)}/watch-confirmation`, {
+        state: {
+          subscriptionConfirmed: true,
+        },
+      });
     } catch (err) {
       const msg = !err.response
         ? 'Network error — check your connection and try again.'

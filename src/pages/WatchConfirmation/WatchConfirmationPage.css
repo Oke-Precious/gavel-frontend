@@ -1,0 +1,46 @@
+.watch-confirmation-page {
+  min-height: calc(100dvh - var(--navbar-height));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4) var(--space-2);
+  background-color: var(--color-bg);
+}
+
+.watch-confirmation-card {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.watch-confirmation-card__icon {
+  color: var(--color-compliant);
+}
+
+.watch-confirmation-card h3 {
+  color: var(--color-text);
+}
+
+.watch-confirmation-card p {
+  color: var(--color-text-muted);
+}
+
+.watch-confirmation-card .btn {
+  margin-top: var(--space-1);
+}
+
+@media (min-width: 641px) {
+  .watch-confirmation-page {
+    padding-inline: var(--space-3);
+  }
+}
+
+@media (min-width: 1025px) {
+  .watch-confirmation-page {
+    padding-inline: var(--space-4);
+  }
+}
