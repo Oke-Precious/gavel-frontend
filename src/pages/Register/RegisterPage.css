@@ -1,0 +1,25 @@
+.register-confirmation {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.register-confirmation__icon {
+  width: 64px;
+  height: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+}
+
+.register-confirmation__icon--success {
+  color: var(--color-compliant);
+  background-color: var(--color-compliant-bg);
+}
+
+.register-confirmation__icon--warning {
+  color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+}
