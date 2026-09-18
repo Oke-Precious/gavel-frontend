@@ -72,8 +72,8 @@ export default function LoginPage() {
             </h1>
 
             <p className="login-showcase__subtitle">
-              A civic-tech web platform tracking awaiting-trial court cases across Nigeria
-              to reduce unlawful pre-trial detention with human dignity and transparency.
+              Access your role-based dashboard to track cases, update records,
+              review delays, or claim eligible pro-bono matters with privacy and dignity.
             </p>
           </div>
 
@@ -210,7 +210,7 @@ export default function LoginPage() {
               onClick={() => navigate('/register')}
               className="login-form-card__create-btn"
             >
-              Create an Account
+              Create Volunteer Account
             </Button>
           </Card>
 
