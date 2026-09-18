@@ -1,0 +1,108 @@
+.privacy-page {
+  min-height: calc(100dvh - var(--navbar-height));
+  padding-block: var(--space-6);
+  background-color: var(--color-bg);
+}
+
+.privacy-page__inner {
+  max-width: 1120px;
+}
+
+.privacy-page__header {
+  max-width: 720px;
+  margin-bottom: var(--space-5);
+}
+
+.privacy-page__eyebrow {
+  margin-bottom: var(--space-1);
+  color: var(--color-indigo);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+.privacy-page__header h1 {
+  color: var(--color-navy);
+}
+
+.privacy-page__header p:not(.privacy-page__eyebrow) {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.privacy-page__layout {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.privacy-page__toc-card h2 {
+  margin-bottom: var(--space-2);
+  color: var(--color-navy);
+  font-size: var(--font-size-body);
+}
+
+.privacy-page__toc nav {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.privacy-page__toc a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+.privacy-page__toc a:hover,
+.privacy-page__toc a:focus-visible {
+  color: var(--color-indigo);
+}
+
+.privacy-page__content {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.privacy-page__content section {
+  scroll-margin-top: calc(var(--navbar-height) + var(--space-3));
+}
+
+.privacy-page__content section:focus {
+  outline: none;
+}
+
+.privacy-page__content h2 {
+  margin-bottom: var(--space-2);
+  color: var(--color-navy);
+  font-size: var(--font-size-h3);
+}
+
+.privacy-page__content p {
+  color: var(--color-text-muted);
+}
+
+.privacy-page__content p + p {
+  margin-top: var(--space-2);
+}
+
+@media (min-width: 641px) {
+  .privacy-page {
+    padding-block: var(--space-8);
+  }
+}
+
+@media (min-width: 1025px) {
+  .privacy-page__layout {
+    grid-template-columns: 280px 1fr;
+    align-items: start;
+  }
+
+  .privacy-page__toc {
+    position: sticky;
+    top: calc(var(--navbar-height) + var(--space-3));
+  }
+}
