@@ -22,6 +22,7 @@ const LandingPage        = lazy(() => import('./pages/Landing/LandingPage.jsx'))
 const AboutPage          = lazy(() => import('./pages/About/AboutPage.jsx'));
 const FaqPage            = lazy(() => import('./pages/Faq/FaqPage.jsx'));
 const PrivacyPage        = lazy(() => import('./pages/Privacy/PrivacyPage.jsx'));
+const TermsPage          = lazy(() => import('./pages/Terms/TermsPage.jsx'));
 const CasePublicPage     = lazy(() => import('./pages/CasePublic/CasePublicPage.jsx'));
 const WatchConfirmationPage = lazy(() => import('./pages/WatchConfirmation/WatchConfirmationPage.jsx'));
 const ScorecardPage      = lazy(() => import('./pages/Scorecard/ScorecardPage.jsx'));
@@ -76,6 +77,7 @@ export default function App() {
                   <Route path="about" element={<AboutPage />} />
                   <Route path="faq" element={<FaqPage />} />
                   <Route path="privacy" element={<PrivacyPage />} />
+                  <Route path="terms" element={<TermsPage />} />
                   <Route path="lookup" element={<PublicLookupPage />} />
                   <Route path="lookup/not-found/:caseHashId?" element={<CaseNotFoundPage />} />
                   <Route path="lookup/:caseHashId/watch-confirmation" element={<WatchConfirmationPage />} />
