@@ -20,6 +20,7 @@ export default function PublicLayout() {
             <img src="/gavel%20blue%20logo.png" alt="GAVEL Logo" className="public-layout__footer-brand-img" />
             <div className="public-layout__footer-links">
               <Link to="/about" className="public-layout__footer-link">About</Link>
+              <Link to="/faq" className="public-layout__footer-link">FAQ</Link>
               <Link to="/privacy" className="public-layout__footer-link">Privacy Policy</Link>
               <Link to="/terms" className="public-layout__footer-link">Terms of Use</Link>
               <Link to="/contact" className="public-layout__footer-link">Contact</Link>
