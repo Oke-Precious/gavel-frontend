@@ -340,15 +340,16 @@
 
 .landing-picture__visual {
   background-color: #F8FAFC;
-  padding: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .landing-picture__map-graphic {
   width: 100%;
-  max-width: 380px;
-  height: auto;
-  object-fit: contain;
+  height: 100%;
+  min-height: 100%;
+  display: block;
+  object-fit: cover;
 }

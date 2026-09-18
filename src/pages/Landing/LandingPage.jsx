@@ -129,19 +129,13 @@ export default function LandingPage() {
           </div>
 
           <div className="landing-picture__visual">
-            <svg
-              viewBox="0 0 400 300"
+            <img
+              src="/Nigeria%20Choropleth%20Map.png"
+              alt="Nigeria backlog choropleth map"
               className="landing-picture__map-graphic"
-              aria-label="Nigeria Map Backlog Overview"
-            >
-              <path d="M 50 150 L 100 130 L 160 140 L 180 180 L 120 220 L 70 200 Z" fill="#CBD5E1" stroke="#FFFFFF" strokeWidth="2" />
-              <path d="M 160 140 L 220 110 L 270 140 L 250 200 L 180 180 Z" fill="#EF4444" stroke="#FFFFFF" strokeWidth="2" />
-              <path d="M 160 140 L 180 180 L 150 240 L 100 230 Z" fill="#F59E0B" stroke="#FFFFFF" strokeWidth="2" />
-              <path d="M 120 220 L 150 240 L 140 280 L 100 270 Z" fill="#10B981" stroke="#FFFFFF" strokeWidth="2" />
-              <path d="M 150 240 L 200 230 L 220 270 L 170 280 Z" fill="#F59E0B" stroke="#FFFFFF" strokeWidth="2" />
-              <path d="M 220 110 L 300 90 L 350 130 L 320 200 L 270 140 Z" fill="#CBD5E1" stroke="#FFFFFF" strokeWidth="2" />
-              <path d="M 270 140 L 320 200 L 280 250 L 220 230 Z" fill="#10B981" stroke="#FFFFFF" strokeWidth="2" />
-            </svg>
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         </div>
       </section>
