@@ -47,6 +47,7 @@
 }
 
 .contact-page__field input,
+.contact-page__field select,
 .contact-page__field textarea {
   width: 100%;
   min-height: 44px;
@@ -68,19 +69,72 @@
 }
 
 .contact-page__field input:focus,
+.contact-page__field select:focus,
 .contact-page__field textarea:focus {
   border-color: var(--color-indigo);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
 }
 
 .contact-page__field input:disabled,
+.contact-page__field select:disabled,
 .contact-page__field textarea:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
 
+.contact-page__hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  text-align: right;
+}
+
 .contact-page__submit {
   width: 100%;
+}
+
+.contact-page__success {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.contact-page__success-icon {
+  width: 64px;
+  height: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: var(--color-compliant);
+  background-color: var(--color-compliant-bg);
+}
+
+.contact-page__success h2 {
+  color: var(--color-navy);
+  font-size: var(--font-size-h3);
+}
+
+.contact-page__success p {
+  color: var(--color-text-muted);
+}
+
+.contact-page__success-actions {
+  width: 100%;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.contact-page__home-link {
+  color: var(--color-indigo);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+.contact-page__home-link:hover {
+  color: var(--color-indigo-hover);
+  text-decoration: underline;
 }
 
 @media (min-width: 641px) {

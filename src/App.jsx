@@ -30,6 +30,7 @@ const ScorecardPage      = lazy(() => import('./pages/Scorecard/ScorecardPage.js
 const BacklogMapPage     = lazy(() => import('./pages/BacklogMap/BacklogMapPage.jsx'));
 const LoginPage          = lazy(() => import('./pages/Login/LoginPage.jsx'));
 const RegisterPage       = lazy(() => import('./pages/Register/RegisterPage.jsx'));
+const EmailVerifiedPage  = lazy(() => import('./pages/EmailVerified/EmailVerifiedPage.jsx'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPassword/ForgotPasswordPage.jsx'));
 const ResetPasswordPage  = lazy(() => import('./pages/ResetPassword/ResetPasswordPage.jsx'));
 
@@ -93,6 +94,7 @@ export default function App() {
                 {/* Auth pages (no layout wrapper) */}
                 <Route path="login"          element={<LoginPage />} />
                 <Route path="register"       element={<RegisterPage />} />
+                <Route path="email-verified" element={<EmailVerifiedPage />} />
                 <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="reset-password/:token" element={<ResetPasswordPage />} />
 

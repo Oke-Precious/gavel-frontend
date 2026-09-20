@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, Activity } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
@@ -10,6 +10,7 @@ import './LoginPage.css';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
   const { toast } = useToast();
 
@@ -17,6 +18,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('verified') === 'true') {
+      navigate('/email-verified', { replace: true });
+    }
+  }, [navigate, searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

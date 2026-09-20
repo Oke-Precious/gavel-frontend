@@ -44,7 +44,10 @@ export const authApi = {
    * @param {{ firstName, lastName, email, password, role?, phoneNumber?, barNumber? }} payload
    */
   register: (payload) =>
-    axiosClient.post('/auth/register', payload).then(unwrap),
+    axiosClient.post('/auth/register', payload, { timeout: 30000 }).then((response) => ({
+      message: response.data?.message,
+      data: unwrap(response),
+    })),
 
   logout: () =>
     axiosClient.post('/auth/logout').then(unwrap),
@@ -281,7 +284,35 @@ export const usersApi = {
 };
 
 /* ================================================================== */
-/* 9. System Health                                                     */
+/* 9. Contact / Report Issue                                            */
+/* ================================================================== */
+export const contactApi = {
+  /**
+   * Public endpoint.
+   * @param {{ name?: string, email: string, category: string, message: string }} payload
+   * @returns {{ messageId: string }}
+   */
+  submit: (payload) =>
+    axiosClient.post('/contact', payload, { timeout: 30000 }).then(unwrap),
+
+  /**
+   * Admin endpoint.
+   * @param {{ page?, limit?, status?, category? }} params
+   */
+  listMessages: (params = {}) =>
+    axiosClient.get('/contact/messages', { params }).then(unwrap),
+
+  /**
+   * Admin endpoint.
+   * @param {string} id
+   * @param {{ status: 'new'|'in_review'|'resolved'|'closed', adminNotes?: string }} payload
+   */
+  updateStatus: (id, payload) =>
+    axiosClient.patch(`/contact/messages/${id}/status`, payload).then(unwrap),
+};
+
+/* ================================================================== */
+/* 10. System Health                                                    */
 /* ================================================================== */
 export const healthApi = {
   ping: () =>

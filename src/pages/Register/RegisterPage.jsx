@@ -38,6 +38,7 @@ export default function RegisterPage() {
   const [barNumber, setBarNumber] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
 
   const handleSubmit = async (event) => {
@@ -62,7 +63,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       // Wire to real backend endpoint: POST /auth/register
-      await authApi.register({
+      const result = await authApi.register({
         firstName,
         lastName,
         email: cleanEmail,
@@ -70,26 +71,39 @@ export default function RegisterPage() {
         role: 'lawyer',
         barNumber: cleanBarNumber,
       });
+      const responseMessage = result.message || '';
+      const emailDeliveryFailed =
+        responseMessage.toLowerCase().includes('could not') ||
+        responseMessage.toLowerCase().includes('failed');
 
       setConfirmation({
-        title: 'Account Created',
+        title: emailDeliveryFailed ? 'Account Created' : 'Check Your Email',
         message:
-          'Your volunteer lawyer account has been created. Check your email for verification, then sign in to continue.',
-        tone: 'success',
+          responseMessage ||
+          'Your volunteer lawyer account has been created. We sent a verification link to your email. Open it to confirm your account, then sign in.',
+        tone: emailDeliveryFailed ? 'warning' : 'success',
       });
-      toast.success('Account created successfully.');
+      if (emailDeliveryFailed) {
+        toast.warning('Account created. Use Resend Verification Email if the link does not arrive.');
+      } else {
+        toast.success('Verification link sent. Please check your email.');
+      }
     } catch (error) {
       const status = error.response?.status;
       const backendMessage = error.response?.data?.message || '';
+      const timedOut =
+        error.code === 'ECONNABORTED' ||
+        String(error.message || '').toLowerCase().includes('timeout');
+      const noResponse = !error.response;
 
-      if (status >= 500) {
+      if (status >= 500 || timedOut || noResponse) {
         setConfirmation({
-          title: 'Signup Details Received',
+          title: 'Check Your Email',
           message:
-            'Your details appear to have reached GAVEL, but the server could not finish the confirmation response. Try signing in. If email verification is required and no email arrives, contact an admin.',
+            'Your signup details may have reached GAVEL, but the server did not finish the confirmation response in time. Check your email for a verification link. If it does not arrive, use Resend Verification Email.',
           tone: 'warning',
         });
-        toast.warning('Your signup may have been created. Try signing in next.');
+        toast.warning('Please check your email, then resend verification if needed.');
         return;
       }
 
@@ -105,6 +119,29 @@ export default function RegisterPage() {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const cleanEmail = email.trim();
+    const emailError = validateEmail(cleanEmail);
+
+    if (emailError) {
+      toast.warning(emailError);
+      return;
+    }
+
+    setIsResendingVerification(true);
+    try {
+      await authApi.resendVerification(cleanEmail);
+      toast.success('Verification email sent. Please check your inbox.');
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          'We could not resend the verification email. Please try again later.'
+      );
+    } finally {
+      setIsResendingVerification(false);
     }
   };
 
@@ -185,6 +222,17 @@ export default function RegisterPage() {
                   className="login-form-card__submit-btn"
                 >
                   Continue to Sign In
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  loading={isResendingVerification}
+                  onClick={handleResendVerification}
+                  className="login-form-card__create-btn"
+                >
+                  Resend Verification Email
                 </Button>
               </div>
             ) : (
