@@ -63,8 +63,11 @@ export const authApi = {
   forgotPassword: (email) =>
     axiosClient.post('/auth/forgot-password', { email }).then(unwrap),
 
+  verifyEmail: (token) =>
+    axiosClient.get(`/auth/verify-email/${encodeURIComponent(token)}`).then(unwrap),
+
   resetPassword: (token, password) =>
-    axiosClient.post(`/auth/reset-password/${token}`, { password }).then(unwrap),
+    axiosClient.post(`/auth/reset-password/${encodeURIComponent(token)}`, { password }).then(unwrap),
 
   resendVerification: (email) =>
     axiosClient.post('/auth/resend-verification', { email }).then(unwrap),
