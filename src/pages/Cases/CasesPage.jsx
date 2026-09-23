@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Plus,
-  Upload,
-  Download,
-  Search,
-  ChevronDown,
-  RefreshCw,
-  FileSpreadsheet,
   CheckCircle,
+  ChevronDown,
+  Download,
+  FileSpreadsheet,
+  Plus,
+  RefreshCw,
+  Search,
+  Upload,
 } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import DataTable from '../../components/DataTable.jsx';
-import StatusPill from '../../components/StatusPill.jsx';
 import Modal from '../../components/Modal.jsx';
+import StatusPill from '../../components/StatusPill.jsx';
 import { casesApi } from '../../services/api.js';
-import { useToast } from '../../context/ToastContext.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
+import { useToast } from '../../context/ToastContext.jsx';
 import { daysInCustody } from '../../utils/formatDate.js';
 import { getAlertLevel } from '../../utils/formatAlertLevel.js';
 import './CasesPage.css';
@@ -37,71 +37,130 @@ const ALERT_OPTIONS = [
   { value: 'critical', label: 'Critical' },
 ];
 
+const PAGE_SIZE = 10;
+
 function normalizeAlert(raw) {
   if (!raw) return 'compliant';
-  const s = String(raw).toLowerCase();
-  if (s.includes('critical')) return 'critical';
-  if (s.includes('severe') || s.includes('orange')) return 'severe';
-  if (s.includes('warning') || s.includes('amber')) return 'warning';
+
+  const value = String(raw).toLowerCase();
+  if (value.includes('critical')) return 'critical';
+  if (value.includes('severe') || value.includes('orange')) return 'severe';
+  if (value.includes('warning') || value.includes('amber')) return 'warning';
   return 'compliant';
 }
 
-const PAGE_SIZE = 10;
+function normalizeStage(raw) {
+  if (!raw) return '—';
+
+  const value = String(raw).toLowerCase().replace(/[_-]/g, ' ');
+  if (value.includes('trial') || value.includes('discharge')) return 'Trial or Discharge';
+  if (value.includes('dpp') || value.includes('adjournment')) return 'DPP Advice / Adjournment';
+  if (value.includes('charge') || value.includes('remand') || value.includes('pre trial')) return 'Charge & Remand';
+  if (value.includes('arrest')) return 'Arrest';
+  return raw;
+}
+
+function normalizeStageFilterValue(stage) {
+  return String(stage ?? '').toLowerCase().replace(/[^a-z]/g, '');
+}
+
+function formatDate(value) {
+  if (!value) return '—';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function extractState(caseRecord) {
+  if (caseRecord.state) return caseRecord.state;
+
+  const description = String(caseRecord.description ?? '');
+  const match = description.match(/State jurisdiction:\s*([^\n]+)/i);
+  return match?.[1]?.trim() || 'Not provided';
+}
+
+function uniqueOptions(rows, key) {
+  return Array.from(
+    new Set(
+      rows
+        .map((row) => row[key])
+        .filter((value) => value && value !== 'Not provided' && value !== '—'),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+}
+
+function getErrorMessage(error) {
+  if (!error?.response) {
+    return 'Network error — check your connection and try again.';
+  }
+
+  if (error.response.status >= 500) {
+    return 'Something went wrong on our end. Please try again in a moment.';
+  }
+
+  return error.response?.data?.message ?? 'Unable to load cases.';
+}
 
 export default function CasesPage() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { hasRole } = useAuth();
+  const { toast } = useToast();
+  const toastRef = useRef(toast);
 
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Filters
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState('');
   const [alertFilter, setAlertFilter] = useState('');
+  const [stateFilter, setStateFilter] = useState('');
+  const [courtFilter, setCourtFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  // Bulk Import Modal
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importFile, setImportFile] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
 
-  // Fetch Cases
-  const loadCases = useCallback(async () => {
-    setLoading(true);
+  const loadCases = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
+
     try {
+      // Real backend endpoint: GET /cases
       const data = await casesApi.list({ limit: 200 });
       const items = Array.isArray(data) ? data : (data?.cases ?? data?.items ?? []);
-      if (items.length === 0) {
-        setCases([]);
-      } else {
-        const normalized = items.map((c) => ({
-          _id: c._id,
-          caseHashId: c.hashId ?? '—',
-          offense: c.offenseCategory ?? c.offense ?? c.title ?? '—',
-          court: c.court ?? 'Not provided',
-          state: c.state ?? 'Not provided',
-          stage: c.stage ?? 'Not provided',
-          daysInCustody: c.detentionDate ? daysInCustody(c.detentionDate) : null,
-          alertLevel: c.detentionDate
-            ? getAlertLevel(daysInCustody(c.detentionDate)).level
-            : c.alertLevel ? normalizeAlert(c.alertLevel) : null,
-          nextHearing: c.nextHearingDate ?? c.nextHearing ?? '—',
-        }));
-        setCases(normalized);
-      }
-    } catch (requestError) {
-      setCases([]);
-      setError({
-        message: !requestError?.response
-          ? 'Network error — check your connection and try again.'
-          : requestError.response.status >= 500
-            ? 'Something went wrong on our end. Please try again in a moment.'
-            : requestError.response?.data?.message ?? 'Unable to load cases.',
+
+      const normalized = items.map((caseRecord) => {
+        const custodyDays = caseRecord.detentionDate ? daysInCustody(caseRecord.detentionDate) : null;
+
+        return {
+          _id: caseRecord._id,
+          caseHashId: caseRecord.hashId ?? caseRecord.caseHashId ?? caseRecord.caseNumber ?? '—',
+          offense: caseRecord.offenseCategory ?? caseRecord.offense ?? caseRecord.title ?? '—',
+          stage: normalizeStage(caseRecord.stage ?? caseRecord.status),
+          state: extractState(caseRecord),
+          court: caseRecord.court ?? 'Not provided',
+          daysInCustody: custodyDays,
+          alertLevel: custodyDays != null
+            ? getAlertLevel(custodyDays).level
+            : caseRecord.alertLevel ? normalizeAlert(caseRecord.alertLevel) : null,
+          nextHearing: formatDate(caseRecord.nextHearingDate ?? caseRecord.nextHearing),
+        };
       });
+
+      setCases(normalized);
+    } catch (requestError) {
+      const message = getErrorMessage(requestError);
+      setCases([]);
+      setError(message);
+      if (!silent) toastRef.current.error(message);
     } finally {
       setLoading(false);
     }
@@ -112,62 +171,74 @@ export default function CasesPage() {
     return () => window.clearTimeout(loadTimer);
   }, [loadCases]);
 
-  // Filtered dataset
+  const stateOptions = useMemo(() => uniqueOptions(cases, 'state'), [cases]);
+  const courtOptions = useMemo(() => uniqueOptions(cases, 'court'), [cases]);
+
   const filteredCases = useMemo(() => {
     return cases.filter((row) => {
-      const q = search.trim().toLowerCase();
-      const matchSearch =
-        !q ||
-        row.caseHashId.toLowerCase().includes(q) ||
-        row.offense.toLowerCase().includes(q) ||
-        row.court.toLowerCase().includes(q) ||
-        row.state.toLowerCase().includes(q);
+      const query = search.trim().toLowerCase();
+      const matchesSearch =
+        !query ||
+        row.caseHashId.toLowerCase().includes(query) ||
+        row.offense.toLowerCase().includes(query) ||
+        row.court.toLowerCase().includes(query) ||
+        row.state.toLowerCase().includes(query);
 
-      const matchStage =
+      const matchesStage =
         !stageFilter ||
-        row.stage.toLowerCase().replace(/[^a-z]/g, '').includes(
-          stageFilter.replace(/_/g, '').toLowerCase()
+        normalizeStageFilterValue(row.stage).includes(
+          stageFilter.replace(/_/g, '').toLowerCase(),
         );
 
-      const matchAlert = !alertFilter || row.alertLevel === alertFilter;
+      const matchesAlert = !alertFilter || row.alertLevel === alertFilter;
+      const matchesState = !stateFilter || row.state === stateFilter;
+      const matchesCourt = !courtFilter || row.court === courtFilter;
 
-      return matchSearch && matchStage && matchAlert;
+      return matchesSearch && matchesStage && matchesAlert && matchesState && matchesCourt;
     });
-  }, [cases, search, stageFilter, alertFilter]);
+  }, [alertFilter, cases, courtFilter, search, stageFilter, stateFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredCases.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pageRows = filteredCases.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  // CSV Bulk Import Handler
-  const handleImportSubmit = async (e) => {
-    e.preventDefault();
+  const resetFilters = () => {
+    setSearch('');
+    setStageFilter('');
+    setAlertFilter('');
+    setStateFilter('');
+    setCourtFilter('');
+    setPage(1);
+  };
+
+  const handleImportSubmit = async (event) => {
+    event.preventDefault();
+
     if (!importFile) {
       toast.warning('Please select a CSV file to upload.');
       return;
     }
 
     setIsImporting(true);
+
     try {
+      // Real backend endpoint: POST /cases/bulk-import
       await casesApi.bulkImport(importFile);
       toast.success(`Successfully imported cases from "${importFile.name}".`);
       setIsImportModalOpen(false);
       setImportFile(null);
-      loadCases();
-    } catch (err) {
-      const msg = !err.response
-        ? 'Network error — check your connection and try again.'
-        : err.response?.data?.message || 'Unable to import cases.';
-      toast.error(msg);
+      await loadCases(true);
+    } catch (requestError) {
+      toast.error(getErrorMessage(requestError).replace('load cases', 'import cases'));
     } finally {
       setIsImporting(false);
     }
   };
 
-  // CSV Export Handler
   const handleExportCSV = async () => {
     try {
       toast.info('Preparing CSV export download...');
+      // Real backend endpoint: GET /cases/export?format=csv
       const blob = await casesApi.export('csv');
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -177,54 +248,56 @@ export default function CasesPage() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      toast.success('CSV Export downloaded successfully.');
-    } catch (err) {
-      const msg = !err.response
-        ? 'Network error — check your connection and try again.'
-        : err.response?.data?.message || 'Unable to export cases.';
-      toast.error(msg);
+      toast.success('CSV export downloaded successfully.');
+    } catch (requestError) {
+      toast.error(getErrorMessage(requestError).replace('load cases', 'export cases'));
     }
   };
 
-  // Columns definition
   const columns = [
     {
       key: 'caseHashId',
       label: 'Case Hash ID',
-      render: (val) => <span className="cases-table__hash">{val}</span>,
+      sortable: false,
+      render: (value) => <span className="cases-table__hash">{value}</span>,
     },
-    { key: 'offense', label: 'Offense' },
-    {
-      key: 'court',
-      label: 'Jurisdiction',
-      render: (val, row) => `${val}, ${row.state}`,
-    },
-    { key: 'stage', label: 'Stage' },
+    { key: 'offense', label: 'Offense', sortable: false },
+    { key: 'stage', label: 'Stage', sortable: false },
     {
       key: 'daysInCustody',
       label: 'Days in Custody',
-      render: (val) => (
+      sortable: false,
+      render: (value) => (
         <span className="cases-table__days">
-          {val == null ? '—' : `${val} ${val === 1 ? 'day' : 'days'}`}
+          {value == null ? '—' : `${value} ${value === 1 ? 'day' : 'days'}`}
         </span>
       ),
     },
     {
       key: 'alertLevel',
       label: 'Alert Level',
-      render: (val) => val ? <StatusPill level={val} /> : '—',
+      sortable: false,
+      render: (value) => value ? <StatusPill level={value} /> : '—',
     },
-    { key: 'nextHearing', label: 'Next Hearing' },
+    {
+      key: 'nextHearing',
+      label: 'Next Hearing',
+      sortable: false,
+      render: (value) => value ?? <span className="cases-table__empty-cell">—</span>,
+    },
     {
       key: '_id',
       label: 'Action',
+      sortable: false,
       render: (_, row) => (
         <button
+          type="button"
           className="cases-table__view-btn"
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             navigate(`/cases/${row._id}`);
           }}
+          aria-label={`View case ${row.caseHashId}`}
         >
           View
         </button>
@@ -233,87 +306,143 @@ export default function CasesPage() {
   ];
 
   const filterSlot = (
-    <div className="cases-page__filters">
-      <div className="cases-page__search-wrap">
-        <Search size={16} className="cases-page__search-icon" />
+    <div className="cases-page__filters" aria-label="Advanced case filters">
+      <div className="cases-page__search-wrap" role="search">
+        <Search size={16} className="cases-page__search-icon" aria-hidden="true" />
         <input
+          id="cases-search"
           type="search"
           className="cases-page__search-input"
-          placeholder="Search by ID, offense, or court..."
+          placeholder="Search by Case Hash ID, offense, state, or court"
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setPage(1);
+          }}
+          aria-label="Search cases"
         />
       </div>
 
-      <div className="cases-page__select-wrap">
-        <select
-          className="cases-page__select"
-          value={stageFilter}
-          onChange={(e) => { setStageFilter(e.target.value); setPage(1); }}
-        >
-          {STAGE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <ChevronDown size={14} className="cases-page__select-icon" />
-      </div>
+      <FilterSelect
+        id="cases-stage-filter"
+        label="Filter by stage"
+        value={stageFilter}
+        onChange={(value) => {
+          setStageFilter(value);
+          setPage(1);
+        }}
+        options={STAGE_OPTIONS}
+      />
 
-      <div className="cases-page__select-wrap">
-        <select
-          className="cases-page__select"
-          value={alertFilter}
-          onChange={(e) => { setAlertFilter(e.target.value); setPage(1); }}
-        >
-          {ALERT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <ChevronDown size={14} className="cases-page__select-icon" />
-      </div>
+      <FilterSelect
+        id="cases-alert-filter"
+        label="Filter by alert level"
+        value={alertFilter}
+        onChange={(value) => {
+          setAlertFilter(value);
+          setPage(1);
+        }}
+        options={ALERT_OPTIONS}
+      />
 
-      <Button
-        variant="ghost"
-        size="sm"
-        iconLeft={RefreshCw}
-        onClick={loadCases}
-      >
-        Refresh
-      </Button>
+      <FilterSelect
+        id="cases-state-filter"
+        label="Filter by state"
+        value={stateFilter}
+        onChange={(value) => {
+          setStateFilter(value);
+          setPage(1);
+        }}
+        options={[
+          { value: '', label: 'All States' },
+          ...stateOptions.map((state) => ({ value: state, label: state })),
+        ]}
+      />
+
+      <FilterSelect
+        id="cases-court-filter"
+        label="Filter by court"
+        value={courtFilter}
+        onChange={(value) => {
+          setCourtFilter(value);
+          setPage(1);
+        }}
+        options={[
+          { value: '', label: 'All Courts' },
+          ...courtOptions.map((court) => ({ value: court, label: court })),
+        ]}
+      />
+
+      <div className="cases-page__filter-actions">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={resetFilters}
+        >
+          Reset
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          iconLeft={RefreshCw}
+          onClick={() => loadCases(true)}
+        >
+          Refresh
+        </Button>
+      </div>
     </div>
   );
 
   return (
     <div className="cases-page">
       <div className="container cases-page__container">
-        {/* Header Bar */}
         <div className="cases-page__header">
           <div className="cases-page__header-left">
-            <h1 className="cases-page__title">Case Directory</h1>
+            <h1 className="cases-page__title">All Cases</h1>
             <p className="cases-page__subtitle">
-              Manage, monitor, and update pre-trial detention cases across Nigeria.
+              Full case list with advanced filters for stage, alert level, state, and court.
             </p>
           </div>
 
           <div className="cases-page__header-actions">
             {hasRole('admin', 'clerk') && (
-              <Button variant="secondary" size="md" iconLeft={Upload} onClick={() => setIsImportModalOpen(true)}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                iconLeft={Upload}
+                onClick={() => setIsImportModalOpen(true)}
+              >
                 Import Cases
               </Button>
             )}
             {hasRole('admin', 'judge') && (
-              <Button variant="secondary" size="md" iconLeft={Download} onClick={handleExportCSV}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                iconLeft={Download}
+                onClick={handleExportCSV}
+              >
                 Export CSV
               </Button>
             )}
             {hasRole('admin', 'clerk') && (
-              <Button variant="primary" size="md" iconLeft={Plus} onClick={() => navigate('/cases/new')}>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                iconLeft={Plus}
+                onClick={() => navigate('/cases/new')}
+              >
                 Add New Case
               </Button>
             )}
           </div>
         </div>
 
-        {/* Data Table */}
         <DataTable
           columns={columns}
           data={pageRows}
@@ -329,14 +458,20 @@ export default function CasesPage() {
                   totalPages,
                   totalItems: filteredCases.length,
                   limit: PAGE_SIZE,
-                  onPageChange: (p) => setPage(p),
+                  onPageChange: (nextPage) => setPage(nextPage),
                 }
               : null
           }
           onRowClick={(row) => navigate(`/cases/${row._id}`)}
         />
 
-        {/* Bulk CSV Import Modal */}
+        {!loading && !error && (
+          <p className="cases-page__count-line" aria-live="polite">
+            Showing {pageRows.length} of {filteredCases.length} case{filteredCases.length !== 1 ? 's' : ''}
+            {filteredCases.length !== cases.length && ` (filtered from ${cases.length})`}
+          </p>
+        )}
+
         <Modal
           isOpen={isImportModalOpen}
           onClose={() => setIsImportModalOpen(false)}
@@ -349,21 +484,22 @@ export default function CasesPage() {
             </p>
 
             <label htmlFor="csv-file-input" className="import-modal__dropzone">
-              <FileSpreadsheet size={40} className="import-modal__icon" />
+              <FileSpreadsheet size={40} className="import-modal__icon" aria-hidden="true" />
               <p className="import-modal__text">Click to choose a CSV file</p>
-              <p className="import-modal__subtext">Supported format: .csv (max 10MB)</p>
+              <p className="import-modal__subtext">Supported format: .csv</p>
               <input
                 id="csv-file-input"
                 type="file"
                 accept=".csv"
                 className="import-modal__file-input"
-                onChange={(e) => setImportFile(e.target.files[0])}
+                onChange={(event) => setImportFile(event.target.files[0] ?? null)}
+                disabled={isImporting}
               />
             </label>
 
             {importFile && (
               <div className="import-modal__selected-file">
-                <CheckCircle size={16} />
+                <CheckCircle size={16} aria-hidden="true" />
                 <span>Selected: {importFile.name} ({(importFile.size / 1024).toFixed(1)} KB)</span>
               </div>
             )}
@@ -391,6 +527,27 @@ export default function CasesPage() {
           </form>
         </Modal>
       </div>
+    </div>
+  );
+}
+
+function FilterSelect({ id, label, value, onChange, options }) {
+  return (
+    <div className="cases-page__select-wrap">
+      <select
+        id={id}
+        className="cases-page__select"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        aria-label={label}
+      >
+        {options.map((option) => (
+          <option key={`${id}-${option.value}`} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown size={14} className="cases-page__select-icon" aria-hidden="true" />
     </div>
   );
 }

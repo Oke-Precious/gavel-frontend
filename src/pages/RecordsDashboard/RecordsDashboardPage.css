@@ -1,0 +1,4 @@
+.records-dash .records-table__location {
+  color: var(--color-text);
+  font-size: var(--font-size-caption);
+}

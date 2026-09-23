@@ -37,7 +37,8 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPassword/ForgotPassw
 const ResetPasswordPage  = lazy(() => import('./pages/ResetPassword/ResetPasswordPage.jsx'));
 
 // Internal pages (authenticated)
-const DashboardPage   = lazy(() => import('./pages/Dashboard/DashboardPage.jsx'));
+const RoleDashboardPage = lazy(() => import('./pages/RoleDashboard/RoleDashboardPage.jsx'));
+const RecordsDashboardPage = lazy(() => import('./pages/RecordsDashboard/RecordsDashboardPage.jsx'));
 const CasesPage       = lazy(() => import('./pages/Cases/CasesPage.jsx'));
 const CaseDetailPage  = lazy(() => import('./pages/CaseDetail/CaseDetailPage.jsx'));
 const NewCasePage     = lazy(() => import('./pages/NewCase/NewCasePage.jsx'));
@@ -108,7 +109,11 @@ export default function App() {
                 {/* Internal / authenticated routes                    */}
                 {/* ------------------------------------------------- */}
                 <Route element={<InternalLayout />}>
-                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="dashboard" element={<RoleDashboardPage />} />
+                  <Route
+                    path="records-dashboard"
+                    element={<RequireRole roles={['admin', 'clerk']}><RecordsDashboardPage /></RequireRole>}
+                  />
                   <Route
                     path="cases"
                     element={<RequireRole roles={['admin', 'judge', 'clerk', 'lawyer']}><CasesPage /></RequireRole>}
