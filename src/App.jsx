@@ -32,6 +32,7 @@ const LoginPage          = lazy(() => import('./pages/Login/LoginPage.jsx'));
 const RegisterPage       = lazy(() => import('./pages/Register/RegisterPage.jsx'));
 const EmailVerifiedPage  = lazy(() => import('./pages/EmailVerified/EmailVerifiedPage.jsx'));
 const VerifyEmailPage    = lazy(() => import('./pages/VerifyEmail/VerifyEmailPage.jsx'));
+const OtpVerificationPage = lazy(() => import('./pages/OtpVerification/OtpVerificationPage.jsx'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPassword/ForgotPasswordPage.jsx'));
 const ResetPasswordPage  = lazy(() => import('./pages/ResetPassword/ResetPasswordPage.jsx'));
 
@@ -98,6 +99,7 @@ export default function App() {
                 <Route path="verify-email" element={<VerifyEmailPage />} />
                 <Route path="verify-email/:token" element={<VerifyEmailPage />} />
                 <Route path="email-verified" element={<EmailVerifiedPage />} />
+                <Route path="otp-verification" element={<OtpVerificationPage />} />
                 <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="reset-password" element={<ResetPasswordPage />} />
                 <Route path="reset-password/:token" element={<ResetPasswordPage />} />
