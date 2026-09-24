@@ -6,6 +6,7 @@ import {
   BarChart2,
   Heart,
   Users,
+  Mail,
   ShieldCheck,
   LogOut,
   ChevronLeft,
@@ -62,6 +63,12 @@ const NAV_ITEMS = [
     to: '/users',
     label: 'Users',
     Icon: Users,
+    roles: ['super_admin', 'admin'],
+  },
+  {
+    to: '/contact-messages',
+    label: 'Contact Messages',
+    Icon: Mail,
     roles: ['super_admin', 'admin'],
   },
 ];

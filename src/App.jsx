@@ -46,6 +46,7 @@ const AnalyticsPage   = lazy(() => import('./pages/Analytics/AnalyticsPage.jsx')
 const ProBonoPage     = lazy(() => import('./pages/ProBono/ProBonoPage.jsx'));
 const UsersPage       = lazy(() => import('./pages/Users/UsersPage.jsx'));
 const SuperAdminPage  = lazy(() => import('./pages/SuperAdmin/SuperAdminPage.jsx'));
+const ContactMessagesPage = lazy(() => import('./pages/ContactMessages/ContactMessagesPage.jsx'));
 
 // 404
 const NotFoundPage    = lazy(() => import('./pages/NotFound/NotFoundPage.jsx'));
@@ -142,6 +143,10 @@ export default function App() {
                   <Route
                     path="users"
                     element={<RequireRole roles={['super_admin', 'admin']}><UsersPage /></RequireRole>}
+                  />
+                  <Route
+                    path="contact-messages"
+                    element={<RequireRole roles={['super_admin', 'admin']}><ContactMessagesPage /></RequireRole>}
                   />
                 </Route>
 
