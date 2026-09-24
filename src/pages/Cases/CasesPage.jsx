@@ -413,7 +413,7 @@ export default function CasesPage() {
                 variant="secondary"
                 size="md"
                 iconLeft={Upload}
-                onClick={() => setIsImportModalOpen(true)}
+                onClick={() => navigate('/cases/bulk-import')}
               >
                 Import Cases
               </Button>

@@ -42,6 +42,9 @@ const RecordsDashboardPage = lazy(() => import('./pages/RecordsDashboard/Records
 const CasesPage       = lazy(() => import('./pages/Cases/CasesPage.jsx'));
 const CaseDetailPage  = lazy(() => import('./pages/CaseDetail/CaseDetailPage.jsx'));
 const NewCasePage     = lazy(() => import('./pages/NewCase/NewCasePage.jsx'));
+const UpdateCaseStatusPage = lazy(() => import('./pages/UpdateCaseStatus/UpdateCaseStatusPage.jsx'));
+const BulkImportCasesPage = lazy(() => import('./pages/BulkImportCases/BulkImportCasesPage.jsx'));
+const DocumentsManagerPage = lazy(() => import('./pages/DocumentsManager/DocumentsManagerPage.jsx'));
 const AnalyticsPage   = lazy(() => import('./pages/Analytics/AnalyticsPage.jsx'));
 const ProBonoPage     = lazy(() => import('./pages/ProBono/ProBonoPage.jsx'));
 const UsersPage       = lazy(() => import('./pages/Users/UsersPage.jsx'));
@@ -127,6 +130,18 @@ export default function App() {
                   <Route
                     path="cases/new"
                     element={<RequireRole roles={['super_admin', 'admin', 'clerk']}><NewCasePage /></RequireRole>}
+                  />
+                  <Route
+                    path="cases/bulk-import"
+                    element={<RequireRole roles={['super_admin', 'admin', 'clerk']}><BulkImportCasesPage /></RequireRole>}
+                  />
+                  <Route
+                    path="cases/:id/update-status"
+                    element={<RequireRole roles={['super_admin', 'admin', 'judge', 'clerk']}><UpdateCaseStatusPage /></RequireRole>}
+                  />
+                  <Route
+                    path="cases/:id/documents"
+                    element={<RequireRole roles={['super_admin', 'admin', 'clerk', 'lawyer']}><DocumentsManagerPage /></RequireRole>}
                   />
                   <Route
                     path="cases/:id"

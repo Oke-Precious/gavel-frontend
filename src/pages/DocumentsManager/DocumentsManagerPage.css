@@ -1,0 +1,103 @@
+.documents-manager__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.documents-manager__header h1,
+.documents-manager__header p,
+.documents-manager__file-body p,
+.documents-manager__empty-note {
+  margin: 0;
+}
+
+.documents-manager__header h1 {
+  color: var(--color-navy);
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-tight);
+}
+
+.documents-manager__header p,
+.documents-manager__file-body p,
+.documents-manager__empty-note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-base);
+}
+
+.documents-manager__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.documents-manager__file-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.documents-manager__file-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-indigo-light);
+  color: var(--color-indigo);
+  flex: 0 0 auto;
+}
+
+.documents-manager__file-body {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.documents-manager__file-body a,
+.documents-manager__file-body span {
+  color: var(--color-navy);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.documents-manager__file-body a:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.documents-manager__visibility {
+  align-self: flex-start;
+  flex: 0 0 auto;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-compliant-bg);
+  color: var(--color-compliant);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .documents-manager__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .documents-manager__header .btn {
+    width: 100%;
+  }
+
+  .documents-manager__file-card {
+    flex-direction: column;
+  }
+}

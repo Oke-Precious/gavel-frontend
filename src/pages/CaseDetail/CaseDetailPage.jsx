@@ -155,10 +155,7 @@ export default function CaseDetailPage() {
   // Open Status Update Modal
   const handleOpenUpdateModal = () => {
     if (!caseData) return;
-    setSelectedStage(STAGES[caseData.currentStageIndex] || STAGES[2]);
-    setSelectedStallReason(STALL_REASONS[0]);
-    setUpdateComments('');
-    setIsUpdateModalOpen(true);
+    navigate(`/cases/${caseData.id}/update-status`);
   };
 
   // Submit Status Update
@@ -404,7 +401,7 @@ export default function CaseDetailPage() {
                   <h2 className="case-detail-card__title">Documents</h2>
                 </div>
                 {hasRole('admin', 'clerk', 'lawyer') && (
-                  <Button variant="secondary" size="sm" iconLeft={Upload} onClick={() => setIsUploadModalOpen(true)}>
+                  <Button variant="secondary" size="sm" iconLeft={Upload} onClick={() => navigate(`/cases/${caseData.id}/documents`)}>
                     Upload
                   </Button>
                 )}
