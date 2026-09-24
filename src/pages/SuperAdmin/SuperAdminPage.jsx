@@ -41,14 +41,6 @@ const ROLE_CONFIG = {
 
 const ROLE_OPTIONS = ['admin', 'judge', 'lawyer', 'clerk', 'litigant', 'public'];
 const ROLE_FILTER_OPTIONS = ['super_admin', ...ROLE_OPTIONS];
-const CONTACT_STATUSES = ['new', 'in_review', 'resolved', 'closed'];
-const CONTACT_CATEGORIES = [
-  'general_question',
-  'report_issue',
-  'privacy_concern',
-  'case_information_concern',
-  'volunteer_legal_aid',
-];
 
 function displayRole(role) {
   return ROLE_CONFIG[role]?.label ?? role ?? 'Unknown';
@@ -92,32 +84,10 @@ function normalizeUser(user) {
   };
 }
 
-function normalizeContact(message) {
-  return {
-    ...message,
-    _id: message?._id ?? message?.id ?? message?.messageId,
-    name: message?.name || 'Not provided',
-    email: message?.email || '-',
-    category: message?.category || 'general_question',
-    message: message?.message || '-',
-    status: message?.status || 'new',
-    createdAt: message?.createdAt,
-    resolvedAt: message?.resolvedAt,
-    adminNotes: message?.adminNotes || '',
-    assignedTo: message?.resolvedBy?.firstName
-      ? `${message.resolvedBy.firstName} ${message.resolvedBy.lastName ?? ''}`.trim()
-      : message?.assignedResolutionAdministrator ?? message?.resolvedBy?.email ?? '-',
-  };
-}
-
 function listFrom(data, keys) {
   if (Array.isArray(data)) return data;
   for (const key of keys) if (Array.isArray(data?.[key])) return data[key];
   return [];
-}
-
-function labelFromToken(value) {
-  return String(value ?? 'not_provided').replace(/_/g, ' ');
 }
 
 function normalizeRoleCounts(overview, users) {
@@ -181,16 +151,6 @@ export default function SuperAdminPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const [contacts, setContacts] = useState([]);
-  const [contactsLoading, setContactsLoading] = useState(true);
-  const [contactsError, setContactsError] = useState(null);
-  const [contactPage, setContactPage] = useState(1);
-  const [contactPages, setContactPages] = useState(1);
-  const [contactTotal, setContactTotal] = useState(0);
-  const [contactStatus, setContactStatus] = useState('');
-  const [contactCategory, setContactCategory] = useState('');
-  const [contactDrafts, setContactDrafts] = useState({});
-
   const [modal, setModal] = useState(null);
   const [inviteForm, setInviteForm] = useState(initialInvite);
   const [editForm, setEditForm] = useState(initialEdit);
@@ -246,30 +206,6 @@ export default function SuperAdminPage() {
     }
   }, [roleFilter, userPage]);
 
-  const loadContacts = useCallback(async () => {
-    setContactsLoading(true);
-    setContactsError(null);
-    try {
-      const data = await superAdminApi.getContactMessages({
-        page: contactPage,
-        limit: 20,
-        ...(contactStatus ? { status: contactStatus } : {}),
-        ...(contactCategory ? { category: contactCategory } : {}),
-      });
-      const items = listFrom(data, ['messages', 'items']);
-      setContacts(items.map(normalizeContact));
-      setContactPages(Number(data?.pagination?.pages ?? data?.totalPages ?? 1));
-      setContactTotal(Number(data?.pagination?.total ?? data?.total ?? items.length));
-    } catch (error) {
-      const message = errorMessage(error, 'Unable to load contact messages.');
-      setContactsError(message);
-      setContacts([]);
-      toastRef.current.error(message);
-    } finally {
-      setContactsLoading(false);
-    }
-  }, [contactCategory, contactPage, contactStatus]);
-
   useEffect(() => {
     const timer = window.setTimeout(loadOverview, 0);
     return () => window.clearTimeout(timer);
@@ -279,11 +215,6 @@ export default function SuperAdminPage() {
     const timer = window.setTimeout(loadUsers, 0);
     return () => window.clearTimeout(timer);
   }, [loadUsers]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(loadContacts, 0);
-    return () => window.clearTimeout(timer);
-  }, [loadContacts]);
 
   const visibleUsers = useMemo(
     () => users.filter((item) => !statusFilter || (statusFilter === 'active' ? item.isActive : !item.isActive)),
@@ -467,21 +398,6 @@ export default function SuperAdminPage() {
     }
   }
 
-  async function updateContact(message) {
-    const draft = contactDrafts[message._id] ?? { status: message.status, adminNotes: message.adminNotes };
-    setModalLoading(true);
-    try {
-      await superAdminApi.updateContactStatus(message._id, draft);
-      toast.success('Contact message updated successfully.');
-      setContactDrafts((current) => ({ ...current, [message._id]: undefined }));
-      loadContacts();
-    } catch (error) {
-      toast.error(errorMessage(error, 'Unable to update this contact message.'));
-    } finally {
-      setModalLoading(false);
-    }
-  }
-
   const userColumns = [
     {
       key: 'firstName',
@@ -529,7 +445,7 @@ export default function SuperAdminPage() {
 
         <section className="super-admin__quick-links" aria-label="Super Admin shortcuts">
           <Button variant="secondary" size="md" iconLeft={Users} onClick={() => document.getElementById('super-admin-users')?.scrollIntoView({ behavior: 'smooth' })}>Manage users</Button>
-          <Button variant="secondary" size="md" iconLeft={Mail} onClick={() => document.getElementById('contact-inbox')?.scrollIntoView({ behavior: 'smooth' })}>Contact inbox</Button>
+          <Button variant="secondary" size="md" iconLeft={Mail} onClick={() => navigate('/contact-messages')}>Contact inbox</Button>
           <Button variant="secondary" size="md" iconLeft={ClipboardList} onClick={() => navigate('/cases')}>View cases</Button>
           <Button variant="secondary" size="md" iconLeft={Plus} onClick={() => navigate('/cases/new')}>Create case</Button>
         </section>
@@ -590,18 +506,6 @@ export default function SuperAdminPage() {
           </Card>
         </section>
 
-        <section id="contact-inbox" className="super-admin__section">
-          <div className="super-admin__section-heading"><div><p className="super-admin__eyebrow">Public accountability</p><h2>Contact / report inbox</h2><p className="super-admin__muted">Review and resolve messages sent by public observers.</p></div><Mail size={20} aria-hidden="true" /></div>
-          <Card padding="md">
-            <div className="super-admin__filters">
-              <label><span>Status</span><select value={contactStatus} onChange={(event) => { setContactStatus(event.target.value); setContactPage(1); }}><option value="">All statuses</option>{CONTACT_STATUSES.map((status) => <option key={status} value={status}>{status.replace('_', ' ')}</option>)}</select></label>
-              <label><span>Category</span><select value={contactCategory} onChange={(event) => { setContactCategory(event.target.value); setContactPage(1); }}><option value="">All categories</option>{CONTACT_CATEGORIES.map((category) => <option key={category} value={category}>{labelFromToken(category)}</option>)}</select></label>
-              <Button variant="ghost" size="sm" iconLeft={RefreshCw} onClick={loadContacts}>Refresh</Button>
-            </div>
-            {contactsError ? <div className="super-admin__inline-error" role="alert">{contactsError}</div> : <div className="super-admin__contact-list" aria-busy={contactsLoading}>{contactsLoading ? <Skeleton variant="card" height={160} /> : contacts.length === 0 ? <p className="super-admin__muted">No contact messages match these filters.</p> : contacts.map((message) => { const draft = contactDrafts[message._id] ?? { status: message.status, adminNotes: message.adminNotes }; return <article className="super-admin__contact-item" key={message._id}><div className="super-admin__contact-main"><div className="super-admin__contact-meta"><strong>{message.name}</strong><a href={`mailto:${message.email}`}>{message.email}</a><Badge tone={message.status === 'resolved' || message.status === 'closed' ? 'compliant' : message.status === 'in_review' ? 'warning' : 'neutral'}>{labelFromToken(message.status)}</Badge></div><p className="super-admin__contact-category">{labelFromToken(message.category)}</p><p className="super-admin__contact-message">{message.message}</p><p className="super-admin__muted">Received {formatDateTime(message.createdAt)} - Assigned: {message.assignedTo}</p></div><div className="super-admin__contact-actions"><label><span>Status</span><select value={draft.status} onChange={(event) => setContactDrafts((current) => ({ ...current, [message._id]: { ...draft, status: event.target.value } }))}>{CONTACT_STATUSES.map((status) => <option key={status} value={status}>{labelFromToken(status)}</option>)}</select></label><label><span>Admin notes</span><textarea rows={2} value={draft.adminNotes} onChange={(event) => setContactDrafts((current) => ({ ...current, [message._id]: { ...draft, adminNotes: event.target.value } }))} placeholder="Optional note" /></label><Button variant="secondary" size="sm" onClick={() => updateContact(message)} loading={modalLoading}>Save update</Button></div></article>; })}</div>}
-            {!contactsLoading && !contactsError && contactTotal > 0 && <div className="super-admin__pagination-line"><span>{contactTotal.toLocaleString()} message{contactTotal === 1 ? '' : 's'}</span><div><Button variant="ghost" size="sm" disabled={contactPage <= 1} onClick={() => setContactPage((page) => page - 1)}>Previous</Button><span>Page {contactPage} of {contactPages}</span><Button variant="ghost" size="sm" disabled={contactPage >= contactPages} onClick={() => setContactPage((page) => page + 1)}>Next</Button></div></div>}
-          </Card>
-        </section>
       </div>
 
       <Modal isOpen={modal?.type === 'invite'} onClose={closeModal} title="Create user" size="md" closeOnBackdrop={!modalLoading} showCloseButton={!modalLoading}>
