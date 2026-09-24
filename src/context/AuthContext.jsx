@@ -139,6 +139,7 @@ export function AuthProvider({ children }) {
    *   litigant / public → Public Observer
    */
   const ROLE_LABELS = {
+    super_admin: 'Super Admin',
     admin: 'Admin',
     judge: 'Legal Aid Officer',
     clerk: 'Records Officer',

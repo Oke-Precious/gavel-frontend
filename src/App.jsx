@@ -45,6 +45,7 @@ const NewCasePage     = lazy(() => import('./pages/NewCase/NewCasePage.jsx'));
 const AnalyticsPage   = lazy(() => import('./pages/Analytics/AnalyticsPage.jsx'));
 const ProBonoPage     = lazy(() => import('./pages/ProBono/ProBonoPage.jsx'));
 const UsersPage       = lazy(() => import('./pages/Users/UsersPage.jsx'));
+const SuperAdminPage  = lazy(() => import('./pages/SuperAdmin/SuperAdminPage.jsx'));
 
 // 404
 const NotFoundPage    = lazy(() => import('./pages/NotFound/NotFoundPage.jsx'));
@@ -111,24 +112,28 @@ export default function App() {
                 <Route element={<InternalLayout />}>
                   <Route path="dashboard" element={<RoleDashboardPage />} />
                   <Route
+                    path="super-admin"
+                    element={<RequireRole roles={['super_admin']}><SuperAdminPage /></RequireRole>}
+                  />
+                  <Route
                     path="records-dashboard"
-                    element={<RequireRole roles={['admin', 'clerk']}><RecordsDashboardPage /></RequireRole>}
+                    element={<RequireRole roles={['super_admin', 'admin', 'clerk']}><RecordsDashboardPage /></RequireRole>}
                   />
                   <Route
                     path="cases"
-                    element={<RequireRole roles={['admin', 'judge', 'clerk', 'lawyer']}><CasesPage /></RequireRole>}
+                    element={<RequireRole roles={['super_admin', 'admin', 'judge', 'clerk', 'lawyer']}><CasesPage /></RequireRole>}
                   />
                   <Route
                     path="cases/new"
-                    element={<RequireRole roles={['admin', 'clerk']}><NewCasePage /></RequireRole>}
+                    element={<RequireRole roles={['super_admin', 'admin', 'clerk']}><NewCasePage /></RequireRole>}
                   />
                   <Route
                     path="cases/:id"
-                    element={<RequireRole roles={['admin', 'judge', 'clerk', 'lawyer']}><CaseDetailPage /></RequireRole>}
+                    element={<RequireRole roles={['super_admin', 'admin', 'judge', 'clerk', 'lawyer']}><CaseDetailPage /></RequireRole>}
                   />
                   <Route
                     path="analytics"
-                    element={<RequireRole roles={['admin']}><AnalyticsPage /></RequireRole>}
+                    element={<RequireRole roles={['super_admin', 'admin']}><AnalyticsPage /></RequireRole>}
                   />
                   <Route
                     path="pro-bono"
@@ -136,7 +141,7 @@ export default function App() {
                   />
                   <Route
                     path="users"
-                    element={<RequireRole roles={['admin']}><UsersPage /></RequireRole>}
+                    element={<RequireRole roles={['super_admin', 'admin']}><UsersPage /></RequireRole>}
                   />
                 </Route>
 

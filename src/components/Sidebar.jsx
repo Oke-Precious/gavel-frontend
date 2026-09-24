@@ -31,19 +31,19 @@ const NAV_ITEMS = [
     to: '/dashboard',
     label: 'Dashboard',
     Icon: LayoutDashboard,
-    roles: ['admin', 'judge', 'clerk', 'lawyer', 'litigant'],
+    roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer', 'litigant'],
   },
   {
     to: '/cases',
     label: 'Cases',
     Icon: FolderOpen,
-    roles: ['admin', 'judge', 'clerk', 'lawyer'],
+    roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer'],
   },
   {
     to: '/analytics',
     label: 'Analytics',
     Icon: BarChart2,
-    roles: ['admin'],
+    roles: ['super_admin', 'admin'],
   },
   {
     to: '/pro-bono',
@@ -55,7 +55,7 @@ const NAV_ITEMS = [
     to: '/users',
     label: 'Users',
     Icon: Users,
-    roles: ['admin'],
+    roles: ['super_admin', 'admin'],
   },
 ];
 

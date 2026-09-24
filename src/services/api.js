@@ -284,6 +284,38 @@ export const usersApi = {
   /** @param {string} id */
   reactivate: (id) =>
     axiosClient.patch(`/users/${id}/reactivate`).then(unwrap),
+
+  /** @param {string} id */
+  auditLog: (id) =>
+    axiosClient.get(`/users/${id}/audit-log`).then((response) => unwrapKey(response, 'logs')),
+
+  /** @param {string} id */
+  deletionCheck: (id) =>
+    axiosClient.get(`/users/${id}/deletion-check`).then(unwrap),
+
+  /** @param {string} id @param {{ reason: string, confirmation: string }} payload */
+  delete: (id, payload) =>
+    axiosClient.delete(`/users/${id}`, { data: payload }).then(unwrap),
+};
+
+/* ================================================================== */
+/* 8b. Super Admin console                                              */
+/* ================================================================== */
+export const superAdminApi = {
+  getOverview: () => analyticsApi.overview(),
+  getHeatmap: () => analyticsApi.heatmap(),
+  getTrends: () => analyticsApi.trends(),
+  getHealth: () => healthApi.ping(),
+  getUsers: (params = {}) => usersApi.list(params),
+  inviteUser: (payload) => usersApi.invite(payload),
+  updateUser: (id, payload) => usersApi.update(id, payload),
+  suspendUser: (id, reason) => usersApi.suspend(id, reason),
+  reactivateUser: (id) => usersApi.reactivate(id),
+  getUserAuditLog: (id) => usersApi.auditLog(id),
+  checkUserDeletion: (id) => usersApi.deletionCheck(id),
+  deleteUser: (id, payload) => usersApi.delete(id, payload),
+  getContactMessages: (params = {}) => contactApi.listMessages(params),
+  updateContactStatus: (id, payload) => contactApi.updateStatus(id, payload),
 };
 
 /* ================================================================== */
