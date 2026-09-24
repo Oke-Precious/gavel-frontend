@@ -169,6 +169,41 @@
 .super-admin__protected { color: var(--color-text-muted); font-size: var(--font-size-small); }
 .super-admin__count-line { margin: var(--space-2) 0 0; color: var(--color-text-muted); font-size: var(--font-size-small); }
 
+.super-admin__users-table .datatable__table-wrapper {
+  display: block;
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.super-admin__users-table .datatable__table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.super-admin__users-table .datatable__th,
+.super-admin__users-table .datatable__td,
+.super-admin__users-table .datatable__th-inner,
+.super-admin__users-table .super-admin__name,
+.super-admin__users-table .super-admin__protected,
+.super-admin__users-table .super-admin__row-actions {
+  white-space: nowrap;
+}
+
+.super-admin__users-table .datatable__thead .datatable__th {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-base);
+  background: var(--color-bg);
+}
+
+.super-admin__users-table .super-admin__row-actions {
+  flex-wrap: nowrap;
+}
+
+.super-admin__users-table .datatable__cards {
+  display: none;
+}
+
 .super-admin__contact-list { display: flex; flex-direction: column; gap: var(--space-2); }
 .super-admin__contact-item { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 280px); gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border); }
 .super-admin__contact-item:last-child { border-bottom: 0; }
@@ -199,6 +234,8 @@
 .super-admin__warning svg { flex-shrink: 0; color: var(--color-warning); }
 .super-admin__dependency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1); padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text-muted); font-size: var(--font-size-small); }
 .super-admin__dependency-grid strong { color: var(--color-text); }
+.super-admin__deletion-acknowledgement { display: flex; align-items: flex-start; gap: var(--space-1); color: var(--color-text); font-size: var(--font-size-caption); }
+.super-admin__deletion-acknowledgement input { width: auto; margin-top: 0.2rem; flex-shrink: 0; accent-color: var(--color-indigo); }
 .super-admin__audit-list { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
 .super-admin__audit-list li { display: flex; gap: var(--space-2); }
 .super-admin__audit-marker { width: 10px; height: 10px; margin-top: 0.35rem; flex-shrink: 0; border: 3px solid var(--color-indigo-light); border-radius: 50%; background: var(--color-indigo); }

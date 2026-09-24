@@ -197,7 +197,9 @@ export default function SuperAdminPage() {
   const [suspensionReason, setSuspensionReason] = useState('');
   const [deletionReason, setDeletionReason] = useState('');
   const [deletionConfirmation, setDeletionConfirmation] = useState('');
+  const [deletionAcknowledged, setDeletionAcknowledged] = useState(false);
   const [deletionCheck, setDeletionCheck] = useState(null);
+  const [deletionCheckError, setDeletionCheckError] = useState(null);
   const [auditLogs, setAuditLogs] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
 
@@ -299,8 +301,10 @@ export default function SuperAdminPage() {
     if (modalLoading && !force) return;
     setModal(null);
     setDeletionCheck(null);
+    setDeletionCheckError(null);
     setDeletionReason('');
     setDeletionConfirmation('');
+    setDeletionAcknowledged(false);
     setSuspensionReason('');
     setAuditLogs([]);
   }
@@ -342,12 +346,18 @@ export default function SuperAdminPage() {
   async function openDeletion(target) {
     setModal({ type: 'delete', user: target });
     setDeletionCheck(null);
+    setDeletionCheckError(null);
+    setDeletionReason('');
+    setDeletionConfirmation('');
+    setDeletionAcknowledged(false);
     setModalLoading(true);
     try {
       const data = await superAdminApi.checkUserDeletion(target._id);
       setDeletionCheck(data);
     } catch (error) {
-      toast.error(errorMessage(error, 'Unable to check deletion eligibility.'));
+      const message = errorMessage(error, 'Unable to check deletion eligibility.');
+      setDeletionCheckError(message);
+      toast.error(message);
     } finally {
       setModalLoading(false);
     }
@@ -438,6 +448,10 @@ export default function SuperAdminPage() {
     }
     if (deletionConfirmation !== deletionCheck.requiredConfirmation) {
       toast.warning('Type the exact confirmation phrase to continue.');
+      return;
+    }
+    if (!deletionAcknowledged) {
+      toast.warning('Confirm that you understand this deletion cannot be undone.');
       return;
     }
     setModalLoading(true);
@@ -569,7 +583,9 @@ export default function SuperAdminPage() {
               <label><span>Status</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All statuses</option><option value="active">Active</option><option value="suspended">Suspended</option></select></label>
               <Button variant="ghost" size="sm" iconLeft={RefreshCw} onClick={loadUsers}>Refresh</Button>
             </div>
-            <DataTable columns={userColumns} data={visibleUsers} loading={usersLoading} error={usersError} rowIdKey="_id" emptyMessage="No users match the selected filters." pagination={userPages > 1 ? { page: userPage, totalPages: userPages, totalItems: userTotal, limit: 20, onPageChange: setUserPage } : null} />
+            <div className="super-admin__users-table">
+              <DataTable columns={userColumns} data={visibleUsers} loading={usersLoading} error={usersError} rowIdKey="_id" emptyMessage="No users match the selected filters." pagination={userPages > 1 ? { page: userPage, totalPages: userPages, totalItems: userTotal, limit: 20, onPageChange: setUserPage } : null} />
+            </div>
             {!usersLoading && !usersError && <p className="super-admin__count-line" aria-live="polite">Showing {filteredUsersCount} user{filteredUsersCount === 1 ? '' : 's'} on this page.</p>}
           </Card>
         </section>
@@ -609,7 +625,60 @@ export default function SuperAdminPage() {
       </Modal>
 
       <Modal isOpen={modal?.type === 'delete'} onClose={closeModal} title="Permanently delete user" size="md" closeOnBackdrop={!modalLoading} showCloseButton={!modalLoading}>
-        <form className="super-admin__form" onSubmit={handleDelete}><p>This action permanently removes <strong>{modal?.user?.firstName} {modal?.user?.lastName}</strong> and cannot be undone.</p>{modalLoading && !deletionCheck ? <Skeleton variant="card" height={120} /> : deletionCheck && <><dl className="super-admin__identity-list"><div><dt>Email</dt><dd>{modal?.user?.email}</dd></div><div><dt>Role</dt><dd>{displayRole(modal?.user?.role)}</dd></div><div><dt>Allowed</dt><dd><Badge tone={deletionCheck.canDelete ? 'compliant' : 'critical'}>{deletionCheck.canDelete ? 'Yes' : 'No'}</Badge></dd></div></dl>{!deletionCheck.canDelete && <div className="super-admin__warning"><FileWarning size={18} aria-hidden="true" /><span>Records must be reassigned or removed first. Non-zero dependencies are listed below.</span></div>}<div className="super-admin__dependency-grid">{Object.entries(deletionCheck.dependencies ?? {}).filter(([, count]) => Number(count) > 0).map(([key, count]) => <span key={key}><strong>{count}</strong> {key.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>)}{Object.values(deletionCheck.dependencies ?? {}).every((count) => Number(count) === 0) && <span>No operational dependencies found.</span>}</div>{deletionCheck.canDelete && <><label className="super-admin__field"><span>Deletion reason</span><textarea rows={3} maxLength={500} value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} disabled={modalLoading} required /></label><label className="super-admin__field"><span>Type <strong>{deletionCheck.requiredConfirmation}</strong> to confirm</span><input value={deletionConfirmation} onChange={(event) => setDeletionConfirmation(event.target.value)} disabled={modalLoading} required /></label><FormActions onCancel={closeModal} loading={modalLoading} submitLabel="Delete permanently" danger disabled={deletionConfirmation !== deletionCheck.requiredConfirmation || deletionReason.trim().length < 10} /></>}</>}</form>
+        <form className="super-admin__form" onSubmit={handleDelete}>
+          <p>This action permanently removes <strong>{modal?.user?.firstName} {modal?.user?.lastName}</strong> and cannot be undone.</p>
+          {modalLoading && !deletionCheck ? (
+            <Skeleton variant="card" height={120} />
+          ) : deletionCheckError ? (
+            <div className="super-admin__inline-error" role="alert">
+              <span>{deletionCheckError}</span>
+              <Button type="button" variant="secondary" size="sm" onClick={() => modal?.user && openDeletion(modal.user)}>Check again</Button>
+            </div>
+          ) : deletionCheck && (
+            <>
+              <dl className="super-admin__identity-list">
+                <div><dt>Email</dt><dd>{modal?.user?.email}</dd></div>
+                <div><dt>Role</dt><dd>{displayRole(modal?.user?.role)}</dd></div>
+                <div><dt>Eligible for deletion</dt><dd><Badge tone={deletionCheck.canDelete ? 'compliant' : 'critical'}>{deletionCheck.canDelete ? 'Yes' : 'No'}</Badge></dd></div>
+              </dl>
+              {!deletionCheck.canDelete && (
+                <div className="super-admin__warning" role="alert">
+                  <FileWarning size={18} aria-hidden="true" />
+                  <span>This account cannot be deleted yet. Its operational records must be reassigned or removed first.</span>
+                </div>
+              )}
+              <div className="super-admin__dependency-grid">
+                {Object.entries(deletionCheck.dependencies ?? {}).filter(([, count]) => Number(count) > 0).map(([key, count]) => (
+                  <span key={key}><strong>{count}</strong> {key.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>
+                ))}
+                {Object.values(deletionCheck.dependencies ?? {}).every((count) => Number(count) === 0) && <span>No operational dependencies found.</span>}
+              </div>
+              {deletionCheck.canDelete && (
+                <>
+                  <label className="super-admin__field">
+                    <span>Deletion reason (10–500 characters)</span>
+                    <textarea rows={3} minLength={10} maxLength={500} value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} disabled={modalLoading} required />
+                  </label>
+                  <label className="super-admin__deletion-acknowledgement">
+                    <input type="checkbox" checked={deletionAcknowledged} onChange={(event) => setDeletionAcknowledged(event.target.checked)} disabled={modalLoading} />
+                    <span>I understand this permanently deletes the account and cannot be undone.</span>
+                  </label>
+                  <label className="super-admin__field">
+                    <span>Type <strong>{deletionCheck.requiredConfirmation}</strong> exactly to confirm</span>
+                    <input value={deletionConfirmation} onChange={(event) => setDeletionConfirmation(event.target.value)} disabled={modalLoading} autoComplete="off" spellCheck="false" required />
+                  </label>
+                  <FormActions
+                    onCancel={closeModal}
+                    loading={modalLoading}
+                    submitLabel="Delete permanently"
+                    danger
+                    disabled={!deletionAcknowledged || deletionConfirmation !== deletionCheck.requiredConfirmation || deletionReason.trim().length < 10 || deletionReason.trim().length > 500}
+                  />
+                </>
+              )}
+            </>
+          )}
+        </form>
       </Modal>
     </div>
   );
