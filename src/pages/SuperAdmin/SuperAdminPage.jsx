@@ -40,6 +40,7 @@ const ROLE_CONFIG = {
 };
 
 const ROLE_OPTIONS = ['admin', 'judge', 'lawyer', 'clerk', 'litigant', 'public'];
+const ROLE_FILTER_OPTIONS = ['super_admin', ...ROLE_OPTIONS];
 const CONTACT_STATUSES = ['new', 'in_review', 'resolved', 'closed'];
 const CONTACT_CATEGORIES = [
   'general_question',
@@ -54,21 +55,21 @@ function displayRole(role) {
 }
 
 function formatDate(value) {
-  if (!value) return '—';
+  if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function formatDateTime(value) {
-  if (!value) return '—';
+  if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
   return date.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 }
 
 function errorMessage(error, fallback) {
-  if (!error?.response) return 'Network error — check your connection and try again.';
+  if (!error?.response) return 'Network error - check your connection and try again.';
   if (error.response.status >= 500) return 'Something went wrong on our end. Please try again in a moment.';
   return error.response.data?.message ?? fallback;
 }
@@ -80,7 +81,7 @@ function normalizeUser(user) {
     _id: user?._id ?? user?.id,
     firstName: user?.firstName ?? '',
     lastName: user?.lastName ?? '',
-    email: user?.email ?? '—',
+    email: user?.email ?? '-',
     role: user?.role ?? 'public',
     status: status || (user?.isActive === false ? 'suspended' : 'active'),
     isActive: typeof user?.isActive === 'boolean' ? user.isActive : status !== 'suspended',
@@ -96,16 +97,16 @@ function normalizeContact(message) {
     ...message,
     _id: message?._id ?? message?.id ?? message?.messageId,
     name: message?.name || 'Not provided',
-    email: message?.email || '—',
+    email: message?.email || '-',
     category: message?.category || 'general_question',
-    message: message?.message || '—',
+    message: message?.message || '-',
     status: message?.status || 'new',
     createdAt: message?.createdAt,
     resolvedAt: message?.resolvedAt,
     adminNotes: message?.adminNotes || '',
     assignedTo: message?.resolvedBy?.firstName
       ? `${message.resolvedBy.firstName} ${message.resolvedBy.lastName ?? ''}`.trim()
-      : message?.assignedResolutionAdministrator ?? message?.resolvedBy?.email ?? '—',
+      : message?.assignedResolutionAdministrator ?? message?.resolvedBy?.email ?? '-',
   };
 }
 
@@ -115,6 +116,38 @@ function listFrom(data, keys) {
   return [];
 }
 
+function labelFromToken(value) {
+  return String(value ?? 'not_provided').replace(/_/g, ' ');
+}
+
+function normalizeRoleCounts(overview, users) {
+  const roles = overview?.users?.roles ?? overview?.roles;
+  if (Array.isArray(roles)) {
+    return roles.reduce((acc, item) => ({
+      ...acc,
+      [item._id ?? item.role]: Number(item.count ?? item.total ?? 0),
+    }), {});
+  }
+
+  const fromApi = overview?.users?.byRole ?? overview?.usersByRole ?? overview?.roleCounts;
+  if (fromApi && typeof fromApi === 'object' && !Array.isArray(fromApi)) return fromApi;
+
+  return users.reduce((acc, item) => ({ ...acc, [item.role]: (acc[item.role] ?? 0) + 1 }), {});
+}
+
+function normalizeTrendRows(rows) {
+  return rows.map((row) => {
+    const year = row._id?.year ?? row.year;
+    const month = row._id?.month ?? row.month;
+    const period = row.period ?? row.label ?? (year && month ? `${year}-${String(month).padStart(2, '0')}` : '-');
+    return {
+      ...row,
+      period,
+      status: row.status ?? row._id?.status ?? 'Not provided',
+      count: Number(row.count ?? row.total ?? 0),
+    };
+  });
+}
 function countValue(source, keys) {
   for (const key of keys) {
     const value = key.split('.').reduce((result, part) => result?.[part], source);
@@ -182,7 +215,7 @@ export default function SuperAdminPage() {
     const [overviewResult, heatmapResult, trendsResult, healthResult] = results;
     if (overviewResult.status === 'fulfilled') setOverview(overviewResult.value);
     if (heatmapResult.status === 'fulfilled') setHeatmap(listFrom(heatmapResult.value, ['heatmap', 'rows']));
-    if (trendsResult.status === 'fulfilled') setTrends(listFrom(trendsResult.value, ['trends', 'rows']));
+    if (trendsResult.status === 'fulfilled') setTrends(normalizeTrendRows(listFrom(trendsResult.value, ['trends', 'rows'])));
     if (healthResult.status === 'fulfilled') setHealth(healthResult.value);
     if (overviewResult.status === 'rejected') {
       const message = errorMessage(overviewResult.reason, 'Unable to load Super Admin overview.');
@@ -255,11 +288,8 @@ export default function SuperAdminPage() {
     [statusFilter, users],
   );
 
-  const userRoleCounts = useMemo(() => {
-    const fromApi = overview?.users?.byRole ?? overview?.usersByRole ?? overview?.roleCounts;
-    if (fromApi && typeof fromApi === 'object' && !Array.isArray(fromApi)) return fromApi;
-    return users.reduce((acc, item) => ({ ...acc, [item.role]: (acc[item.role] ?? 0) + 1 }), {});
-  }, [overview, users]);
+  const userRoleCounts = useMemo(() => normalizeRoleCounts(overview, users), [overview, users]);
+
 
   function canManage(target) {
     return target?._id && target.role !== 'super_admin' && target._id !== currentUserId;
@@ -522,7 +552,7 @@ export default function SuperAdminPage() {
           </Card>
           <Card padding="lg">
             <div className="super-admin__section-heading"><div><p className="super-admin__eyebrow">Trends</p><h2>Case status trends</h2></div><Activity size={20} aria-hidden="true" /></div>
-            {trends.length ? <div className="super-admin__mini-table"><table><thead><tr><th>Period</th><th>Filed</th><th>Resolved</th></tr></thead><tbody>{trends.slice(-8).map((row, index) => <tr key={row.period ?? index}><td>{row.period ?? row.label ?? '—'}</td><td>{Number(row.filed ?? row.created ?? 0).toLocaleString()}</td><td>{Number(row.resolved ?? row.closed ?? 0).toLocaleString()}</td></tr>)}</tbody></table></div> : <p className="super-admin__muted">No trend data available.</p>}
+            {trends.length ? <div className="super-admin__mini-table"><table><thead><tr><th>Period</th><th>Status</th><th>Changes</th></tr></thead><tbody>{trends.slice(-8).map((row, index) => <tr key={`${row.period}-${row.status}-${index}`}><td>{row.period}</td><td>{row.status}</td><td>{row.count.toLocaleString()}</td></tr>)}</tbody></table></div> : <p className="super-admin__muted">No trend data available.</p>}
           </Card>
           <Card padding="lg" className="super-admin__health-card">
             <div className="super-admin__section-heading"><div><p className="super-admin__eyebrow">System status</p><h2>Backend status</h2></div><ShieldCheck size={20} aria-hidden="true" /></div>
@@ -535,7 +565,7 @@ export default function SuperAdminPage() {
           <div className="super-admin__section-heading super-admin__section-heading--wide"><div><p className="super-admin__eyebrow">Access control</p><h2>User management</h2><p className="super-admin__muted">{userTotal.toLocaleString()} accounts across GAVEL.</p></div><Button variant="primary" size="md" iconLeft={UserPlus} onClick={openInvite}>Create User</Button></div>
           <Card padding="md">
             <div className="super-admin__filters" role="search">
-              <label><span>Role</span><select value={roleFilter} onChange={(event) => { setRoleFilter(event.target.value); setUserPage(1); }}><option value="">All roles</option>{ROLE_OPTIONS.map((role) => <option key={role} value={role}>{displayRole(role)}</option>)}</select></label>
+              <label><span>Role</span><select value={roleFilter} onChange={(event) => { setRoleFilter(event.target.value); setUserPage(1); }}><option value="">All roles</option>{ROLE_FILTER_OPTIONS.map((role) => <option key={role} value={role}>{displayRole(role)}</option>)}</select></label>
               <label><span>Status</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All statuses</option><option value="active">Active</option><option value="suspended">Suspended</option></select></label>
               <Button variant="ghost" size="sm" iconLeft={RefreshCw} onClick={loadUsers}>Refresh</Button>
             </div>
@@ -549,10 +579,10 @@ export default function SuperAdminPage() {
           <Card padding="md">
             <div className="super-admin__filters">
               <label><span>Status</span><select value={contactStatus} onChange={(event) => { setContactStatus(event.target.value); setContactPage(1); }}><option value="">All statuses</option>{CONTACT_STATUSES.map((status) => <option key={status} value={status}>{status.replace('_', ' ')}</option>)}</select></label>
-              <label><span>Category</span><select value={contactCategory} onChange={(event) => { setContactCategory(event.target.value); setContactPage(1); }}><option value="">All categories</option>{CONTACT_CATEGORIES.map((category) => <option key={category} value={category}>{category.replaceAll('_', ' ')}</option>)}</select></label>
+              <label><span>Category</span><select value={contactCategory} onChange={(event) => { setContactCategory(event.target.value); setContactPage(1); }}><option value="">All categories</option>{CONTACT_CATEGORIES.map((category) => <option key={category} value={category}>{labelFromToken(category)}</option>)}</select></label>
               <Button variant="ghost" size="sm" iconLeft={RefreshCw} onClick={loadContacts}>Refresh</Button>
             </div>
-            {contactsError ? <div className="super-admin__inline-error" role="alert">{contactsError}</div> : <div className="super-admin__contact-list" aria-busy={contactsLoading}>{contactsLoading ? <Skeleton variant="card" height={160} /> : contacts.length === 0 ? <p className="super-admin__muted">No contact messages match these filters.</p> : contacts.map((message) => { const draft = contactDrafts[message._id] ?? { status: message.status, adminNotes: message.adminNotes }; return <article className="super-admin__contact-item" key={message._id}><div className="super-admin__contact-main"><div className="super-admin__contact-meta"><strong>{message.name}</strong><a href={`mailto:${message.email}`}>{message.email}</a><Badge tone={message.status === 'resolved' || message.status === 'closed' ? 'compliant' : message.status === 'in_review' ? 'warning' : 'neutral'}>{message.status.replace('_', ' ')}</Badge></div><p className="super-admin__contact-category">{message.category.replaceAll('_', ' ')}</p><p className="super-admin__contact-message">{message.message}</p><p className="super-admin__muted">Received {formatDateTime(message.createdAt)} · Assigned: {message.assignedTo}</p></div><div className="super-admin__contact-actions"><label><span>Status</span><select value={draft.status} onChange={(event) => setContactDrafts((current) => ({ ...current, [message._id]: { ...draft, status: event.target.value } }))}>{CONTACT_STATUSES.map((status) => <option key={status} value={status}>{status.replace('_', ' ')}</option>)}</select></label><label><span>Admin notes</span><textarea rows={2} value={draft.adminNotes} onChange={(event) => setContactDrafts((current) => ({ ...current, [message._id]: { ...draft, adminNotes: event.target.value } }))} placeholder="Optional note" /></label><Button variant="secondary" size="sm" onClick={() => updateContact(message)} loading={modalLoading}>Save update</Button></div></article>; })}</div>}
+            {contactsError ? <div className="super-admin__inline-error" role="alert">{contactsError}</div> : <div className="super-admin__contact-list" aria-busy={contactsLoading}>{contactsLoading ? <Skeleton variant="card" height={160} /> : contacts.length === 0 ? <p className="super-admin__muted">No contact messages match these filters.</p> : contacts.map((message) => { const draft = contactDrafts[message._id] ?? { status: message.status, adminNotes: message.adminNotes }; return <article className="super-admin__contact-item" key={message._id}><div className="super-admin__contact-main"><div className="super-admin__contact-meta"><strong>{message.name}</strong><a href={`mailto:${message.email}`}>{message.email}</a><Badge tone={message.status === 'resolved' || message.status === 'closed' ? 'compliant' : message.status === 'in_review' ? 'warning' : 'neutral'}>{labelFromToken(message.status)}</Badge></div><p className="super-admin__contact-category">{labelFromToken(message.category)}</p><p className="super-admin__contact-message">{message.message}</p><p className="super-admin__muted">Received {formatDateTime(message.createdAt)} - Assigned: {message.assignedTo}</p></div><div className="super-admin__contact-actions"><label><span>Status</span><select value={draft.status} onChange={(event) => setContactDrafts((current) => ({ ...current, [message._id]: { ...draft, status: event.target.value } }))}>{CONTACT_STATUSES.map((status) => <option key={status} value={status}>{labelFromToken(status)}</option>)}</select></label><label><span>Admin notes</span><textarea rows={2} value={draft.adminNotes} onChange={(event) => setContactDrafts((current) => ({ ...current, [message._id]: { ...draft, adminNotes: event.target.value } }))} placeholder="Optional note" /></label><Button variant="secondary" size="sm" onClick={() => updateContact(message)} loading={modalLoading}>Save update</Button></div></article>; })}</div>}
             {!contactsLoading && !contactsError && contactTotal > 0 && <div className="super-admin__pagination-line"><span>{contactTotal.toLocaleString()} message{contactTotal === 1 ? '' : 's'}</span><div><Button variant="ghost" size="sm" disabled={contactPage <= 1} onClick={() => setContactPage((page) => page - 1)}>Previous</Button><span>Page {contactPage} of {contactPages}</span><Button variant="ghost" size="sm" disabled={contactPage >= contactPages} onClick={() => setContactPage((page) => page + 1)}>Next</Button></div></div>}
           </Card>
         </section>
@@ -563,11 +593,11 @@ export default function SuperAdminPage() {
       </Modal>
 
       <Modal isOpen={modal?.type === 'edit'} onClose={closeModal} title="Edit user" size="md" closeOnBackdrop={!modalLoading} showCloseButton={!modalLoading}>
-        <form className="super-admin__form" onSubmit={handleEdit}><div className="super-admin__form-grid"><Field id="edit-first-name" label="First name" value={editForm.firstName} onChange={(value) => setEditForm((form) => ({ ...form, firstName: value }))} disabled={modalLoading} required /><Field id="edit-last-name" label="Last name" value={editForm.lastName} onChange={(value) => setEditForm((form) => ({ ...form, lastName: value }))} disabled={modalLoading} required /></div><Field id="edit-phone" label="Phone number" value={editForm.phoneNumber} onChange={(value) => setEditForm((form) => ({ ...form, phoneNumber: value }))} disabled={modalLoading} /><Field id="edit-bar" label="Bar number" value={editForm.barNumber} onChange={(value) => setEditForm((form) => ({ ...form, barNumber: value }))} disabled={modalLoading} /><SelectField id="edit-role" label="Role" value={editForm.role} onChange={(value) => setEditForm((form) => ({ ...form, role: value }))} options={ROLE_OPTIONS} disabled={modalLoading || modal.user?._id === currentUserId || modal.user?.role === 'super_admin'} /><FormActions onCancel={closeModal} loading={modalLoading} submitLabel="Save changes" /></form>
+        <form className="super-admin__form" onSubmit={handleEdit}><div className="super-admin__form-grid"><Field id="edit-first-name" label="First name" value={editForm.firstName} onChange={(value) => setEditForm((form) => ({ ...form, firstName: value }))} disabled={modalLoading} required /><Field id="edit-last-name" label="Last name" value={editForm.lastName} onChange={(value) => setEditForm((form) => ({ ...form, lastName: value }))} disabled={modalLoading} required /></div><Field id="edit-phone" label="Phone number" value={editForm.phoneNumber} onChange={(value) => setEditForm((form) => ({ ...form, phoneNumber: value }))} disabled={modalLoading} /><Field id="edit-bar" label="Bar number" value={editForm.barNumber} onChange={(value) => setEditForm((form) => ({ ...form, barNumber: value }))} disabled={modalLoading} /><SelectField id="edit-role" label="Role" value={editForm.role} onChange={(value) => setEditForm((form) => ({ ...form, role: value }))} options={ROLE_OPTIONS} disabled={modalLoading || modal?.user?._id === currentUserId || modal?.user?.role === 'super_admin'} /><FormActions onCancel={closeModal} loading={modalLoading} submitLabel="Save changes" /></form>
       </Modal>
 
       <Modal isOpen={modal?.type === 'suspend'} onClose={closeModal} title="Suspend user" size="sm" closeOnBackdrop={!modalLoading} showCloseButton={!modalLoading}>
-        <form className="super-admin__form" onSubmit={handleSuspend}><p>Are you sure you want to suspend <strong>{modal?.user?.firstName} {modal?.user?.lastName}</strong>?</p><dl className="super-admin__identity-list"><div><dt>Email</dt><dd>{modal?.user?.email}</dd></div><div><dt>Current role</dt><dd>{displayRole(modal?.user?.role)}</dd></div></dl><div className="super-admin__warning" role="note"><AlertTriangle size={18} aria-hidden="true" /> Active sessions will become unusable immediately.</div>{modal?.user?.activeCasesCount > 0 && <div className="super-admin__warning" role="note">This officer has {modal.user.activeCasesCount} active case{modal.user.activeCasesCount === 1 ? '' : 's'} assigned.</div>}<label className="super-admin__field"><span>Reason (recommended)</span><textarea rows={4} maxLength={500} value={suspensionReason} onChange={(event) => setSuspensionReason(event.target.value)} disabled={modalLoading} placeholder="At least 10 characters" required /></label><FormActions onCancel={closeModal} loading={modalLoading} submitLabel="Confirm suspension" danger /></form>
+        <form className="super-admin__form" onSubmit={handleSuspend}><p>Are you sure you want to suspend <strong>{modal?.user?.firstName} {modal?.user?.lastName}</strong>?</p><dl className="super-admin__identity-list"><div><dt>Email</dt><dd>{modal?.user?.email}</dd></div><div><dt>Current role</dt><dd>{displayRole(modal?.user?.role)}</dd></div></dl><div className="super-admin__warning" role="note"><AlertTriangle size={18} aria-hidden="true" /> Active sessions will become unusable immediately.</div>{modal?.user?.activeCasesCount > 0 && <div className="super-admin__warning" role="note">This officer has {modal?.user?.activeCasesCount} active case{modal?.user?.activeCasesCount === 1 ? '' : 's'} assigned.</div>}<label className="super-admin__field"><span>Reason (recommended)</span><textarea rows={4} maxLength={500} value={suspensionReason} onChange={(event) => setSuspensionReason(event.target.value)} disabled={modalLoading} placeholder="At least 10 characters" required /></label><FormActions onCancel={closeModal} loading={modalLoading} submitLabel="Confirm suspension" danger /></form>
       </Modal>
 
       <Modal isOpen={modal?.type === 'reactivate'} onClose={closeModal} title="Reactivate user" size="sm" closeOnBackdrop={!modalLoading} showCloseButton={!modalLoading}>
@@ -575,11 +605,11 @@ export default function SuperAdminPage() {
       </Modal>
 
       <Modal isOpen={modal?.type === 'audit'} onClose={closeModal} title="User activity" size="md" closeOnBackdrop={!modalLoading} showCloseButton={!modalLoading}>
-        <div className="super-admin__audit"><p className="super-admin__form-note">Suspension and reactivation history for <strong>{modal?.user?.firstName} {modal?.user?.lastName}</strong>.</p>{modalLoading ? <Skeleton variant="card" height={120} /> : auditLogs.length === 0 ? <p className="super-admin__muted">No suspension or reactivation activity recorded.</p> : <ol className="super-admin__audit-list">{auditLogs.map((entry, index) => <li key={entry._id ?? index}><div className="super-admin__audit-marker" aria-hidden="true" /> <div><strong>{entry.action ?? entry.type ?? 'Account update'}</strong><p>{entry.reason || 'No reason provided.'}</p><span>{entry.performedBy?.firstName ? `${entry.performedBy.firstName} ${entry.performedBy.lastName ?? ''}`.trim() : entry.administrator ?? 'Administrator'} · {formatDateTime(entry.createdAt ?? entry.date)}</span></div></li>)}</ol>}</div>
+        <div className="super-admin__audit"><p className="super-admin__form-note">Suspension and reactivation history for <strong>{modal?.user?.firstName} {modal?.user?.lastName}</strong>.</p>{modalLoading ? <Skeleton variant="card" height={120} /> : auditLogs.length === 0 ? <p className="super-admin__muted">No suspension or reactivation activity recorded.</p> : <ol className="super-admin__audit-list">{auditLogs.map((entry, index) => <li key={entry._id ?? index}><div className="super-admin__audit-marker" aria-hidden="true" /> <div><strong>{entry.action ?? entry.type ?? 'Account update'}</strong><p>{entry.reason || 'No reason provided.'}</p><span>{entry.performedBy?.firstName ? `${entry.performedBy.firstName} ${entry.performedBy.lastName ?? ''}`.trim() : entry.administrator ?? 'Administrator'} - {formatDateTime(entry.createdAt ?? entry.date)}</span></div></li>)}</ol>}</div>
       </Modal>
 
       <Modal isOpen={modal?.type === 'delete'} onClose={closeModal} title="Permanently delete user" size="md" closeOnBackdrop={!modalLoading} showCloseButton={!modalLoading}>
-        <form className="super-admin__form" onSubmit={handleDelete}><p>This action permanently removes <strong>{modal?.user?.firstName} {modal?.user?.lastName}</strong> and cannot be undone.</p>{modalLoading && !deletionCheck ? <Skeleton variant="card" height={120} /> : deletionCheck && <><dl className="super-admin__identity-list"><div><dt>Email</dt><dd>{modal?.user?.email}</dd></div><div><dt>Role</dt><dd>{displayRole(modal?.user?.role)}</dd></div><div><dt>Allowed</dt><dd><Badge tone={deletionCheck.canDelete ? 'compliant' : 'critical'}>{deletionCheck.canDelete ? 'Yes' : 'No'}</Badge></dd></div></dl>{!deletionCheck.canDelete && <div className="super-admin__warning"><FileWarning size={18} aria-hidden="true" /><span>Records must be reassigned or removed first. Non-zero dependencies are listed below.</span></div>}<div className="super-admin__dependency-grid">{Object.entries(deletionCheck.dependencies ?? {}).filter(([, count]) => Number(count) > 0).map(([key, count]) => <span key={key}><strong>{count}</strong> {key.replaceAll(/([A-Z])/g, ' $1').toLowerCase()}</span>)}{Object.values(deletionCheck.dependencies ?? {}).every((count) => Number(count) === 0) && <span>No operational dependencies found.</span>}</div>{deletionCheck.canDelete && <><label className="super-admin__field"><span>Deletion reason</span><textarea rows={3} maxLength={500} value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} disabled={modalLoading} required /></label><label className="super-admin__field"><span>Type <strong>{deletionCheck.requiredConfirmation}</strong> to confirm</span><input value={deletionConfirmation} onChange={(event) => setDeletionConfirmation(event.target.value)} disabled={modalLoading} required /></label><FormActions onCancel={closeModal} loading={modalLoading} submitLabel="Delete permanently" danger disabled={deletionConfirmation !== deletionCheck.requiredConfirmation || deletionReason.trim().length < 10} /></>}</>}</form>
+        <form className="super-admin__form" onSubmit={handleDelete}><p>This action permanently removes <strong>{modal?.user?.firstName} {modal?.user?.lastName}</strong> and cannot be undone.</p>{modalLoading && !deletionCheck ? <Skeleton variant="card" height={120} /> : deletionCheck && <><dl className="super-admin__identity-list"><div><dt>Email</dt><dd>{modal?.user?.email}</dd></div><div><dt>Role</dt><dd>{displayRole(modal?.user?.role)}</dd></div><div><dt>Allowed</dt><dd><Badge tone={deletionCheck.canDelete ? 'compliant' : 'critical'}>{deletionCheck.canDelete ? 'Yes' : 'No'}</Badge></dd></div></dl>{!deletionCheck.canDelete && <div className="super-admin__warning"><FileWarning size={18} aria-hidden="true" /><span>Records must be reassigned or removed first. Non-zero dependencies are listed below.</span></div>}<div className="super-admin__dependency-grid">{Object.entries(deletionCheck.dependencies ?? {}).filter(([, count]) => Number(count) > 0).map(([key, count]) => <span key={key}><strong>{count}</strong> {key.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>)}{Object.values(deletionCheck.dependencies ?? {}).every((count) => Number(count) === 0) && <span>No operational dependencies found.</span>}</div>{deletionCheck.canDelete && <><label className="super-admin__field"><span>Deletion reason</span><textarea rows={3} maxLength={500} value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} disabled={modalLoading} required /></label><label className="super-admin__field"><span>Type <strong>{deletionCheck.requiredConfirmation}</strong> to confirm</span><input value={deletionConfirmation} onChange={(event) => setDeletionConfirmation(event.target.value)} disabled={modalLoading} required /></label><FormActions onCancel={closeModal} loading={modalLoading} submitLabel="Delete permanently" danger disabled={deletionConfirmation !== deletionCheck.requiredConfirmation || deletionReason.trim().length < 10} /></>}</>}</form>
       </Modal>
     </div>
   );

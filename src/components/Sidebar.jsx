@@ -6,6 +6,7 @@ import {
   BarChart2,
   Heart,
   Users,
+  ShieldCheck,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -16,17 +17,23 @@ import { useAuth } from '../hooks/useAuth.js';
 import './Sidebar.css';
 
 /**
- * Sidebar — collapsible internal navigation sidebar.
+ * Sidebar - collapsible internal navigation sidebar.
  *
  * Role-aware nav items:
- *   admin   → all items
- *   judge   → Dashboard, Cases
- *   clerk   → Dashboard, Cases
- *   lawyer  → Dashboard, Cases, Pro-Bono
- *   litigant → Dashboard only
+ *   admin   - all items
+ *   judge   - Dashboard, Cases
+ *   clerk   - Dashboard, Cases
+ *   lawyer  - Dashboard, Cases, Pro-Bono
+ *   litigant - Dashboard only
  */
 
 const NAV_ITEMS = [
+  {
+    to: '/super-admin',
+    label: 'Super Admin',
+    Icon: ShieldCheck,
+    roles: ['super_admin'],
+  },
   {
     to: '/dashboard',
     label: 'Dashboard',

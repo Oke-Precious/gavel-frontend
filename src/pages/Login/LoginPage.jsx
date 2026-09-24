@@ -40,7 +40,7 @@ export default function LoginPage() {
       // Wire to real backend endpoint: POST /auth/login via AuthContext
       const signedInUser = await login(cleanEmail, password);
       toast.success('Signed in successfully.');
-      navigate(signedInUser?.role === 'lawyer' ? '/pro-bono' : '/dashboard');
+      navigate(signedInUser?.role === 'super_admin' ? '/super-admin' : signedInUser?.role === 'lawyer' ? '/pro-bono' : '/dashboard');
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
@@ -166,7 +166,7 @@ export default function LoginPage() {
                     id="login-password"
                     type={showPassword ? 'text' : 'password'}
                     className="login-form-card__input login-form-card__input--password"
-                    placeholder="••••••••"
+                    placeholder="*"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isLoading}
@@ -226,7 +226,7 @@ export default function LoginPage() {
             <Link to="/privacy" className="login-form-panel__footer-link">
               Privacy Policy
             </Link>
-            <span className="login-form-panel__footer-dot">•</span>
+            <span className="login-form-panel__footer-dot">.</span>
             <Link to="/terms" className="login-form-panel__footer-link">
               Terms of Use
             </Link>

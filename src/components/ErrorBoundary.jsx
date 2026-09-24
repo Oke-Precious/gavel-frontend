@@ -3,7 +3,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 import './ErrorBoundary.css';
 
 /**
- * ErrorBoundary — class component that catches render errors.
+ * ErrorBoundary - class component that catches render errors.
  *
  * Wraps the whole app (in App.jsx). Shows a calm fallback UI
  * rather than a blank white screen. Never exposes a stack trace
@@ -15,7 +15,7 @@ import './ErrorBoundary.css';
  *   </ErrorBoundary>
  *
  * @prop {React.ReactNode} children
- * @prop {React.ReactNode} [fallback] — custom fallback (optional)
+ * @prop {React.ReactNode} [fallback] - custom fallback (optional)
  */
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -72,7 +72,7 @@ export default class ErrorBoundary extends React.Component {
             </div>
             {/* Dev-only: show message, never in prod user-facing UI */}
             {import.meta.env.DEV && (
-              <details className="error-boundary__details">
+              <details className="error-boundary__details" open>
                 <summary>Developer info</summary>
                 <pre>{this.state.errorMessage}</pre>
               </details>
