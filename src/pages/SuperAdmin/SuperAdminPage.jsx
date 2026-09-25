@@ -1,22 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Activity,
   AlertTriangle,
-  BarChart3,
   ClipboardList,
   Edit3,
   FileWarning,
-  HeartHandshake,
   History,
   Mail,
   Plus,
   RefreshCw,
-  ShieldCheck,
   Trash2,
   UserPlus,
   Users,
-  XCircle,
 } from 'lucide-react';
 import Badge from '../../components/Badge.jsx';
 import Button from '../../components/Button.jsx';
@@ -27,6 +22,7 @@ import Skeleton from '../../components/Skeleton.jsx';
 import { superAdminApi } from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import AdminOverviewPage from '../AdminOverview/AdminOverviewPage.jsx';
 import './SuperAdminPage.css';
 
 const ROLE_CONFIG = {
@@ -90,42 +86,6 @@ function listFrom(data, keys) {
   return [];
 }
 
-function normalizeRoleCounts(overview, users) {
-  const roles = overview?.users?.roles ?? overview?.roles;
-  if (Array.isArray(roles)) {
-    return roles.reduce((acc, item) => ({
-      ...acc,
-      [item._id ?? item.role]: Number(item.count ?? item.total ?? 0),
-    }), {});
-  }
-
-  const fromApi = overview?.users?.byRole ?? overview?.usersByRole ?? overview?.roleCounts;
-  if (fromApi && typeof fromApi === 'object' && !Array.isArray(fromApi)) return fromApi;
-
-  return users.reduce((acc, item) => ({ ...acc, [item.role]: (acc[item.role] ?? 0) + 1 }), {});
-}
-
-function normalizeTrendRows(rows) {
-  return rows.map((row) => {
-    const year = row._id?.year ?? row.year;
-    const month = row._id?.month ?? row.month;
-    const period = row.period ?? row.label ?? (year && month ? `${year}-${String(month).padStart(2, '0')}` : '-');
-    return {
-      ...row,
-      period,
-      status: row.status ?? row._id?.status ?? 'Not provided',
-      count: Number(row.count ?? row.total ?? 0),
-    };
-  });
-}
-function countValue(source, keys) {
-  for (const key of keys) {
-    const value = key.split('.').reduce((result, part) => result?.[part], source);
-    if (value !== undefined && value !== null && Number.isFinite(Number(value))) return Number(value);
-  }
-  return 0;
-}
-
 const initialInvite = { firstName: '', lastName: '', email: '', role: 'admin' };
 const initialEdit = { firstName: '', lastName: '', phoneNumber: '', barNumber: '', role: 'admin' };
 
@@ -134,13 +94,6 @@ export default function SuperAdminPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const toastRef = useRef(toast);
-
-  const [overview, setOverview] = useState(null);
-  const [heatmap, setHeatmap] = useState([]);
-  const [trends, setTrends] = useState([]);
-  const [health, setHealth] = useState(null);
-  const [overviewLoading, setOverviewLoading] = useState(true);
-  const [overviewError, setOverviewError] = useState(null);
 
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(true);
@@ -165,28 +118,6 @@ export default function SuperAdminPage() {
 
   const currentUserId = user?._id ?? user?.id;
 
-  const loadOverview = useCallback(async () => {
-    setOverviewLoading(true);
-    setOverviewError(null);
-    const results = await Promise.allSettled([
-      superAdminApi.getOverview(),
-      superAdminApi.getHeatmap(),
-      superAdminApi.getTrends(),
-      superAdminApi.getHealth(),
-    ]);
-    const [overviewResult, heatmapResult, trendsResult, healthResult] = results;
-    if (overviewResult.status === 'fulfilled') setOverview(overviewResult.value);
-    if (heatmapResult.status === 'fulfilled') setHeatmap(listFrom(heatmapResult.value, ['heatmap', 'rows']));
-    if (trendsResult.status === 'fulfilled') setTrends(normalizeTrendRows(listFrom(trendsResult.value, ['trends', 'rows'])));
-    if (healthResult.status === 'fulfilled') setHealth(healthResult.value);
-    if (overviewResult.status === 'rejected') {
-      const message = errorMessage(overviewResult.reason, 'Unable to load Super Admin overview.');
-      setOverviewError(message);
-      toastRef.current.error(message);
-    }
-    setOverviewLoading(false);
-  }, []);
-
   const loadUsers = useCallback(async () => {
     setUsersLoading(true);
     setUsersError(null);
@@ -207,11 +138,6 @@ export default function SuperAdminPage() {
   }, [roleFilter, userPage]);
 
   useEffect(() => {
-    const timer = window.setTimeout(loadOverview, 0);
-    return () => window.clearTimeout(timer);
-  }, [loadOverview]);
-
-  useEffect(() => {
     const timer = window.setTimeout(loadUsers, 0);
     return () => window.clearTimeout(timer);
   }, [loadUsers]);
@@ -220,9 +146,6 @@ export default function SuperAdminPage() {
     () => users.filter((item) => !statusFilter || (statusFilter === 'active' ? item.isActive : !item.isActive)),
     [statusFilter, users],
   );
-
-  const userRoleCounts = useMemo(() => normalizeRoleCounts(overview, users), [overview, users]);
-
 
   function canManage(target) {
     return target?._id && target.role !== 'super_admin' && target._id !== currentUserId;
@@ -428,16 +351,14 @@ export default function SuperAdminPage() {
   ];
 
   const filteredUsersCount = visibleUsers.length;
-  const overviewCases = overview?.cases ?? overview;
-  const overviewUsers = overview?.users ?? overview;
-
   return (
     <div className="super-admin-page">
+      <AdminOverviewPage />
       <div className="super-admin-container">
         <header className="super-admin__header">
           <div>
             <p className="super-admin__eyebrow">GAVEL governance console</p>
-            <h1 className="super-admin__title">Super Admin Overview</h1>
+            <h2 className="super-admin__title">Super Admin Governance</h2>
             <p className="super-admin__subtitle">Safeguard access, accountability, and the public record across the platform.</p>
           </div>
           <Button variant="primary" size="md" iconLeft={UserPlus} onClick={openInvite}>Create User</Button>
@@ -448,47 +369,6 @@ export default function SuperAdminPage() {
           <Button variant="secondary" size="md" iconLeft={Mail} onClick={() => navigate('/contact-messages')}>Contact inbox</Button>
           <Button variant="secondary" size="md" iconLeft={ClipboardList} onClick={() => navigate('/cases')}>View cases</Button>
           <Button variant="secondary" size="md" iconLeft={Plus} onClick={() => navigate('/cases/new')}>Create case</Button>
-        </section>
-
-        {overviewLoading ? (
-          <div className="super-admin__stats" aria-label="Loading overview">
-            {Array.from({ length: 5 }).map((_, index) => <Card key={index} padding="lg"><Skeleton variant="card" height={88} /></Card>)}
-          </div>
-        ) : overviewError ? (
-          <Card padding="lg" className="super-admin__error-card" role="alert">
-            <XCircle size={20} aria-hidden="true" />
-            <span>{overviewError}</span>
-            <Button variant="secondary" size="sm" iconLeft={RefreshCw} onClick={loadOverview}>Try again</Button>
-          </Card>
-        ) : (
-          <section className="super-admin__stats" aria-label="System overview">
-            <SummaryCard icon={Users} label="Total users" value={countValue(overviewUsers, ['total', 'totalUsers', 'count'])} />
-            <SummaryCard icon={ClipboardList} label="Total cases" value={countValue(overviewCases, ['total', 'totalCases'])} />
-            <SummaryCard icon={Activity} label="Active cases" value={countValue(overviewCases, ['active', 'activeCases'])} />
-            <SummaryCard icon={HeartHandshake} label="Pro-bono cases" value={countValue(overviewCases, ['proBono', 'proBonoCases'])} />
-            <Card padding="lg" className="super-admin__roles-card">
-              <div className="super-admin__stat-label"><Users size={18} aria-hidden="true" /> Users by role</div>
-              <div className="super-admin__role-list">
-                {Object.entries(userRoleCounts).filter(([role]) => ROLE_CONFIG[role]).map(([role, count]) => <span key={role}><strong>{Number(count).toLocaleString()}</strong> {displayRole(role)}</span>)}
-              </div>
-            </Card>
-          </section>
-        )}
-
-        <section className="super-admin__insights" aria-label="System insights">
-          <Card padding="lg">
-            <div className="super-admin__section-heading"><div><p className="super-admin__eyebrow">Analytics</p><h2>Court and stage heatmap</h2></div><BarChart3 size={20} aria-hidden="true" /></div>
-            {heatmap.length ? <div className="super-admin__mini-table"><table><thead><tr><th>Court</th><th>Stage</th><th>Cases</th></tr></thead><tbody>{heatmap.slice(0, 8).map((row, index) => <tr key={row._id ?? index}><td>{row.court ?? row._id?.court ?? 'Not provided'}</td><td>{row.stage ?? row._id?.stage ?? 'Not provided'}</td><td>{Number(row.count ?? row.total ?? 0).toLocaleString()}</td></tr>)}</tbody></table></div> : <p className="super-admin__muted">No heatmap data available.</p>}
-          </Card>
-          <Card padding="lg">
-            <div className="super-admin__section-heading"><div><p className="super-admin__eyebrow">Trends</p><h2>Case status trends</h2></div><Activity size={20} aria-hidden="true" /></div>
-            {trends.length ? <div className="super-admin__mini-table"><table><thead><tr><th>Period</th><th>Status</th><th>Changes</th></tr></thead><tbody>{trends.slice(-8).map((row, index) => <tr key={`${row.period}-${row.status}-${index}`}><td>{row.period}</td><td>{row.status}</td><td>{row.count.toLocaleString()}</td></tr>)}</tbody></table></div> : <p className="super-admin__muted">No trend data available.</p>}
-          </Card>
-          <Card padding="lg" className="super-admin__health-card">
-            <div className="super-admin__section-heading"><div><p className="super-admin__eyebrow">System status</p><h2>Backend status</h2></div><ShieldCheck size={20} aria-hidden="true" /></div>
-            <div className="super-admin__health-status"><span className={`super-admin__health-dot${health ? ' super-admin__health-dot--ok' : ''}`} aria-hidden="true" />{health ? 'Operational' : 'Status unavailable'}</div>
-            <p className="super-admin__muted">Health is checked from the deployed API.</p>
-          </Card>
         </section>
 
         <section id="super-admin-users" className="super-admin__section">
@@ -586,10 +466,6 @@ export default function SuperAdminPage() {
       </Modal>
     </div>
   );
-}
-
-function SummaryCard({ icon: Icon, label, value }) {
-  return <Card padding="lg"><div className="super-admin__stat-label"><Icon size={18} aria-hidden="true" /> {label}</div><strong className="super-admin__stat-value">{Number(value).toLocaleString()}</strong></Card>;
 }
 
 function Field({ id, label, value, onChange, type = 'text', disabled, required = false }) {

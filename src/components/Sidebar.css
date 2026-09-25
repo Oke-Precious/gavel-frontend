@@ -95,6 +95,16 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.sidebar__link--disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.sidebar__link--disabled:hover {
+  color: rgba(255, 255, 255, 0.6);
+  background-color: transparent;
+}
+
 .sidebar__link--collapsed {
   justify-content: center;
   padding: 0.625rem;

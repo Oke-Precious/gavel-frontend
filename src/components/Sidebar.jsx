@@ -4,6 +4,9 @@ import {
   LayoutDashboard,
   FolderOpen,
   BarChart2,
+  TrendingUp,
+  FileDown,
+  ScrollText,
   Heart,
   Users,
   Mail,
@@ -44,28 +47,46 @@ const NAV_ITEMS = [
     roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer', 'litigant'],
   },
   {
-    to: '/cases',
-    label: 'Cases',
-    Icon: FolderOpen,
-    roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer'],
-  },
-  {
     to: '/analytics',
-    label: 'Analytics',
+    label: 'Heatmap',
     Icon: BarChart2,
     roles: ['super_admin', 'admin'],
   },
   {
-    to: '/pro-bono',
-    label: 'Pro-Bono',
-    Icon: Heart,
-    roles: ['lawyer'],
+    label: 'Trends',
+    Icon: TrendingUp,
+    roles: ['super_admin', 'admin'],
+    disabled: true,
   },
   {
     to: '/users',
     label: 'Users',
     Icon: Users,
     roles: ['super_admin', 'admin'],
+  },
+  {
+    label: 'Reports',
+    Icon: FileDown,
+    roles: ['super_admin', 'admin'],
+    disabled: true,
+  },
+  {
+    label: 'Audit Log',
+    Icon: ScrollText,
+    roles: ['super_admin', 'admin'],
+    disabled: true,
+  },
+  {
+    to: '/cases',
+    label: 'Cases',
+    Icon: FolderOpen,
+    roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer'],
+  },
+  {
+    to: '/pro-bono',
+    label: 'Pro-Bono',
+    Icon: Heart,
+    roles: ['lawyer'],
   },
   {
     to: '/contact-messages',
@@ -128,7 +149,18 @@ export default function Sidebar() {
 
         {/* Nav items */}
         <nav className="sidebar__nav" aria-label="Internal navigation">
-          {visibleItems.map(({ to, label, Icon }) => (
+          {visibleItems.map(({ to, label, Icon, disabled }) => disabled ? (
+            <span
+              key={label}
+              className={`sidebar__link sidebar__link--disabled${collapsed ? ' sidebar__link--collapsed' : ''}`}
+              title={collapsed ? `${label} - coming soon` : 'Coming soon'}
+              aria-label={`${label} - coming soon`}
+              aria-disabled="true"
+            >
+              <Icon size={20} strokeWidth={1.75} aria-hidden="true" className="sidebar__link-icon" />
+              {!collapsed && <span className="sidebar__link-label">{label}</span>}
+            </span>
+          ) : (
             <NavLink
               key={to}
               to={to}
