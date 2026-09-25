@@ -46,6 +46,7 @@ const UpdateCaseStatusPage = lazy(() => import('./pages/UpdateCaseStatus/UpdateC
 const BulkImportCasesPage = lazy(() => import('./pages/BulkImportCases/BulkImportCasesPage.jsx'));
 const DocumentsManagerPage = lazy(() => import('./pages/DocumentsManager/DocumentsManagerPage.jsx'));
 const BottleneckHeatmapPage = lazy(() => import('./pages/BottleneckHeatmap/BottleneckHeatmapPage.jsx'));
+const HistoricalTrendsPage = lazy(() => import('./pages/HistoricalTrends/HistoricalTrendsPage.jsx'));
 const ProBonoPage     = lazy(() => import('./pages/ProBono/ProBonoPage.jsx'));
 const UsersPage       = lazy(() => import('./pages/Users/UsersPage.jsx'));
 const SuperAdminPage  = lazy(() => import('./pages/SuperAdmin/SuperAdminPage.jsx'));
@@ -156,6 +157,10 @@ export default function App() {
                   <Route
                     path="heatmap"
                     element={<RequireRole roles={['super_admin', 'admin']}><BottleneckHeatmapPage /></RequireRole>}
+                  />
+                  <Route
+                    path="trends"
+                    element={<RequireRole roles={['super_admin', 'admin']}><HistoricalTrendsPage /></RequireRole>}
                   />
                   <Route
                     path="pro-bono"

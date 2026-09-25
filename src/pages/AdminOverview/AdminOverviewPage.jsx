@@ -248,6 +248,7 @@ export default function AdminOverviewPage() {
               ) : (
                 <p className="admin-overview__empty">No historical trend data is available yet.</p>
               )}
+              <Button variant="ghost" size="sm" onClick={() => navigate('/trends')}>View trends</Button>
             </Card>
           </section>
         </>

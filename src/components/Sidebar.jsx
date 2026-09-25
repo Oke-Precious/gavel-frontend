@@ -53,10 +53,10 @@ const NAV_ITEMS = [
     roles: ['super_admin', 'admin'],
   },
   {
+    to: '/trends',
     label: 'Trends',
     Icon: TrendingUp,
     roles: ['super_admin', 'admin'],
-    disabled: true,
   },
   {
     to: '/users',
