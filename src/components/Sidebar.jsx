@@ -47,7 +47,7 @@ const NAV_ITEMS = [
     roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer', 'litigant'],
   },
   {
-    to: '/analytics',
+    to: '/heatmap',
     label: 'Heatmap',
     Icon: BarChart2,
     roles: ['super_admin', 'admin'],

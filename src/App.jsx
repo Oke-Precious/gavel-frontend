@@ -45,7 +45,7 @@ const NewCasePage     = lazy(() => import('./pages/NewCase/NewCasePage.jsx'));
 const UpdateCaseStatusPage = lazy(() => import('./pages/UpdateCaseStatus/UpdateCaseStatusPage.jsx'));
 const BulkImportCasesPage = lazy(() => import('./pages/BulkImportCases/BulkImportCasesPage.jsx'));
 const DocumentsManagerPage = lazy(() => import('./pages/DocumentsManager/DocumentsManagerPage.jsx'));
-const AnalyticsPage   = lazy(() => import('./pages/Analytics/AnalyticsPage.jsx'));
+const BottleneckHeatmapPage = lazy(() => import('./pages/BottleneckHeatmap/BottleneckHeatmapPage.jsx'));
 const ProBonoPage     = lazy(() => import('./pages/ProBono/ProBonoPage.jsx'));
 const UsersPage       = lazy(() => import('./pages/Users/UsersPage.jsx'));
 const SuperAdminPage  = lazy(() => import('./pages/SuperAdmin/SuperAdminPage.jsx'));
@@ -151,7 +151,11 @@ export default function App() {
                   />
                   <Route
                     path="analytics"
-                    element={<RequireRole roles={['super_admin', 'admin']}><AnalyticsPage /></RequireRole>}
+                    element={<RequireRole roles={['super_admin', 'admin']}><BottleneckHeatmapPage /></RequireRole>}
+                  />
+                  <Route
+                    path="heatmap"
+                    element={<RequireRole roles={['super_admin', 'admin']}><BottleneckHeatmapPage /></RequireRole>}
                   />
                   <Route
                     path="pro-bono"

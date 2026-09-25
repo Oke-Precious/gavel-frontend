@@ -5,6 +5,7 @@ import Card from '../../components/Card.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
 import { analyticsApi, casesApi } from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext.jsx';
 import { daysInCustody } from '../../utils/formatDate.js';
 import { getAlertLevel } from '../../utils/formatAlertLevel.js';
@@ -85,6 +86,7 @@ function errorMessage(error) {
 }
 
 export default function AdminOverviewPage() {
+  const navigate = useNavigate();
   const { user, roleLabel } = useAuth();
   const { toast } = useToast();
   const toastRef = useRef(toast);
@@ -213,6 +215,7 @@ export default function AdminOverviewPage() {
                   ? `${topCourt.court} has the highest reported court-stage group at ${topCourt.count.toLocaleString()} cases.`
                   : 'No court heatmap data is available yet.'}
               </p>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/heatmap')}>View heatmap</Button>
             </Card>
 
             <Card padding="lg" className="admin-overview__preview-card">
