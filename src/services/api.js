@@ -299,6 +299,20 @@ export const usersApi = {
 };
 
 /* ================================================================== */
+/* 8a. Profile / Settings                                               */
+/* ================================================================== */
+export const profileApi = {
+  me: () =>
+    authApi.me(),
+
+  updateProfile: (id, payload) =>
+    usersApi.update(id, payload),
+
+  requestPasswordReset: (email) =>
+    authApi.forgotPassword(email),
+};
+
+/* ================================================================== */
 /* 8b. Super Admin console                                              */
 /* ================================================================== */
 export const superAdminApi = {

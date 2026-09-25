@@ -1,0 +1,258 @@
+.profile-settings-page {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-3);
+}
+
+.profile-settings-page__shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.profile-settings-page__shell--narrow {
+  max-width: 760px;
+}
+
+.profile-settings-page__header h1,
+.profile-settings-page__header p,
+.profile-settings-page__identity h2,
+.profile-settings-page__identity p,
+.profile-settings-page__field p,
+.profile-settings-page__password-row p {
+  margin: 0;
+}
+
+.profile-settings-page__header h1 {
+  color: var(--color-navy);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.profile-settings-page__header p:not(.profile-settings-page__eyebrow) {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-base);
+}
+
+.profile-settings-page__eyebrow {
+  color: var(--color-indigo) !important;
+  font-size: var(--font-size-small) !important;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.profile-settings-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.profile-settings-page__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.profile-settings-page__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-indigo-light);
+  color: var(--color-indigo);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+}
+
+.profile-settings-page__identity h2 {
+  color: var(--color-navy);
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-tight);
+}
+
+.profile-settings-page__identity p,
+.profile-settings-page__field p,
+.profile-settings-page__password-row p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-base);
+}
+
+.profile-settings-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.profile-settings-page__field label,
+.profile-settings-page__password-row label,
+.profile-settings-page__toggle span:first-child {
+  color: var(--color-text);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.profile-settings-page__field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-caption);
+  box-sizing: border-box;
+}
+
+.profile-settings-page__field input:disabled {
+  color: var(--color-text-muted);
+  background-color: var(--color-bg);
+}
+
+.profile-settings-page__field input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.profile-settings-page__password-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+}
+
+.profile-settings-page__toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.profile-settings-page__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  cursor: pointer;
+}
+
+.profile-settings-page__toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.profile-settings-page__switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 44px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border);
+  transition: background-color var(--transition-base);
+}
+
+.profile-settings-page__switch span {
+  position: absolute;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--transition-base);
+}
+
+.profile-settings-page__toggle input:checked + .profile-settings-page__switch {
+  background-color: var(--color-indigo);
+}
+
+.profile-settings-page__toggle input:checked + .profile-settings-page__switch span {
+  transform: translateX(20px);
+}
+
+.profile-settings-page__toggle input:focus-visible + .profile-settings-page__switch {
+  box-shadow: var(--focus-ring);
+}
+
+.profile-settings-page__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+}
+
+.profile-settings-page__return-link {
+  width: fit-content;
+  color: var(--color-indigo);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+.profile-settings-page__return-link:hover {
+  text-decoration: underline;
+}
+
+.profile-settings-page__return-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+:root.gavel-larger-text {
+  font-size: 17px;
+}
+
+:root.gavel-dark-mode body {
+  background-color: var(--color-dark-bg);
+  color: var(--color-dark-text);
+}
+
+@media (max-width: 1024px) {
+  .profile-settings-page {
+    padding: var(--space-3) var(--space-2);
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-settings-page {
+    padding: var(--space-2);
+  }
+
+  .profile-settings-page__identity,
+  .profile-settings-page__password-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profile-settings-page__password-row .btn,
+  .profile-settings-page__actions .btn {
+    width: 100%;
+  }
+
+  .profile-settings-page__actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+}

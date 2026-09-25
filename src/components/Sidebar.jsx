@@ -8,6 +8,7 @@ import {
   Users,
   Mail,
   Bell,
+  Settings,
   ShieldCheck,
   LogOut,
   ChevronLeft,
@@ -77,6 +78,12 @@ const NAV_ITEMS = [
     label: 'Notifications',
     Icon: Bell,
     roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer'],
+  },
+  {
+    to: '/profile-settings',
+    label: 'Settings',
+    Icon: Settings,
+    roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer', 'litigant'],
   },
 ];
 
