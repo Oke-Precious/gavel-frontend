@@ -7,6 +7,7 @@ import {
   Heart,
   Users,
   Mail,
+  Bell,
   ShieldCheck,
   LogOut,
   ChevronLeft,
@@ -70,6 +71,12 @@ const NAV_ITEMS = [
     label: 'Contact Messages',
     Icon: Mail,
     roles: ['super_admin', 'admin'],
+  },
+  {
+    to: '/notifications',
+    label: 'Notifications',
+    Icon: Bell,
+    roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer'],
   },
 ];
 

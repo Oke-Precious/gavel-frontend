@@ -347,6 +347,21 @@ export const contactApi = {
 };
 
 /* ================================================================== */
+/* 9b. Notifications Center                                             */
+/* ================================================================== */
+export const notificationsApi = {
+  /**
+   * Backend does not expose a dedicated /notifications resource yet.
+   * This uses the real authenticated case list as the source of case alerts.
+   * @param {{ limit?: number }} params
+   */
+  list: (params = {}) =>
+    casesApi.list({ limit: params.limit ?? 20 }).then((data) => ({
+      cases: Array.isArray(data) ? data : (data?.cases ?? data?.items ?? []),
+      pagination: data?.pagination,
+    })),
+};
+/* ================================================================== */
 /* 10. System Health                                                    */
 /* ================================================================== */
 export const healthApi = {
