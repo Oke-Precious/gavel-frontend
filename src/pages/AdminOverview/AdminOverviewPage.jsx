@@ -80,7 +80,9 @@ function chartPoints(rows) {
 }
 
 function errorMessage(error) {
-  if (!error?.response) return 'Network error - check your connection and try again.';
+  if (typeof navigator !== 'undefined' && !navigator.onLine) return 'You are offline. Reconnect and try again.';
+  if (error?.code === 'ECONNABORTED') return 'The GAVEL API took too long to respond. Please try again.';
+  if (!error?.response) return 'The GAVEL API could not be reached. Your internet connection may still be working.';
   if (error.response.status >= 500) return 'The analytics service is temporarily unavailable. Please try again.';
   return error.response.data?.message ?? 'Unable to load the Admin Overview.';
 }
@@ -96,21 +98,42 @@ export default function AdminOverviewPage() {
   const [trends, setTrends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [partialWarning, setPartialWarning] = useState('');
 
   const loadOverview = useCallback(async () => {
     setLoading(true);
     setError('');
+    setPartialWarning('');
     try {
-      const [overviewData, heatmapData, trendsData, casesData] = await Promise.all([
+      const results = await Promise.allSettled([
         analyticsApi.overview(),
         analyticsApi.heatmap(),
         analyticsApi.trends(),
-        casesApi.list({ page: 1, limit: 200 }),
+        casesApi.list({ page: 1, limit: 100 }),
       ]);
-      setOverview(overviewData ?? {});
-      setHeatmap(normalizeHeatmap(heatmapData));
-      setTrends(normalizeTrends(trendsData));
-      setCases(listFrom(casesData, ['cases', 'items']));
+
+      const [overviewResult, heatmapResult, trendsResult, casesResult] = results;
+      const successfulRequests = results.filter((result) => result.status === 'fulfilled').length;
+      if (successfulRequests === 0) {
+        const usefulError = results.find((result) => result.reason?.response)?.reason
+          ?? results[0].reason;
+        throw usefulError;
+      }
+
+      setOverview(overviewResult.status === 'fulfilled' ? (overviewResult.value ?? {}) : {});
+      setHeatmap(heatmapResult.status === 'fulfilled' ? normalizeHeatmap(heatmapResult.value) : []);
+      setTrends(trendsResult.status === 'fulfilled' ? normalizeTrends(trendsResult.value) : []);
+      setCases(casesResult.status === 'fulfilled' ? listFrom(casesResult.value, ['cases', 'items']) : []);
+
+      const sourceLabels = ['summary statistics', 'heatmap preview', 'trend preview', 'case-derived metrics'];
+      const failedSources = results
+        .map((result, index) => result.status === 'rejected' ? sourceLabels[index] : null)
+        .filter(Boolean);
+      if (failedSources.length) {
+        const warning = `Some data is temporarily unavailable: ${failedSources.join(', ')}.`;
+        setPartialWarning(warning);
+        toastRef.current.warning(warning);
+      }
     } catch (requestError) {
       const message = errorMessage(requestError);
       setError(message);
@@ -192,6 +215,11 @@ export default function AdminOverviewPage() {
         </Card>
       ) : (
         <>
+          {partialWarning && (
+            <p className="admin-overview__warning" role="status" aria-live="polite">
+              {partialWarning} Available figures and previews are shown below.
+            </p>
+          )}
           <section className="admin-overview__stats" aria-label="System case statistics">
             <MetricCard icon={Briefcase} label="Total Cases" value={metrics.total.toLocaleString()} />
             <MetricCard icon={AlertOctagon} label="Critical" value={metrics.critical.toLocaleString()} critical />
