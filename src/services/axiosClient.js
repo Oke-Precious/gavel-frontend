@@ -43,7 +43,10 @@ const axiosClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000,
+  // Render can need longer than 15 seconds to wake and complete MongoDB
+  // aggregation queries. Keep a finite timeout, but do not abort valid
+  // dashboard requests while the deployed service is warming up.
+  timeout: 45000,
 });
 
 /* ------------------------------------------------------------------ */

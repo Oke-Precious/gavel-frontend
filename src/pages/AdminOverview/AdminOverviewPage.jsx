@@ -3,7 +3,7 @@ import { AlertOctagon, Briefcase, Clock3, Map, RefreshCw, TrendingUp } from 'luc
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
-import { analyticsApi, casesApi } from '../../services/api.js';
+import { analyticsApi, casesApi, publicApi } from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -61,7 +61,8 @@ function normalizeTrends(data) {
       ? `${year}-${String(month).padStart(2, '0')}`
       : null);
     if (!period) return;
-    totals.set(period, (totals.get(period) ?? 0) + Number(row?.count ?? row?.total ?? 0));
+    const count = row?.count ?? row?.total ?? (Number(row?.filed ?? 0) + Number(row?.resolved ?? 0));
+    totals.set(period, (totals.get(period) ?? 0) + Number(count));
   });
 
   return Array.from(totals, ([period, count]) => ({ period, count }))
@@ -105,19 +106,61 @@ export default function AdminOverviewPage() {
     setError('');
     setPartialWarning('');
     try {
-      const results = await Promise.allSettled([
+      // Load essential figures first. Running every aggregation at once can
+      // overwhelm the deployed Render instance while it is warming up.
+      const primaryResults = await Promise.allSettled([
         analyticsApi.overview(),
-        analyticsApi.heatmap(),
-        analyticsApi.trends(),
         casesApi.list({ page: 1, limit: 100 }),
       ]);
+      const previewResults = await Promise.allSettled([
+        analyticsApi.heatmap(),
+        analyticsApi.trends(),
+      ]);
+      const results = [
+        primaryResults[0],
+        previewResults[0],
+        previewResults[1],
+        primaryResults[1],
+      ];
 
       const [overviewResult, heatmapResult, trendsResult, casesResult] = results;
       const successfulRequests = results.filter((result) => result.status === 'fulfilled').length;
       if (successfulRequests === 0) {
-        const usefulError = results.find((result) => result.reason?.response)?.reason
-          ?? results[0].reason;
-        throw usefulError;
+        const publicResults = await Promise.allSettled([
+          publicApi.scorecard(),
+          publicApi.backlogMap(),
+          publicApi.trends(),
+        ]);
+        const [scorecardResult, backlogResult, publicTrendsResult] = publicResults;
+        if (publicResults.every((result) => result.status === 'rejected')) {
+          const usefulError = results.find((result) => result.reason?.response)?.reason
+            ?? results[0].reason;
+          throw usefulError;
+        }
+
+        const scorecard = scorecardResult.status === 'fulfilled' ? scorecardResult.value : {};
+        setOverview({
+          cases: {
+            total: Number(scorecard?.totalCases ?? 0),
+            active: Number(scorecard?.activeCases ?? 0),
+          },
+        });
+        setHeatmap(backlogResult.status === 'fulfilled'
+          ? listFrom(backlogResult.value, ['backlog', 'rows']).map((row, index) => ({
+              id: row?._id ?? `${row?.court ?? 'court'}-${index}`,
+              court: row?.court ?? 'Not provided',
+              stage: 'Active backlog',
+              count: Number(row?.totalBacklog ?? row?.activeCount ?? 0),
+            }))
+          : []);
+        setTrends(publicTrendsResult.status === 'fulfilled'
+          ? normalizeTrends(publicTrendsResult.value)
+          : []);
+        setCases([]);
+        const fallbackWarning = 'Signed-in analytics are temporarily unavailable. Public aggregate data is shown instead.';
+        setPartialWarning(fallbackWarning);
+        toastRef.current.warning(fallbackWarning);
+        return;
       }
 
       setOverview(overviewResult.status === 'fulfilled' ? (overviewResult.value ?? {}) : {});
