@@ -13,7 +13,10 @@
 
 import axios from 'axios';
 
-export const BASE_URL = 'https://gavel-backend-nw0p.onrender.com/api/v1';
+const DEFAULT_API_BASE_URL = 'https://gavel-backend-nw0p.onrender.com/api/v1';
+
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+export const API_ORIGIN = BASE_URL.replace(/\/api\/v1\/?$/, '');
 
 /* ------------------------------------------------------------------ */
 /* In-memory token store (never touches localStorage or sessionStorage) */

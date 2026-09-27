@@ -44,7 +44,7 @@ const NAV_ITEMS = [
     to: '/dashboard',
     label: 'Dashboard',
     Icon: LayoutDashboard,
-    roles: ['super_admin', 'admin', 'judge', 'clerk', 'lawyer', 'litigant'],
+    roles: ['judge', 'clerk', 'lawyer', 'litigant'],
   },
   {
     to: '/heatmap',
@@ -124,6 +124,11 @@ export default function Sidebar() {
   }, []);
 
   const userRole = user?.role ?? 'litigant';
+  const homePath = userRole === 'super_admin'
+    ? '/super-admin'
+    : userRole === 'admin'
+      ? '/users'
+      : '/dashboard';
 
   const visibleItems = NAV_ITEMS.filter((item) =>
     item.roles.includes(userRole),
@@ -138,7 +143,7 @@ export default function Sidebar() {
       <>
         {/* Logo */}
         <div className="sidebar__logo-row">
-          <NavLink to="/dashboard" className="sidebar__logo-link" aria-label="GAVEL Dashboard">
+          <NavLink to={homePath} className="sidebar__logo-link" aria-label="GAVEL home">
             <img
               src="/gavel white logo.png"
               alt="GAVEL"

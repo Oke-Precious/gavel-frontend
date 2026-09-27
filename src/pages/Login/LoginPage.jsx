@@ -40,7 +40,15 @@ export default function LoginPage() {
       // Wire to real backend endpoint: POST /auth/login via AuthContext
       const signedInUser = await login(cleanEmail, password);
       toast.success('Signed in successfully.');
-      navigate(signedInUser?.role === 'super_admin' ? '/super-admin' : signedInUser?.role === 'lawyer' ? '/pro-bono' : '/dashboard');
+      const destination = signedInUser?.role === 'super_admin'
+        ? '/super-admin'
+        : signedInUser?.role === 'admin'
+          ? '/users'
+          : signedInUser?.role === 'lawyer'
+            ? '/pro-bono'
+            : '/dashboard';
+
+      navigate(destination);
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||

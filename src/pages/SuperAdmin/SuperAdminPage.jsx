@@ -22,7 +22,6 @@ import Skeleton from '../../components/Skeleton.jsx';
 import { superAdminApi } from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useToast } from '../../context/ToastContext.jsx';
-import AdminOverviewPage from '../AdminOverview/AdminOverviewPage.jsx';
 import './SuperAdminPage.css';
 
 const ROLE_CONFIG = {
@@ -353,7 +352,6 @@ export default function SuperAdminPage() {
   const filteredUsersCount = visibleUsers.length;
   return (
     <div className="super-admin-page">
-      <AdminOverviewPage />
       <div className="super-admin-container">
         <header className="super-admin__header">
           <div>

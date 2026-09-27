@@ -46,6 +46,18 @@ Install dependencies:
 npm install
 ```
 
+Create a local environment file:
+
+```bash
+cp .env.example .env
+```
+
+Then set the frontend API base URL in `.env`:
+
+```env
+VITE_API_BASE_URL=https://your-backend-domain.example.com/api/v1
+```
+
 Start the local development server:
 
 ```bash
@@ -115,7 +127,7 @@ The frontend uses the backend prefix:
 /api/v1
 ```
 
-Do not add credentials, private tokens, SMTP secrets, database URLs, or personal account passwords to this README or to committed source files.
+Frontend env variables must be prefixed with `VITE_`, which means they are exposed to the browser bundle. Do not put credentials, private tokens, SMTP secrets, database URLs, JWT secrets, Brevo keys, or personal account passwords in this README, `.env.example`, or any committed source file.
 
 ## Main Routes
 

@@ -15,7 +15,7 @@
  *   litigant / public → Public Observer
  */
 
-import axiosClient from './axiosClient.js';
+import axiosClient, { API_ORIGIN } from './axiosClient.js';
 
 /* ------------------------------------------------------------------ */
 /* Helper: unwrap the standard response envelope                       */
@@ -173,7 +173,7 @@ export const documentsApi = {
   fileUrl: (fileUrl) => {
     if (!fileUrl) return '';
     if (fileUrl.startsWith('http')) return fileUrl;
-    return `https://gavel-backend-nw0p.onrender.com/uploads/${fileUrl.replace(/^\/uploads\//, '')}`;
+    return `${API_ORIGIN}/uploads/${fileUrl.replace(/^\/uploads\//, '')}`;
   },
 };
 
