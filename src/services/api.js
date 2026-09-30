@@ -140,6 +140,20 @@ export const casesApi = {
 };
 
 /* ================================================================== */
+/* 2a. Reports                                                          */
+/* ================================================================== */
+export const reportsApi = {
+  /**
+   * Export Reports page.
+   * Real backend source: GET /cases
+   * Report formatting is handled in the browser because the backend only
+   * documents CSV for all cases and PDF for a single case.
+   */
+  caseRecords: (params = {}) =>
+    casesApi.list({ page: 1, limit: 500, ...params }),
+};
+
+/* ================================================================== */
 /* 3. Documents                                                         */
 /* ================================================================== */
 export const documentsApi = {

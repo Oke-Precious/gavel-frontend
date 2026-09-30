@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   ClipboardList,
   Edit3,
+  FileDown,
   FileWarning,
   History,
   Mail,
@@ -365,6 +366,7 @@ export default function SuperAdminPage() {
         <section className="super-admin__quick-links" aria-label="Super Admin shortcuts">
           <Button variant="secondary" size="md" iconLeft={Users} onClick={() => document.getElementById('super-admin-users')?.scrollIntoView({ behavior: 'smooth' })}>Manage users</Button>
           <Button variant="secondary" size="md" iconLeft={Mail} onClick={() => navigate('/contact-messages')}>Contact inbox</Button>
+          <Button variant="secondary" size="md" iconLeft={FileDown} onClick={() => navigate('/reports')}>Export reports</Button>
           <Button variant="secondary" size="md" iconLeft={ClipboardList} onClick={() => navigate('/cases')}>View cases</Button>
           <Button variant="secondary" size="md" iconLeft={Plus} onClick={() => navigate('/cases/new')}>Create case</Button>
         </section>
