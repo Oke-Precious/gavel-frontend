@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertOctagon, RefreshCw } from 'lucide-react';
+import { AlertOctagon, ChevronDown, ChevronUp, Info, RefreshCw } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
@@ -41,7 +41,7 @@ function monthKey(date) {
 }
 
 function monthLabel(date) {
-  return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
 function lastTwelveMonths(anchor = new Date()) {
@@ -166,6 +166,28 @@ function pointsFor(rows, valueKey) {
   });
 }
 
+function trendFor(rows, valueKey) {
+  if (rows.length < 6) return { direction: 'flat', label: '0% vs prior quarter' };
+
+  const current = rows.slice(-3);
+  const previous = rows.slice(-6, -3);
+  const currentAverage = current.reduce((sum, row) => sum + row[valueKey], 0) / current.length;
+  const previousAverage = previous.reduce((sum, row) => sum + row[valueKey], 0) / previous.length;
+
+  if (previousAverage === 0) {
+    return {
+      direction: currentAverage > 0 ? 'up' : 'flat',
+      label: currentAverage > 0 ? '+100% vs prior quarter' : '0% vs prior quarter',
+    };
+  }
+
+  const percent = Math.round(((currentAverage - previousAverage) / previousAverage) * 100);
+  return {
+    direction: percent > 0 ? 'up' : percent < 0 ? 'down' : 'flat',
+    label: `${percent > 0 ? '+' : ''}${percent}% vs prior quarter`,
+  };
+}
+
 export default function HistoricalTrendsPage() {
   const { toast } = useToast();
   const toastRef = useRef(toast);
@@ -235,7 +257,6 @@ export default function HistoricalTrendsPage() {
       <section aria-labelledby="backlog-over-time-title">
         <div className="historical-trends__section-heading">
           <h2 id="backlog-over-time-title">Backlog Over Time</h2>
-          {!loading && !error && <p>{sourceNote}</p>}
         </div>
 
         {loading ? (
@@ -263,6 +284,7 @@ export default function HistoricalTrendsPage() {
                 valueKey="backlog"
                 valueLabel="cases"
                 tone="indigo"
+                sourceNote={sourceNote}
               />
               <LineChart
                 title="Average Wait Time (days, last 12 months)"
@@ -270,6 +292,7 @@ export default function HistoricalTrendsPage() {
                 valueKey="averageWaitDays"
                 valueLabel="days"
                 tone="severe"
+                sourceNote={sourceNote}
               />
             </div>
             {!hasData && <p className="historical-trends__empty" role="status">No historical case activity is available for this period.</p>}
@@ -280,39 +303,94 @@ export default function HistoricalTrendsPage() {
   );
 }
 
-function LineChart({ title, rows, valueKey, valueLabel, tone }) {
+function LineChart({ title, rows, valueKey, valueLabel, tone, sourceNote }) {
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+  const [rawOpen, setRawOpen] = useState(false);
   const points = pointsFor(rows, valueKey);
   const maximum = Math.max(1, ...rows.map((row) => row[valueKey]));
   const polyline = points.map(({ x, y }) => `${x},${y}`).join(' ');
+  const baseline = 212;
+  const areaPoints = points.length
+    ? `${points[0].x},${baseline} ${polyline} ${points[points.length - 1].x},${baseline}`
+    : '';
+  const gradientId = `${valueKey}-area-gradient`;
+  const trend = trendFor(rows, valueKey);
 
   return (
-    <Card padding="lg" className={`historical-chart historical-chart--${tone}`}>
-      <h3>{title}</h3>
+    <Card padding="lg" hoverable className={`historical-chart historical-chart--${tone}`}>
+      <div className="historical-chart__header">
+        <div className="historical-chart__title-row">
+          <h3>{title}</h3>
+          {sourceNote && (
+            <span className="historical-chart__info-wrap">
+              <button type="button" className="historical-chart__info-button" aria-label={`About ${title}`}>
+                <Info size={16} aria-hidden="true" />
+              </button>
+              <span className="historical-chart__info-tooltip" role="tooltip">{sourceNote}</span>
+            </span>
+          )}
+        </div>
+        <span className={`historical-chart__trend historical-chart__trend--${trend.direction}`}>
+          {trend.direction === 'down' ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronUp size={16} aria-hidden="true" />}
+          {trend.label}
+        </span>
+      </div>
       <div className="historical-chart__scroll" tabIndex="0" aria-label={`Scrollable chart: ${title}`}>
         <div className="historical-chart__canvas">
           <svg viewBox="0 0 744 272" role="img" aria-labelledby={`${valueKey}-chart-title ${valueKey}-chart-description`}>
             <title id={`${valueKey}-chart-title`}>{title}</title>
             <desc id={`${valueKey}-chart-description`}>Monthly values for the most recent 12-month period.</desc>
+            <defs>
+              <linearGradient id={gradientId} x1="0" x2="0" y1="48" y2="212" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" className="historical-chart__area-stop historical-chart__area-stop--start" />
+                <stop offset="100%" className="historical-chart__area-stop historical-chart__area-stop--end" />
+              </linearGradient>
+            </defs>
             {[48, 103, 157, 212].map((y) => <line key={y} className="historical-chart__grid-line" x1="56" y1={y} x2="688" y2={y} />)}
             <text x="48" y="52" textAnchor="end">{maximum.toLocaleString()}</text>
             <text x="48" y="216" textAnchor="end">0</text>
-            <polyline className="historical-chart__line" points={polyline} />
+            {areaPoints && <polygon className="historical-chart__area" points={areaPoints} fill={`url(#${gradientId})`} />}
+            <polyline className="historical-chart__line" pathLength="1" points={polyline} />
             {points.map(({ x, y, row }, index) => (
-              <g key={row.key}>
-                <circle cx={x} cy={y} r="5">
-                  <title>{`${row.label}: ${row[valueKey].toLocaleString()} ${valueLabel}`}</title>
-                </circle>
+              <g
+                key={row.key}
+                onMouseEnter={() => setHoveredPoint({ x, y, row })}
+                onMouseLeave={() => setHoveredPoint(null)}
+                onFocus={() => setHoveredPoint({ x, y, row })}
+                onBlur={() => setHoveredPoint(null)}
+              >
+                <circle cx={x} cy={y} r="5" tabIndex="0" aria-label={`${row.label}: ${row[valueKey].toLocaleString()} ${valueLabel}`} />
                 {(index % 3 === 0 || index === points.length - 1) && <text x={x} y="244" textAnchor="middle">{row.label}</text>}
               </g>
             ))}
           </svg>
+          {hoveredPoint && (
+            <div
+              className="historical-chart__tooltip"
+              style={{
+                left: `${(hoveredPoint.x / 744) * 100}%`,
+                top: `${(hoveredPoint.y / 272) * 100}%`,
+              }}
+              role="status"
+            >
+              <strong>{hoveredPoint.row.label}</strong>
+              <span>{hoveredPoint.row[valueKey].toLocaleString()} {valueLabel}</span>
+            </div>
+          )}
         </div>
       </div>
-      <table className="sr-only">
-        <caption>{title}</caption>
-        <thead><tr><th scope="col">Month</th><th scope="col">Value</th></tr></thead>
-        <tbody>{rows.map((row) => <tr key={row.key}><th scope="row">{row.label}</th><td>{row[valueKey]} {valueLabel}</td></tr>)}</tbody>
-      </table>
+      <button type="button" className="historical-chart__raw-toggle" onClick={() => setRawOpen((open) => !open)} aria-expanded={rawOpen}>
+        {rawOpen ? 'Hide raw data' : 'View raw data'}
+      </button>
+      {rawOpen && (
+        <div className="historical-chart__raw-table-wrap">
+          <table className="historical-chart__raw-table">
+            <caption>{title}</caption>
+            <thead><tr><th scope="col">Month</th><th scope="col">Value</th></tr></thead>
+            <tbody>{rows.map((row) => <tr key={row.key}><th scope="row">{row.label}</th><td>{row[valueKey]} {valueLabel}</td></tr>)}</tbody>
+          </table>
+        </div>
+      )}
     </Card>
   );
 }
