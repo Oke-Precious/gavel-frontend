@@ -71,10 +71,10 @@ const NAV_ITEMS = [
     roles: ['super_admin', 'admin'],
   },
   {
+    to: '/audit-log',
     label: 'Audit Log',
     Icon: ScrollText,
     roles: ['super_admin', 'admin'],
-    disabled: true,
   },
   {
     to: '/cases',

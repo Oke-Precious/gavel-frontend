@@ -48,6 +48,7 @@ const DocumentsManagerPage = lazy(() => import('./pages/DocumentsManager/Documen
 const BottleneckHeatmapPage = lazy(() => import('./pages/BottleneckHeatmap/BottleneckHeatmapPage.jsx'));
 const HistoricalTrendsPage = lazy(() => import('./pages/HistoricalTrends/HistoricalTrendsPage.jsx'));
 const ExportReportsPage = lazy(() => import('./pages/ExportReports/ExportReportsPage.jsx'));
+const SystemAuditLogPage = lazy(() => import('./pages/SystemAuditLog/SystemAuditLogPage.jsx'));
 const ProBonoPage     = lazy(() => import('./pages/ProBono/ProBonoPage.jsx'));
 const UsersPage       = lazy(() => import('./pages/Users/UsersPage.jsx'));
 const SuperAdminPage  = lazy(() => import('./pages/SuperAdmin/SuperAdminPage.jsx'));
@@ -166,6 +167,10 @@ export default function App() {
                   <Route
                     path="reports"
                     element={<RequireRole roles={['super_admin', 'admin']}><ExportReportsPage /></RequireRole>}
+                  />
+                  <Route
+                    path="audit-log"
+                    element={<RequireRole roles={['super_admin', 'admin']}><SystemAuditLogPage /></RequireRole>}
                   />
                   <Route
                     path="pro-bono"

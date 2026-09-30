@@ -157,6 +157,33 @@ export const reportsApi = {
 };
 
 /* ================================================================== */
+/* 2b. System Audit Log                                                 */
+/* ================================================================== */
+export const auditApi = {
+  /**
+   * System Audit Log page.
+   * Real backend sources: GET /cases and GET /cases/:id/audit-log.
+   */
+  system: async (params = {}) => {
+    const data = await casesApi.list({ page: 1, limit: 200, ...params });
+    const cases = Array.isArray(data) ? data : (data?.cases ?? data?.items ?? []);
+
+    const results = await Promise.allSettled(
+      cases.map(async (caseRecord) => {
+        const id = caseRecord?._id ?? caseRecord?.id;
+        if (!id) return [];
+
+        const logs = await casesApi.auditLog(id);
+        const caseHashId = caseRecord?.hashId ?? caseRecord?.caseHashId ?? caseRecord?.caseNumber ?? id;
+        return (Array.isArray(logs) ? logs : []).map((log) => ({ ...log, caseHashId, caseId: id }));
+      }),
+    );
+
+    return results.flatMap((result) => result.status === 'fulfilled' ? result.value : []);
+  },
+};
+
+/* ================================================================== */
 /* 3. Documents                                                         */
 /* ================================================================== */
 export const documentsApi = {
