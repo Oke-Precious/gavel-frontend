@@ -60,13 +60,9 @@ export default function LoginPage() {
       }
 
       toast.success('Signed in successfully.');
-      const destination = signedInUser?.role === 'super_admin'
-        ? '/super-admin'
-        : signedInUser?.role === 'admin'
-          ? '/users'
-          : signedInUser?.role === 'lawyer'
-            ? '/pro-bono'
-            : '/dashboard';
+      const destination = signedInUser?.role === 'lawyer'
+        ? '/pro-bono'
+        : '/dashboard';
 
       navigate(destination);
     } catch (err) {

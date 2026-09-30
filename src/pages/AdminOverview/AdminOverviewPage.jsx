@@ -374,33 +374,66 @@ export default function AdminOverviewPage() {
                 </Link>
               </div>
               {loading ? (
-                <Skeleton variant="card" height={220} />
+                <Skeleton variant="card" height={260} />
               ) : (
                 <div className="admin-overview__map-wrapper">
                   <svg
-                    viewBox="0 0 720 500"
+                    viewBox="0 0 720 520"
                     className="admin-overview__map-svg"
                     role="img"
                     aria-label="National Backlog Distribution Map Preview"
                   >
-                    {MAP_PREVIEW_STATES.map((st) => {
-                      const stData = mapData[st.id];
-                      const isHovered = hoveredState === st.id;
-                      const fillColor = stData ? getAlertColor(stData.alertLevel) : '#CBD5E1';
-                      return (
-                        <path
-                          key={st.id}
-                          d={st.path}
-                          fill={fillColor}
-                          stroke="#FFFFFF"
-                          strokeWidth="1.5"
-                          className={`admin-overview__state-path ${isHovered ? 'is-hovered' : ''}`}
-                          onMouseEnter={() => setHoveredState(st.id)}
-                          onMouseLeave={() => setHoveredState(null)}
-                          onClick={() => navigate('/backlog-map')}
-                        />
-                      );
-                    })}
+                    <defs>
+                      <filter id="map-drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                        <feDropShadow dx="0" dy="3" stdDeviation="3" floodOpacity="0.12" />
+                      </filter>
+                      <radialGradient id="glow-ring-critical" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#EF4444" stopOpacity="0.6" />
+                        <stop offset="100%" stopColor="#EF4444" stopOpacity="0.0" />
+                      </radialGradient>
+                      <radialGradient id="glow-ring-warning" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.6" />
+                        <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.0" />
+                      </radialGradient>
+                    </defs>
+
+                    <g filter="url(#map-drop-shadow)">
+                      {MAP_PREVIEW_STATES.map((st) => {
+                        const stData = mapData[st.id];
+                        const isHovered = hoveredState === st.id;
+                        const fillColor = stData ? getAlertColor(stData.alertLevel) : '#CBD5E1';
+                        return (
+                          <path
+                            key={st.id}
+                            d={st.path}
+                            fill={fillColor}
+                            stroke="#FFFFFF"
+                            strokeWidth={isHovered ? '2.5' : '1.5'}
+                            strokeLinejoin="round"
+                            strokeLinecap="round"
+                            className={`admin-overview__state-path ${isHovered ? 'is-hovered' : ''}`}
+                            onMouseEnter={() => setHoveredState(st.id)}
+                            onMouseLeave={() => setHoveredState(null)}
+                            onClick={() => navigate('/backlog-map')}
+                          />
+                        );
+                      })}
+                    </g>
+
+                    {/* Interactive Hub Node Indicators for major backlog centers */}
+                    {[
+                      { id: 'Lagos', cx: 185, cy: 400, level: 'critical' },
+                      { id: 'FCT', cx: 347, cy: 217, level: 'critical' },
+                      { id: 'Rivers', cx: 350, cy: 455, level: 'warning' },
+                      { id: 'Kano', cx: 405, cy: 75, level: 'severe' },
+                      { id: 'Oyo', cx: 180, cy: 310, level: 'compliant' },
+                      { id: 'Kaduna', cx: 370, cy: 150, level: 'warning' },
+                    ].map((hub) => (
+                      <g key={`hub-${hub.id}`} className="admin-overview__hub-node" onClick={() => navigate('/backlog-map')}>
+                        <circle cx={hub.cx} cy={hub.cy} r="14" fill={`url(#glow-ring-${hub.level === 'critical' ? 'critical' : 'warning'})`} className="admin-overview__pulse-ring" />
+                        <circle cx={hub.cx} cy={hub.cy} r="4.5" fill={getAlertColor(hub.level)} stroke="#FFFFFF" strokeWidth="2" />
+                      </g>
+                    ))}
                   </svg>
 
                   {/* Floating State Tooltip */}
@@ -414,6 +447,17 @@ export default function AdminOverviewPage() {
                       </span>
                     </div>
                   )}
+
+                  {/* Map Severity Legend */}
+                  <div className="admin-overview__map-legend" role="region" aria-label="Map severity legend">
+                    <span className="admin-overview__legend-title">Backlog Severity:</span>
+                    <div className="admin-overview__legend-items">
+                      <span className="admin-overview__legend-item"><span className="legend-dot legend-dot--compliant" /> Compliant</span>
+                      <span className="admin-overview__legend-item"><span className="legend-dot legend-dot--warning" /> Warning</span>
+                      <span className="admin-overview__legend-item"><span className="legend-dot legend-dot--severe" /> Severe</span>
+                      <span className="admin-overview__legend-item"><span className="legend-dot legend-dot--critical" /> Critical</span>
+                    </div>
+                  </div>
                 </div>
               )}
             </Card>
