@@ -1,0 +1,427 @@
+/* ============================================================
+   Admin Overview Dashboard Page — CSS
+   Single source of truth using GAVEL design system tokens only.
+   ============================================================ */
+
+.admin-overview {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3);
+  color: var(--color-text);
+}
+
+/* --- Header --- */
+.admin-overview__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6); /* Generous whitespace */
+}
+
+.admin-overview__eyebrow {
+  color: var(--color-indigo);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 var(--space-1);
+}
+
+.admin-overview__title {
+  margin: 0;
+  color: var(--color-navy);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+}
+
+.admin-overview__subtitle {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.admin-overview__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.admin-overview__user-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.admin-overview__user-name {
+  color: var(--color-navy);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+}
+
+.admin-overview__user-role {
+  color: var(--color-indigo);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* --- Error Card --- */
+.admin-overview__error-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  border-color: var(--color-critical);
+  background: var(--color-critical-bg);
+  margin-bottom: var(--space-6);
+}
+
+.admin-overview__error-card > svg {
+  color: var(--color-critical);
+}
+
+.admin-overview__error-content h2 {
+  margin: 0;
+  color: var(--color-navy);
+  font-size: var(--font-size-h3);
+}
+
+.admin-overview__error-content p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+/* --- Stat Cards Grid --- */
+/* Breakpoints: 4-col desktop, 3-col tablet, 2-col mobile */
+.admin-overview__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-6); /* Generous whitespace */
+}
+
+.admin-stat-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.admin-stat-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.admin-stat-card__label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Tinted Circular Badges */
+.admin-stat-card__badge {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-stat-card__badge--indigo {
+  background-color: var(--color-indigo-light);
+  color: var(--color-indigo);
+}
+
+.admin-stat-card__badge--critical {
+  background-color: var(--color-critical-bg);
+  color: var(--color-critical);
+}
+
+.admin-stat-card__badge--severe {
+  background-color: var(--color-severe-bg);
+  color: var(--color-severe);
+}
+
+.admin-stat-card__badge--warning {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.admin-stat-card__badge--compliant {
+  background-color: var(--color-compliant-bg);
+  color: var(--color-compliant);
+}
+
+.admin-stat-card__value-row {
+  margin-bottom: var(--space-1);
+}
+
+.admin-stat-card__value {
+  color: var(--color-navy);
+  font-size: 1.875rem; /* 30px */
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.admin-stat-card__unit {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+/* Trend Badges */
+.admin-stat-card__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  width: fit-content;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Emerald (Improving) vs Crimson (Worsening) */
+.admin-stat-card__trend--emerald {
+  color: var(--color-compliant);
+  background-color: var(--color-compliant-bg);
+}
+
+.admin-stat-card__trend--crimson {
+  color: var(--color-critical);
+  background-color: var(--color-critical-bg);
+}
+
+/* --- Previews Grid (Map & Sparkline side-by-side) --- */
+.admin-overview__previews-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.admin-overview__preview-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Standardized Card Header Pattern */
+.admin-overview__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.admin-overview__card-header h3 {
+  margin: 0;
+  color: var(--color-navy);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+}
+
+.admin-overview__action-link {
+  color: var(--color-indigo);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+.admin-overview__action-link:hover,
+.admin-overview__action-link:focus-visible {
+  color: var(--color-indigo-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --- Map Preview Card --- */
+.admin-overview__map-wrapper {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  padding: var(--space-2);
+}
+
+.admin-overview__map-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+}
+
+.admin-overview__state-path {
+  cursor: pointer;
+  transition: opacity var(--transition-base), filter var(--transition-base);
+}
+
+.admin-overview__state-path:hover,
+.admin-overview__state-path.is-hovered {
+  opacity: 0.85;
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.2));
+}
+
+.admin-overview__map-tooltip {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: var(--z-dropdown);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-2);
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+  pointer-events: none;
+}
+
+.admin-overview__map-tooltip strong {
+  display: block;
+  color: var(--color-navy);
+  font-weight: var(--font-weight-bold);
+}
+
+.admin-overview__map-tooltip span {
+  display: block;
+  color: var(--color-text-muted);
+}
+
+/* --- Chart Sparkline Preview Card --- */
+.admin-overview__chart-wrapper {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  padding: var(--space-2);
+}
+
+.admin-overview__sparkline-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+}
+
+.admin-overview__grid-line {
+  stroke: var(--color-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+  opacity: 0.55;
+}
+
+.admin-overview__sparkline-line {
+  fill: none;
+  stroke: var(--color-indigo);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: admin-sparkline-draw 800ms ease-out forwards;
+}
+
+.admin-overview__sparkline-dot {
+  fill: var(--color-surface);
+  stroke: var(--color-indigo);
+  stroke-width: 3;
+  cursor: pointer;
+  transition: r var(--transition-base), filter var(--transition-base);
+}
+
+.admin-overview__sparkline-dot:hover,
+.admin-overview__sparkline-dot.is-active {
+  r: 6;
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.2));
+}
+
+.admin-overview__chart-tooltip {
+  position: absolute;
+  z-index: var(--z-dropdown);
+  min-width: 110px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-2);
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+  text-align: center;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 8px));
+}
+
+.admin-overview__chart-tooltip strong {
+  display: block;
+  color: var(--color-navy);
+  font-weight: var(--font-weight-bold);
+}
+
+.admin-overview__chart-tooltip span {
+  display: block;
+  color: var(--color-text-muted);
+}
+
+@keyframes admin-sparkline-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* --- Responsive Breakpoints --- */
+@media (max-width: 1024px) {
+  .admin-overview__stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-overview__previews-grid {
+    grid-template-columns: 1fr; /* Stack preview cards vertically on tablet/mobile */
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-overview {
+    padding: var(--space-2);
+  }
+
+  .admin-overview__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-overview__header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .admin-overview__stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2-col on mobile */
+    gap: var(--space-2);
+  }
+
+  .admin-overview__error-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .admin-overview__error-card .btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}

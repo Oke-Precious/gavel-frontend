@@ -1,8 +1,8 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.js';
 import DashboardPage from '../Dashboard/DashboardPage.jsx';
 import RecordsDashboardPage from '../RecordsDashboard/RecordsDashboardPage.jsx';
+import AdminOverviewPage from '../AdminOverview/AdminOverviewPage.jsx';
 
 export default function RoleDashboardPage() {
   const { user } = useAuth();
@@ -11,13 +11,10 @@ export default function RoleDashboardPage() {
     return <RecordsDashboardPage />;
   }
 
-  if (user?.role === 'super_admin') {
-    return <Navigate to="/super-admin" replace />;
-  }
-
-  if (user?.role === 'admin') {
-    return <Navigate to="/users" replace />;
+  if (user?.role === 'super_admin' || user?.role === 'admin') {
+    return <AdminOverviewPage />;
   }
 
   return <DashboardPage />;
 }
+

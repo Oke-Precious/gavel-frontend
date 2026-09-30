@@ -38,6 +38,7 @@ const ResetPasswordPage  = lazy(() => import('./pages/ResetPassword/ResetPasswor
 
 // Internal pages (authenticated)
 const RoleDashboardPage = lazy(() => import('./pages/RoleDashboard/RoleDashboardPage.jsx'));
+const AdminOverviewPage = lazy(() => import('./pages/AdminOverview/AdminOverviewPage.jsx'));
 const RecordsDashboardPage = lazy(() => import('./pages/RecordsDashboard/RecordsDashboardPage.jsx'));
 const CasesPage       = lazy(() => import('./pages/Cases/CasesPage.jsx'));
 const CaseDetailPage  = lazy(() => import('./pages/CaseDetail/CaseDetailPage.jsx'));
@@ -121,9 +122,14 @@ export default function App() {
                 <Route element={<InternalLayout />}>
                   <Route path="dashboard" element={<RoleDashboardPage />} />
                   <Route
+                    path="admin-overview"
+                    element={<RequireRole roles={['super_admin', 'admin']}><AdminOverviewPage /></RequireRole>}
+                  />
+                  <Route
                     path="super-admin"
                     element={<RequireRole roles={['super_admin']}><SuperAdminPage /></RequireRole>}
                   />
+
                   <Route
                     path="records-dashboard"
                     element={<RequireRole roles={['super_admin', 'admin', 'clerk']}><RecordsDashboardPage /></RequireRole>}
