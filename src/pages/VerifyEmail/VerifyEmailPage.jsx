@@ -48,11 +48,11 @@ export default function VerifyEmailPage() {
         setStatus('error');
         setMessage(
           error.response?.data?.message ||
-            'Verification link is invalid, expired, or the network request failed.',
+            'Verification request is invalid, expired, or the network request failed.',
         );
         toast.error(
           error.response?.data?.message ||
-            'Verification link is invalid, expired, or the network request failed.',
+            'Verification request is invalid, expired, or the network request failed.',
         );
       }
     }
@@ -68,7 +68,7 @@ export default function VerifyEmailPage() {
     const emailError = validateEmail(email);
 
     if (emailError) {
-      toast.warning('Open this page with your email address, or request a new verification email from sign in.');
+      toast.warning('Open this page with your email address, or request a new verification code from sign in.');
       return;
     }
 
@@ -77,11 +77,11 @@ export default function VerifyEmailPage() {
     try {
       // Real backend endpoint: POST /auth/resend-verification
       await authApi.resendVerification(email);
-      toast.success('Verification link sent. Please check your inbox.');
+      toast.success('Verification code sent. Please check your inbox.');
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
-          'We could not resend the verification email. Please try again later.',
+          'We could not resend the verification code. Please try again later.',
       );
     } finally {
       setIsResending(false);
@@ -123,14 +123,14 @@ export default function VerifyEmailPage() {
           </div>
 
           <h3 className="verify-email-card__title">
-            {isVerified ? 'Email Verified' : isError ? 'Verification Link Problem' : 'Verify Your Email'}
+            {isVerified ? 'Email Verified' : isError ? 'Verification Problem' : 'Verify Your Email'}
           </h3>
 
           <p className="verify-email-card__text">
-            {isLoading && 'We are confirming your verification link.'}
+            {isLoading && 'We are confirming your verification request.'}
             {isVerified && 'Your email has been verified. You can now sign in to your GAVEL account.'}
             {isError && message}
-            {!isLoading && !isVerified && !isError && 'Check your inbox for a verification link.'}
+            {!isLoading && !isVerified && !isError && 'Check your inbox for a 6-digit verification code.'}
           </p>
 
           <div className="verify-email-card__actions">
@@ -165,7 +165,7 @@ export default function VerifyEmailPage() {
                     onClick={handleResendVerification}
                     className="verify-email-card__button"
                   >
-                    Resend Verification Email
+                    Resend Verification Code
                   </Button>
                 )}
               </>
@@ -180,7 +180,7 @@ export default function VerifyEmailPage() {
                     onClick={handleResendVerification}
                     className="verify-email-card__button"
                   >
-                    Resend Verification Email
+                    Resend Verification Code
                   </Button>
                 )}
                 <Button

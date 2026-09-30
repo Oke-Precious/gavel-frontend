@@ -5,6 +5,11 @@ import { useAuth } from '../hooks/useAuth.js';
 import Skeleton from '../components/Skeleton.jsx';
 import './InternalLayout.css';
 
+function needsEmailVerification(user) {
+  const value = user?.emailVerified ?? user?.isEmailVerified ?? user?.verified;
+  return value === false;
+}
+
 /**
  * InternalLayout — wraps all authenticated internal pages.
  * Includes the collapsible Sidebar, a top header bar, and the Outlet.
@@ -28,6 +33,11 @@ export default function InternalLayout() {
   // Redirect unauthenticated users
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (needsEmailVerification(user)) {
+    const email = encodeURIComponent(user?.email || '');
+    return <Navigate to={`/otp-verification${email ? `?email=${email}` : ''}`} replace />;
   }
 
   return (

@@ -4,10 +4,24 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, Activity } from 'luci
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
+import { authApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { validateEmail } from '../../utils/validators.js';
 import './LoginPage.css';
 
+function isEmailVerificationError(error) {
+  const status = error.response?.status;
+  const message = String(error.response?.data?.message || '').toLowerCase();
+
+  return (status === 400 || status === 401 || status === 403) &&
+    message.includes('email') &&
+    (message.includes('verify') || message.includes('verification') || message.includes('unverified'));
+}
+
+function needsEmailVerification(user) {
+  const value = user?.emailVerified ?? user?.isEmailVerified ?? user?.verified;
+  return value === false;
+}
 export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -39,6 +53,12 @@ export default function LoginPage() {
     try {
       // Wire to real backend endpoint: POST /auth/login via AuthContext
       const signedInUser = await login(cleanEmail, password);
+      if (needsEmailVerification(signedInUser)) {
+        toast.info('Please verify your email before accessing your dashboard.');
+        navigate(`/otp-verification?email=${encodeURIComponent(cleanEmail)}`);
+        return;
+      }
+
       toast.success('Signed in successfully.');
       const destination = signedInUser?.role === 'super_admin'
         ? '/super-admin'
@@ -50,6 +70,17 @@ export default function LoginPage() {
 
       navigate(destination);
     } catch (err) {
+      if (isEmailVerificationError(err)) {
+        try {
+          await authApi.resendVerification(cleanEmail);
+          toast.info('Please verify your email. We sent a fresh 6-digit code.');
+        } catch {
+          toast.info('Please verify your email to continue. You can request a new code on the next page.');
+        }
+        navigate(`/otp-verification?email=${encodeURIComponent(cleanEmail)}`);
+        return;
+      }
+
       const errorMessage =
         err.response?.data?.message ||
         'Invalid email or password. Please check your credentials and try again.';

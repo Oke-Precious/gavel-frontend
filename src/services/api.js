@@ -66,6 +66,9 @@ export const authApi = {
   verifyEmail: (token) =>
     axiosClient.get(`/auth/verify-email/${encodeURIComponent(token)}`).then(unwrap),
 
+  verifyEmailCode: (email, code) =>
+    axiosClient.post('/auth/verify-email-code', { email, code }).then(unwrap),
+
   resetPassword: (token, password) =>
     axiosClient.post(`/auth/reset-password/${encodeURIComponent(token)}`, { password }).then(unwrap),
 
