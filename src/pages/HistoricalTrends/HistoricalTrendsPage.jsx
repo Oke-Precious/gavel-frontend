@@ -158,33 +158,34 @@ function errorMessage(error) {
 }
 
 function pointsFor(rows, valueKey) {
-  const maximum = Math.max(1, ...rows.map((row) => row[valueKey]));
+  if (!rows || rows.length === 0) return [];
+  const maximum = Math.max(1, ...rows.map((row) => row[valueKey] || 0));
   return rows.map((row, index) => {
     const x = rows.length === 1 ? 360 : 56 + (index / (rows.length - 1)) * 632;
-    const y = 212 - (row[valueKey] / maximum) * 164;
+    const y = 212 - ((row[valueKey] || 0) / maximum) * 164;
     return { x, y, row };
   });
 }
 
 function trendFor(rows, valueKey) {
-  if (rows.length < 6) return { direction: 'flat', label: '0% vs prior quarter' };
+  if (!rows || rows.length < 6) return { direction: 'flat', label: '0% vs prior quarter' };
 
   const current = rows.slice(-3);
   const previous = rows.slice(-6, -3);
-  const currentAverage = current.reduce((sum, row) => sum + row[valueKey], 0) / current.length;
-  const previousAverage = previous.reduce((sum, row) => sum + row[valueKey], 0) / previous.length;
+  const currentAverage = current.reduce((sum, row) => sum + (row[valueKey] || 0), 0) / current.length;
+  const previousAverage = previous.reduce((sum, row) => sum + (row[valueKey] || 0), 0) / previous.length;
 
   if (previousAverage === 0) {
-    return {
-      direction: currentAverage > 0 ? 'up' : 'flat',
-      label: currentAverage > 0 ? '+100% vs prior quarter' : '0% vs prior quarter',
-    };
+    if (currentAverage === 0) return { direction: 'flat', label: '0% vs prior quarter' };
+    return { direction: 'up', label: '+100% vs prior quarter' };
   }
 
   const percent = Math.round(((currentAverage - previousAverage) / previousAverage) * 100);
+  const direction = percent > 0 ? 'up' : percent < 0 ? 'down' : 'flat';
+  const sign = percent > 0 ? '+' : '';
   return {
-    direction: percent > 0 ? 'up' : percent < 0 ? 'down' : 'flat',
-    label: `${percent > 0 ? '+' : ''}${percent}% vs prior quarter`,
+    direction,
+    label: `${sign}${percent}% vs prior quarter`,
   };
 }
 
@@ -217,7 +218,7 @@ export default function HistoricalTrendsPage() {
       } else if (casesResult.status === 'fulfilled') {
         const cases = listFrom(casesResult.value, ['cases', 'items']);
         setSeries(reconstructedSeries(cases));
-        setSourceNote('The current API exposes status-transition trends, so these month-end values are reconstructed from real case detention and closure dates.');
+        setSourceNote('Reconstructed from real case detention and closure dates.');
       } else {
         throw trendsResult.status === 'rejected' ? trendsResult.reason : casesResult.reason;
       }
@@ -306,8 +307,9 @@ export default function HistoricalTrendsPage() {
 function LineChart({ title, rows, valueKey, valueLabel, tone, sourceNote }) {
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [rawOpen, setRawOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const points = pointsFor(rows, valueKey);
-  const maximum = Math.max(1, ...rows.map((row) => row[valueKey]));
+  const maximum = Math.max(1, ...rows.map((row) => row[valueKey] || 0));
   const polyline = points.map(({ x, y }) => `${x},${y}`).join(' ');
   const baseline = 212;
   const areaPoints = points.length
@@ -315,6 +317,7 @@ function LineChart({ title, rows, valueKey, valueLabel, tone, sourceNote }) {
     : '';
   const gradientId = `${valueKey}-area-gradient`;
   const trend = trendFor(rows, valueKey);
+  const strokeColor = tone === 'severe' ? '#F97316' : '#4F46E5';
 
   return (
     <Card padding="lg" hoverable className={`historical-chart historical-chart--${tone}`}>
@@ -323,16 +326,27 @@ function LineChart({ title, rows, valueKey, valueLabel, tone, sourceNote }) {
           <h3>{title}</h3>
           {sourceNote && (
             <span className="historical-chart__info-wrap">
-              <button type="button" className="historical-chart__info-button" aria-label={`About ${title}`}>
+              <button
+                type="button"
+                className="historical-chart__info-button"
+                aria-label={`About ${title}`}
+                onClick={() => setInfoOpen((open) => !open)}
+              >
                 <Info size={16} aria-hidden="true" />
               </button>
-              <span className="historical-chart__info-tooltip" role="tooltip">{sourceNote}</span>
+              <span className={`historical-chart__info-tooltip ${infoOpen ? 'is-visible' : ''}`} role="tooltip">
+                {sourceNote}
+              </span>
             </span>
           )}
         </div>
         <span className={`historical-chart__trend historical-chart__trend--${trend.direction}`}>
-          {trend.direction === 'down' ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronUp size={16} aria-hidden="true" />}
-          {trend.label}
+          {trend.direction === 'down' ? (
+            <ChevronDown size={14} aria-hidden="true" />
+          ) : (
+            <ChevronUp size={14} aria-hidden="true" />
+          )}
+          <span>{trend.label}</span>
         </span>
       </div>
       <div className="historical-chart__scroll" tabIndex="0" aria-label={`Scrollable chart: ${title}`}>
@@ -342,27 +356,52 @@ function LineChart({ title, rows, valueKey, valueLabel, tone, sourceNote }) {
             <desc id={`${valueKey}-chart-description`}>Monthly values for the most recent 12-month period.</desc>
             <defs>
               <linearGradient id={gradientId} x1="0" x2="0" y1="48" y2="212" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" className="historical-chart__area-stop historical-chart__area-stop--start" />
-                <stop offset="100%" className="historical-chart__area-stop historical-chart__area-stop--end" />
+                <stop offset="0%" stopColor={strokeColor} stopOpacity="0.2" />
+                <stop offset="100%" stopColor={strokeColor} stopOpacity="0.0" />
               </linearGradient>
             </defs>
-            {[48, 103, 157, 212].map((y) => <line key={y} className="historical-chart__grid-line" x1="56" y1={y} x2="688" y2={y} />)}
+            {[48, 103, 157, 212].map((y) => (
+              <line key={y} className="historical-chart__grid-line" x1="56" y1={y} x2="688" y2={y} />
+            ))}
             <text x="48" y="52" textAnchor="end">{maximum.toLocaleString()}</text>
             <text x="48" y="216" textAnchor="end">0</text>
             {areaPoints && <polygon className="historical-chart__area" points={areaPoints} fill={`url(#${gradientId})`} />}
-            <polyline className="historical-chart__line" pathLength="1" points={polyline} />
-            {points.map(({ x, y, row }, index) => (
-              <g
-                key={row.key}
-                onMouseEnter={() => setHoveredPoint({ x, y, row })}
-                onMouseLeave={() => setHoveredPoint(null)}
-                onFocus={() => setHoveredPoint({ x, y, row })}
-                onBlur={() => setHoveredPoint(null)}
-              >
-                <circle cx={x} cy={y} r="5" tabIndex="0" aria-label={`${row.label}: ${row[valueKey].toLocaleString()} ${valueLabel}`} />
-                {(index % 3 === 0 || index === points.length - 1) && <text x={x} y="244" textAnchor="middle">{row.label}</text>}
-              </g>
-            ))}
+            {polyline && (
+              <polyline
+                key={polyline}
+                className="historical-chart__line"
+                pathLength="1"
+                points={polyline}
+              />
+            )}
+            {points.map(({ x, y, row }, index) => {
+              const isHovered = hoveredPoint?.row?.key === row.key;
+              const showLabel = index % 2 === 0 || index === points.length - 1;
+              return (
+                <g
+                  key={row.key}
+                  onMouseEnter={() => setHoveredPoint({ x, y, row })}
+                  onMouseLeave={() => setHoveredPoint(null)}
+                  onFocus={() => setHoveredPoint({ x, y, row })}
+                  onBlur={() => setHoveredPoint(null)}
+                >
+                  <circle cx={x} cy={y} r="14" fill="transparent" style={{ cursor: 'pointer' }} />
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={isHovered ? 6 : 4.5}
+                    tabIndex="0"
+                    className={`historical-chart__dot ${isHovered ? 'is-active' : ''}`}
+                    aria-label={`${row.label}: ${row[valueKey].toLocaleString()} ${valueLabel}`}
+                  />
+                  {showLabel && (
+                    <text x={x} y="244" textAnchor="middle" className="historical-chart__x-label">
+                      {row.label}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
           </svg>
           {hoveredPoint && (
             <div
@@ -373,24 +412,47 @@ function LineChart({ title, rows, valueKey, valueLabel, tone, sourceNote }) {
               }}
               role="status"
             >
-              <strong>{hoveredPoint.row.label}</strong>
-              <span>{hoveredPoint.row[valueKey].toLocaleString()} {valueLabel}</span>
+              <strong className="historical-chart__tooltip-month">{hoveredPoint.row.label}</strong>
+              <span className="historical-chart__tooltip-value">
+                {hoveredPoint.row[valueKey].toLocaleString()} {valueLabel}
+              </span>
             </div>
           )}
         </div>
       </div>
-      <button type="button" className="historical-chart__raw-toggle" onClick={() => setRawOpen((open) => !open)} aria-expanded={rawOpen}>
+      <button
+        type="button"
+        className="historical-chart__raw-toggle"
+        onClick={() => setRawOpen((open) => !open)}
+        aria-expanded={rawOpen}
+        aria-controls={`${valueKey}-raw-table`}
+      >
         {rawOpen ? 'Hide raw data' : 'View raw data'}
       </button>
       {rawOpen && (
-        <div className="historical-chart__raw-table-wrap">
+        <div className="historical-chart__raw-table-wrap" id={`${valueKey}-raw-table`}>
           <table className="historical-chart__raw-table">
             <caption>{title}</caption>
-            <thead><tr><th scope="col">Month</th><th scope="col">Value</th></tr></thead>
-            <tbody>{rows.map((row) => <tr key={row.key}><th scope="row">{row.label}</th><td>{row[valueKey]} {valueLabel}</td></tr>)}</tbody>
+            <thead>
+              <tr>
+                <th scope="col">Month</th>
+                <th scope="col">Value ({valueLabel})</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.key}>
+                  <th scope="row">{row.label}</th>
+                  <td>
+                    {row[valueKey].toLocaleString()} {valueLabel}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
       )}
     </Card>
   );
 }
+
