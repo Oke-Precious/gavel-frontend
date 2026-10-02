@@ -129,6 +129,16 @@ The following frontend origins are allowed without any extra configuration:
 - `http://127.0.0.1:3000`
 - Any URL set in the `CLIENT_URL` environment variable (production)
 
+In addition, the following cloud deployment domains are allowed automatically via pattern matching — no `CLIENT_URL` change needed for preview deployments:
+
+| Platform | Pattern | Example |
+|---|---|---|
+| **Netlify** | `*.netlify.app` | `https://gavel-frontend.netlify.app` |
+| **Vercel** | `*.vercel.app` | `https://gavel-frontend.vercel.app` |
+| **Google Cloud Run** | `(any).run.app` — any subdomain depth | `https://my-app.run.app`, `https://my-app.europe-west1.run.app` |
+
+> **Cloud Run regional URLs** (e.g. `https://ais-dev-c22hodycqkah3jwljr3ndo-372757961021.europe-west1.run.app`) are fully supported — the pattern matches any number of subdomain segments before `.run.app`.
+
 > **Note:** In non-production (`NODE_ENV !== 'production'`), all origins are allowed automatically for local development convenience.
 
 ---
