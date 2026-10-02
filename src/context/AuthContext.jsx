@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { authApi } from '../services/api.js';
-import { setAccessToken, clearAccessToken } from '../services/axiosClient.js';
+import { setAccessToken, getAccessToken, clearAccessToken } from '../services/axiosClient.js';
 
 /**
  * AuthContext — manages authenticated user state and token lifecycle.
@@ -30,6 +30,19 @@ export function AuthProvider({ children }) {
 
     async function restoreSession() {
       try {
+        const existingToken = getAccessToken();
+        if (existingToken) {
+          try {
+            const me = await authApi.me();
+            if (!cancelled && (me?.user || me?._id)) {
+              setUser(me?.user ?? me);
+              return;
+            }
+          } catch {
+            // Token might be expired, proceed to refresh
+          }
+        }
+
         const data = await authApi.refreshToken();
         if (cancelled) return;
 

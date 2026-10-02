@@ -13,20 +13,50 @@
 
 import axios from 'axios';
 
-const DEFAULT_API_BASE_URL = 'https://gavel-backend-nw0p.onrender.com/api/v1';
+// In browser environments where the page origin differs from a remote backend,
+// use the relative path '/api/v1' so Vite's proxy handles requests server-to-server,
+// avoiding cross-origin browser CORS blocks.
+function computeBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const raw = import.meta.env.VITE_API_BASE_URL;
+    if (raw && raw.startsWith('http')) {
+      try {
+        const targetUrl = new URL(raw);
+        if (targetUrl.origin !== window.location.origin) {
+          return '/api/v1';
+        }
+      } catch {
+        return '/api/v1';
+      }
+    }
+  }
+  return import.meta.env.VITE_API_BASE_URL || '/api/v1';
+}
 
-export const BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
-export const API_ORIGIN = BASE_URL.replace(/\/api\/v1\/?$/, '');
+export const BASE_URL = computeBaseUrl();
+export const API_ORIGIN = BASE_URL.startsWith('http')
+  ? BASE_URL.replace(/\/api\/v1\/?$/, '')
+  : (typeof window !== 'undefined' ? window.location.origin : '');
 
 /* ------------------------------------------------------------------ */
-/* In-memory token store (never touches localStorage or sessionStorage) */
+/* Token store (in-memory + localStorage backup)                       */
 /* ------------------------------------------------------------------ */
 const tokenStore = {
-  accessToken: null,
+  accessToken: (() => {
+    try {
+      return localStorage.getItem('accessToken') || null;
+    } catch {
+      return null;
+    }
+  })(),
 };
 
 export function setAccessToken(token) {
   tokenStore.accessToken = token;
+  try {
+    if (token) localStorage.setItem('accessToken', token);
+    else localStorage.removeItem('accessToken');
+  } catch {}
 }
 
 export function getAccessToken() {
@@ -35,6 +65,9 @@ export function getAccessToken() {
 
 export function clearAccessToken() {
   tokenStore.accessToken = null;
+  try {
+    localStorage.removeItem('accessToken');
+  } catch {}
 }
 
 /* ------------------------------------------------------------------ */
