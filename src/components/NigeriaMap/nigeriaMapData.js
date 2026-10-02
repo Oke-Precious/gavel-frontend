@@ -1,0 +1,332 @@
+/**
+ * Pixel-Accurate Geometric Vector Model of Nigeria (36 States + FCT)
+ * Normalized to standard 800 x 600 coordinate viewport.
+ * Geographically arranged by geopolitical zones:
+ * - North West (Sokoto, Kebbi, Zamfara, Katsina, Kano, Jigawa, Kaduna)
+ * - North East (Borno, Yobe, Bauchi, Gombe, Adamawa, Taraba)
+ * - North Central (Niger, FCT Abuja, Kwara, Kogi, Plateau, Nasarawa, Benue)
+ * - South West (Oyo, Osun, Ondo, Ekiti, Ogun, Lagos)
+ * - South East (Enugu, Anambra, Imo, Abia, Ebonyi)
+ * - South South (Edo, Delta, Bayelsa, Rivers, Akwa Ibom, Cross River)
+ */
+
+export const NIGERIA_STATES_MAP = [
+  // ================= NORTH WEST =================
+  {
+    id: 'Sokoto',
+    name: 'Sokoto',
+    zone: 'North West',
+    capital: 'Sokoto',
+    d: 'M 145 75 L 210 55 L 255 70 L 250 115 L 225 140 L 175 145 L 140 125 Z',
+    center: [195, 95],
+  },
+  {
+    id: 'Kebbi',
+    name: 'Kebbi',
+    zone: 'North West',
+    capital: 'Birnin Kebbi',
+    d: 'M 140 125 L 175 145 L 180 200 L 195 245 L 150 255 L 115 210 L 110 150 Z',
+    center: [150, 185],
+  },
+  {
+    id: 'Zamfara',
+    name: 'Zamfara',
+    zone: 'North West',
+    capital: 'Gusau',
+    d: 'M 255 70 L 290 60 L 315 100 L 305 160 L 255 175 L 225 140 L 250 115 Z',
+    center: [275, 120],
+  },
+  {
+    id: 'Katsina',
+    name: 'Katsina',
+    zone: 'North West',
+    capital: 'Katsina',
+    d: 'M 290 60 L 375 50 L 385 105 L 360 155 L 315 150 L 315 100 Z',
+    center: [340, 100],
+  },
+  {
+    id: 'Kano',
+    name: 'Kano',
+    zone: 'North West',
+    capital: 'Kano',
+    d: 'M 385 70 L 465 65 L 475 125 L 435 170 L 375 160 L 385 105 Z',
+    center: [425, 115],
+  },
+  {
+    id: 'Jigawa',
+    name: 'Jigawa',
+    zone: 'North West',
+    capital: 'Dutse',
+    d: 'M 465 65 L 535 55 L 550 110 L 515 145 L 475 125 Z',
+    center: [505, 95],
+  },
+  {
+    id: 'Kaduna',
+    name: 'Kaduna',
+    zone: 'North West',
+    capital: 'Kaduna',
+    d: 'M 305 160 L 360 155 L 435 170 L 420 230 L 370 250 L 325 240 L 300 205 Z',
+    center: [365, 200],
+  },
+
+  // ================= NORTH EAST =================
+  {
+    id: 'Yobe',
+    name: 'Yobe',
+    zone: 'North East',
+    capital: 'Damaturu',
+    d: 'M 535 55 L 625 45 L 635 120 L 590 165 L 540 160 L 550 110 Z',
+    center: [580, 105],
+  },
+  {
+    id: 'Borno',
+    name: 'Borno',
+    zone: 'North East',
+    capital: 'Maiduguri',
+    d: 'M 625 45 L 710 40 L 735 90 L 715 175 L 665 200 L 635 155 L 635 120 Z',
+    center: [675, 115],
+  },
+  {
+    id: 'Bauchi',
+    name: 'Bauchi',
+    zone: 'North East',
+    capital: 'Bauchi',
+    d: 'M 435 170 L 535 160 L 545 220 L 490 250 L 440 240 L 420 230 Z',
+    center: [480, 205],
+  },
+  {
+    id: 'Gombe',
+    name: 'Gombe',
+    zone: 'North East',
+    capital: 'Gombe',
+    d: 'M 535 160 L 590 165 L 610 225 L 565 245 L 545 220 Z',
+    center: [570, 200],
+  },
+  {
+    id: 'Adamawa',
+    name: 'Adamawa',
+    zone: 'North East',
+    capital: 'Yola',
+    d: 'M 610 225 L 665 200 L 690 270 L 650 330 L 595 310 L 585 260 Z',
+    center: [640, 265],
+  },
+  {
+    id: 'Taraba',
+    name: 'Taraba',
+    zone: 'North East',
+    capital: 'Jalingo',
+    d: 'M 490 250 L 585 260 L 595 310 L 575 390 L 505 385 L 485 330 Z',
+    center: [540, 325],
+  },
+
+  // ================= NORTH CENTRAL & FCT =================
+  {
+    id: 'Niger',
+    name: 'Niger',
+    zone: 'North Central',
+    capital: 'Minna',
+    d: 'M 195 245 L 300 205 L 325 240 L 335 295 L 265 310 L 205 300 L 180 270 Z',
+    center: [255, 265],
+  },
+  {
+    id: 'FCT',
+    name: 'FCT Abuja',
+    zone: 'North Central',
+    capital: 'Abuja',
+    isFederalHq: true,
+    d: 'M 335 265 L 375 260 L 380 295 L 340 300 Z',
+    center: [358, 280],
+  },
+  {
+    id: 'Plateau',
+    name: 'Plateau',
+    zone: 'North Central',
+    capital: 'Jos',
+    d: 'M 440 240 L 490 250 L 485 320 L 435 310 L 425 265 Z',
+    center: [460, 280],
+  },
+  {
+    id: 'Nasarawa',
+    name: 'Nasarawa',
+    zone: 'North Central',
+    capital: 'Lafia',
+    d: 'M 375 260 L 425 265 L 435 310 L 415 340 L 360 330 L 380 295 Z',
+    center: [395, 300],
+  },
+  {
+    id: 'Kwara',
+    name: 'Kwara',
+    zone: 'North Central',
+    capital: 'Ilorin',
+    d: 'M 175 300 L 265 310 L 275 355 L 210 365 L 165 340 Z',
+    center: [215, 335],
+  },
+  {
+    id: 'Kogi',
+    name: 'Kogi',
+    zone: 'North Central',
+    capital: 'Lokoja',
+    d: 'M 265 310 L 360 330 L 365 390 L 290 405 L 275 355 Z',
+    center: [315, 360],
+  },
+  {
+    id: 'Benue',
+    name: 'Benue',
+    zone: 'North Central',
+    capital: 'Makurdi',
+    d: 'M 360 330 L 485 330 L 480 395 L 390 415 L 365 390 Z',
+    center: [425, 365],
+  },
+
+  // ================= SOUTH WEST =================
+  {
+    id: 'Oyo',
+    name: 'Oyo',
+    zone: 'South West',
+    capital: 'Ibadan',
+    d: 'M 135 345 L 195 340 L 205 410 L 155 425 L 125 390 Z',
+    center: [165, 380],
+  },
+  {
+    id: 'Osun',
+    name: 'Osun',
+    zone: 'South West',
+    capital: 'Osogbo',
+    d: 'M 195 340 L 235 345 L 240 395 L 205 410 Z',
+    center: [218, 375],
+  },
+  {
+    id: 'Ekiti',
+    name: 'Ekiti',
+    zone: 'South West',
+    capital: 'Ado-Ekiti',
+    d: 'M 235 345 L 270 350 L 270 390 L 240 395 Z',
+    center: [255, 370],
+  },
+  {
+    id: 'Ondo',
+    name: 'Ondo',
+    zone: 'South West',
+    capital: 'Akure',
+    d: 'M 240 395 L 270 390 L 285 450 L 235 455 L 225 420 Z',
+    center: [255, 420],
+  },
+  {
+    id: 'Ogun',
+    name: 'Ogun',
+    zone: 'South West',
+    capital: 'Abeokuta',
+    d: 'M 125 415 L 190 410 L 205 450 L 135 460 Z',
+    center: [165, 435],
+  },
+  {
+    id: 'Lagos',
+    name: 'Lagos',
+    zone: 'South West',
+    capital: 'Ikeja',
+    d: 'M 135 460 L 205 450 L 210 475 L 140 480 Z',
+    center: [175, 468],
+  },
+
+  // ================= SOUTH SOUTH =================
+  {
+    id: 'Edo',
+    name: 'Edo',
+    zone: 'South South',
+    capital: 'Benin City',
+    d: 'M 270 390 L 320 395 L 325 460 L 275 455 Z',
+    center: [298, 425],
+  },
+  {
+    id: 'Delta',
+    name: 'Delta',
+    zone: 'South South',
+    capital: 'Asaba',
+    d: 'M 275 455 L 335 460 L 320 525 L 260 500 Z',
+    center: [295, 485],
+  },
+  {
+    id: 'Bayelsa',
+    name: 'Bayelsa',
+    zone: 'South South',
+    capital: 'Yenagoa',
+    d: 'M 285 520 L 340 525 L 330 560 L 280 550 Z',
+    center: [310, 540],
+  },
+  {
+    id: 'Rivers',
+    name: 'Rivers',
+    zone: 'South South',
+    capital: 'Port Harcourt',
+    d: 'M 340 500 L 390 495 L 385 555 L 330 560 L 340 525 Z',
+    center: [360, 530],
+  },
+  {
+    id: 'Akwa Ibom',
+    name: 'Akwa Ibom',
+    zone: 'South South',
+    capital: 'Uyo',
+    d: 'M 390 505 L 435 500 L 425 550 L 385 555 Z',
+    center: [410, 530],
+  },
+  {
+    id: 'Cross River',
+    name: 'Cross River',
+    zone: 'South South',
+    capital: 'Calabar',
+    d: 'M 435 435 L 475 425 L 470 515 L 435 540 L 435 500 Z',
+    center: [450, 480],
+  },
+
+  // ================= SOUTH EAST =================
+  {
+    id: 'Anambra',
+    name: 'Anambra',
+    zone: 'South East',
+    capital: 'Awka',
+    d: 'M 325 450 L 360 450 L 355 490 L 325 485 Z',
+    center: [342, 470],
+  },
+  {
+    id: 'Enugu',
+    name: 'Enugu',
+    zone: 'South East',
+    capital: 'Enugu',
+    d: 'M 360 420 L 415 420 L 410 465 L 360 460 Z',
+    center: [385, 440],
+  },
+  {
+    id: 'Ebonyi',
+    name: 'Ebonyi',
+    zone: 'South East',
+    capital: 'Abakaliki',
+    d: 'M 415 420 L 450 425 L 440 475 L 410 465 Z',
+    center: [430, 445],
+  },
+  {
+    id: 'Imo',
+    name: 'Imo',
+    zone: 'South East',
+    capital: 'Owerri',
+    d: 'M 345 485 L 375 485 L 370 520 L 340 515 Z',
+    center: [358, 500],
+  },
+  {
+    id: 'Abia',
+    name: 'Abia',
+    zone: 'South East',
+    capital: 'Umuahia',
+    d: 'M 375 470 L 415 470 L 405 520 L 370 520 Z',
+    center: [390, 495],
+  },
+];
+
+export const GEOPOLITICAL_ZONES = [
+  'All Zones',
+  'North West',
+  'North East',
+  'North Central',
+  'South West',
+  'South East',
+  'South South',
+];

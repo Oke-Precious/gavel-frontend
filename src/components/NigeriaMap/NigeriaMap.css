@@ -1,0 +1,244 @@
+/* ==========================================================================
+   Nigeria Sovereign Vector Map — Futuristic Cyber-GIS Styling
+   ========================================================================== */
+
+.nigeria-cyber-map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  border-radius: 12px;
+  cursor: grab;
+}
+
+.nigeria-cyber-map-container:active {
+  cursor: grabbing;
+}
+
+.nigeria-cyber-map-container.theme-dark {
+  background: radial-gradient(circle at 50% 50%, #090E17 0%, #030712 100%);
+}
+
+.nigeria-cyber-map-container.theme-light {
+  background: #F8FAFC;
+}
+
+.nigeria-cyber-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 600px;
+  display: block;
+}
+
+/* Floating Tactical Navigation Controls */
+.map-hud-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 8px;
+  color: #94A3B8;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.15s ease;
+}
+
+.hud-ctrl-btn:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38BDF8;
+  color: #38BDF8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.hud-ctrl-btn.reset {
+  color: #64748B;
+}
+
+/* State Vector Paths */
+.state-polygon-path {
+  cursor: pointer;
+  transition: fill 0.2s ease, stroke 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+}
+
+.state-polygon-path:hover,
+.state-polygon-path.is-hovered {
+  stroke: #FFFFFF !important;
+  stroke-width: 2.2px !important;
+  opacity: 1 !important;
+}
+
+.state-polygon-path.is-selected {
+  stroke: #38BDF8 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 14px #38BDF8);
+  opacity: 1 !important;
+}
+
+.state-polygon-path:focus-visible {
+  outline: none;
+  stroke: #38BDF8;
+  stroke-width: 3px;
+}
+
+/* Neural Circuit Track Lines */
+.circuit-track {
+  stroke: rgba(56, 189, 248, 0.12);
+  stroke-width: 0.8;
+  stroke-dasharray: 2 4;
+}
+
+.circuit-track.is-active {
+  stroke: rgba(56, 189, 248, 0.45);
+  stroke-width: 1.2;
+  animation: circuit-flow 2.5s infinite linear;
+}
+
+@keyframes circuit-flow {
+  from { stroke-dashoffset: 20; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Centroid Markers & Labels */
+.state-centroid-marker {
+  transition: transform 0.2s ease;
+}
+
+.state-centroid-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 8.5px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: #64748B;
+  letter-spacing: -0.01em;
+  transition: fill 0.15s ease;
+}
+
+.theme-dark .state-centroid-label {
+  fill: #94A3B8;
+}
+
+.state-centroid-label.is-selected {
+  fill: #FFFFFF;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+/* Pulsing Radar Hotspot Ring */
+.hotspot-pulse-ring {
+  animation: hotspot-pulse-anim 2s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
+  transform-origin: 0 0;
+}
+
+@keyframes hotspot-pulse-anim {
+  0% { r: 5; opacity: 1; }
+  100% { r: 22; opacity: 0; }
+}
+
+/* Floating Hologram Tooltip */
+.map-hologram-tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+  background: rgba(11, 17, 32, 0.95);
+  border: 1px solid #38BDF8;
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(56, 189, 248, 0.25);
+  backdrop-filter: blur(10px);
+  min-width: 160px;
+  transform: translateY(-50%);
+  animation: tooltip-scale 0.15s ease-out;
+}
+
+@keyframes tooltip-scale {
+  from { opacity: 0; transform: translateY(-40%) scale(0.95); }
+  to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+.hologram-tooltip-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #38BDF8;
+}
+
+.hq-tag {
+  background: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.hologram-tooltip-title {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.hologram-tooltip-divider {
+  height: 1px;
+  background: rgba(56, 189, 248, 0.2);
+  margin: 6px 0;
+}
+
+.hologram-tooltip-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+}
+
+.tooltip-metric-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.metric-label {
+  color: #94A3B8;
+}
+
+.metric-value {
+  font-weight: 600;
+  color: #F8FAFC;
+}
+
+.metric-value.highlight {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: #38BDF8;
+  font-weight: 700;
+}
+
+/* Compact Widget Mode */
+.nigeria-cyber-map-container.is-compact {
+  min-height: 280px;
+}
+
+.nigeria-cyber-map-container.is-compact .nigeria-cyber-svg {
+  max-height: 280px;
+}

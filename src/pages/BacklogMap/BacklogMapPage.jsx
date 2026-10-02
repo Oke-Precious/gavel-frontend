@@ -1,223 +1,157 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Activity,
   AlertTriangle,
-  FileText,
+  Building2,
+  ExternalLink,
+  Filter,
   Layers,
-  Maximize2,
-  Minimize2,
-  Radio,
   Search,
-  ShieldAlert,
-  Volume2,
-  VolumeX,
+  Shield,
   Zap,
 } from 'lucide-react';
-import TacticalLeafletMap from './TacticalLeafletMap.jsx';
-import HolographicRadarMap from './HolographicRadarMap.jsx';
-import SpatialDensityMatrix from './SpatialDensityMatrix.jsx';
-import { NIGERIA_STATES_GEO, MAP_MODES, SEVERITY_TIERS, JUDICIAL_REGIONS } from './nigeriaGeoData.js';
-import { cyberAudio } from './cyberAudio.js';
+import NigeriaMap from '../../components/NigeriaMap/NigeriaMap.jsx';
+import { NIGERIA_REAL_GEO_STATES } from '../../components/NigeriaMap/nigeriaRealGeoPaths.js';
+import { GEOPOLITICAL_ZONES } from '../../components/NigeriaMap/nigeriaMapData.js';
 import { publicApi } from '../../services/api.js';
+import Skeleton from '../../components/Skeleton.jsx';
 import './BacklogMapPage.css';
 
 export default function BacklogMapPage() {
-  const [mapEngine, setMapEngine] = useState('leaflet'); // 'leaflet' | 'radar' | 'matrix'
   const [selectedState, setSelectedState] = useState('Lagos');
-  const [hoveredState, setHoveredState] = useState(null);
-  const [regionFilter, setRegionFilter] = useState('all');
+  const [mapMode, setMapMode] = useState('backlog'); // 'backlog' | 'stalled' | 'hubs'
+  const [zoneFilter, setZoneFilter] = useState('All Zones');
   const [searchQuery, setSearchQuery] = useState('');
   const [mapData, setMapData] = useState({});
   const [loading, setLoading] = useState(true);
-  const [audioMuted, setAudioMuted] = useState(true);
-  const [isScannerRunning, setIsScannerRunning] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const scannerTimerRef = useRef(null);
-  const pageContainerRef = useRef(null);
-
-  // Play procedural audio helpers
-  const playBlip = (freq) => {
-    if (!audioMuted) cyberAudio.blip(freq);
-  };
-  const playLockOn = () => {
-    if (!audioMuted) cyberAudio.lockOn();
-  };
-  const playRadarPing = () => {
-    if (!audioMuted) cyberAudio.radarPing();
-  };
-
-  // Fetch real backlog data from the GAVEL backend
+  // Fetch live backlog statistics from GAVEL Render backend
   useEffect(() => {
     let cancelled = false;
 
-    async function loadBacklogData() {
+    async function loadData() {
       setLoading(true);
       try {
         const res = await publicApi.backlogMap();
         if (cancelled) return;
 
         const list = Array.isArray(res) ? res : (res?.backlog ?? []);
-
-        // Aggregate by state
         const aggregated = {};
 
-        // Seed with all states so every state has a valid baseline record
-        NIGERIA_STATES_GEO.forEach((s) => {
+        // Seed all 37 federal divisions
+        NIGERIA_REAL_GEO_STATES.forEach((s) => {
           aggregated[s.id] = {
             id: s.id,
             name: s.name,
             capital: s.capital,
-            region: s.region,
+            zone: s.zone,
             totalCases: 0,
             activeCases: 0,
             stalledCases: 0,
             courts: [],
-            congestionIndex: s.congestionIndex,
-            estimatedDetainees: s.estimatedDetainees,
             alertLevel: 'compliant',
           };
         });
 
-        // Map backend court records to states
+        // Map backend court records to state jurisdictions
         list.forEach((item) => {
           const courtName = String(item.court ?? '').trim();
           const courtLower = courtName.toLowerCase();
 
-          // Match court to state
           let targetState = null;
           if (courtLower.includes('ikeja') || courtLower.includes('lagos')) {
             targetState = 'Lagos';
           } else if (courtLower.includes('abuja') || courtLower.includes('fct') || courtLower.includes('maitama')) {
             targetState = 'FCT';
           } else {
-            const matched = NIGERIA_STATES_GEO.find(
+            const matched = NIGERIA_REAL_GEO_STATES.find(
               (s) => courtLower.includes(s.id.toLowerCase()) || courtLower.includes(s.capital.toLowerCase())
             );
             if (matched) targetState = matched.id;
           }
 
-          if (!targetState) targetState = 'Lagos'; // Fallback to Lagos hub for unassigned judicial records
+          if (!targetState) targetState = 'Lagos';
 
-          const stateRecord = aggregated[targetState];
+          const record = aggregated[targetState];
           const active = Number(item.activeCount ?? item.activeCases ?? 0);
           const stalled = Number(item.stalledCount ?? item.stalledCases ?? 0);
           const total = Number(item.totalBacklog ?? (active + stalled));
 
-          stateRecord.totalCases += total;
-          stateRecord.activeCases += active;
-          stateRecord.stalledCases += stalled;
-          stateRecord.courts.push({
-            court: courtName,
+          record.totalCases += total;
+          record.activeCases += active;
+          record.stalledCases += stalled;
+          record.courts.push({
+            name: courtName,
             active,
             stalled,
             total,
           });
 
-          // Compute alert severity tier
-          if (stateRecord.totalCases > 5 || stateRecord.stalledCases > 2) {
-            stateRecord.alertLevel = 'critical';
-          } else if (stateRecord.totalCases > 2) {
-            stateRecord.alertLevel = 'severe';
-          } else if (stateRecord.totalCases > 0) {
-            stateRecord.alertLevel = 'warning';
+          if (record.totalCases > 5 || record.stalledCases > 2) {
+            record.alertLevel = 'critical';
+          } else if (record.totalCases > 2) {
+            record.alertLevel = 'severe';
+          } else if (record.totalCases > 0) {
+            record.alertLevel = 'warning';
           } else {
-            stateRecord.alertLevel = 'compliant';
+            record.alertLevel = 'compliant';
           }
         });
 
         setMapData(aggregated);
       } catch {
-        // Fallback to baseline if backend API returns error
+        // Fallback to seeded baseline
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
-    loadBacklogData();
+    loadData();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // Automated Scanner Patrol Mode
-  useEffect(() => {
-    if (!isScannerRunning) {
-      if (scannerTimerRef.current) clearInterval(scannerTimerRef.current);
-      return;
-    }
+  // Compute National KPIs
+  const totalNationalBacklog = Object.values(mapData).reduce((sum, s) => sum + (s.totalCases || 0), 0);
+  const totalActiveTrials = Object.values(mapData).reduce((sum, s) => sum + (s.activeCases || 0), 0);
+  const totalStalledRemand = Object.values(mapData).reduce((sum, s) => sum + (s.stalledCases || 0), 0);
 
-    const stateIds = NIGERIA_STATES_GEO.map((s) => s.id);
-    let index = stateIds.indexOf(selectedState);
-    if (index === -1) index = 0;
-
-    scannerTimerRef.current = setInterval(() => {
-      index = (index + 1) % stateIds.length;
-      const nextId = stateIds[index];
-      setSelectedState(nextId);
-      if (!audioMuted) cyberAudio.blip(1000 + (index % 5) * 150, 0.03);
-    }, 3200);
-
-    return () => {
-      if (scannerTimerRef.current) clearInterval(scannerTimerRef.current);
-    };
-  }, [isScannerRunning, selectedState, audioMuted]);
-
-  // Aggregate National Metrics
-  const nationalTotals = Object.values(mapData).reduce(
-    (acc, curr) => ({
-      total: acc.total + (curr.totalCases || 0),
-      active: acc.active + (curr.activeCases || 0),
-      stalled: acc.stalled + (curr.stalledCases || 0),
-      detainees: acc.detainees + (curr.estimatedDetainees || 0),
-    }),
-    { total: 0, active: 0, stalled: 0, detainees: 0 }
-  );
-
+  // Active selected state metadata
   const selectedStateData = mapData[selectedState] || {
     id: selectedState,
     name: selectedState,
+    capital: '—',
+    zone: '—',
     totalCases: 0,
     activeCases: 0,
     stalledCases: 0,
-    estimatedDetainees: 0,
-    congestionIndex: 50,
     courts: [],
     alertLevel: 'compliant',
   };
 
-  const selectedGeo = NIGERIA_STATES_GEO.find((s) => s.id === selectedState) || NIGERIA_STATES_GEO[0];
+  const selectedMeta = NIGERIA_REAL_GEO_STATES.find((s) => s.id === selectedState) || NIGERIA_REAL_GEO_STATES[0];
 
-  // Filtered States list for selector
-  const filteredStates = NIGERIA_STATES_GEO.filter((s) => {
-    const matchesRegion = regionFilter === 'all' || s.region === regionFilter;
-    const matchesSearch =
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.capital.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesRegion && matchesSearch;
+  // Filtered States List for search
+  const filteredStates = NIGERIA_REAL_GEO_STATES.filter((s) => {
+    const matchesZone = zoneFilter === 'All Zones' || s.zone === zoneFilter;
+    const matchesQuery = s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         s.capital.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesZone && matchesQuery;
   });
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      pageContainerRef.current?.requestFullscreen?.().catch(() => {});
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen?.().catch(() => {});
-      setIsFullscreen(false);
-    }
-  };
 
   if (loading) {
     return (
-      <div className="cyber-backlog-page">
-        <div className="cyber-hud-container">
-          <div className="cyber-loader-panel">
-            <div className="cyber-loader-radar-ring"></div>
-            <p className="cyber-loader-text">INITIALIZING TACTICAL GEOSPATIAL ENGINE...</p>
-            <div className="cyber-loader-bar">
-              <div className="cyber-loader-fill"></div>
-            </div>
+      <div className="futuristic-backlog-page">
+        <div className="futuristic-container">
+          <div className="futuristic-skeleton-header">
+            <Skeleton variant="text" width="320px" height="36px" />
+            <Skeleton variant="text" width="480px" height="20px" />
+          </div>
+          <div className="futuristic-grid">
+            <Skeleton variant="card" height={560} />
+            <Skeleton variant="card" height={560} />
           </div>
         </div>
       </div>
@@ -225,262 +159,206 @@ export default function BacklogMapPage() {
   }
 
   return (
-    <div ref={pageContainerRef} className={`cyber-backlog-page ${isFullscreen ? 'is-fullscreen' : ''}`}>
-      <div className="cyber-hud-container">
-        {/* =================================================================== */}
-        {/* Top Mission Control Header                                         */}
-        {/* =================================================================== */}
-        <header className="cyber-mission-header">
-          <div className="cyber-header-left">
-            <div className="cyber-branding-badge">
-              <span className="cyber-blinking-node"></span>
-              <span className="cyber-brand-text">GAVEL TACTICAL CARTOGRAPHY // VER 3.4</span>
+    <div className="futuristic-backlog-page">
+      <div className="futuristic-container">
+        {/* ================================================================= */}
+        {/* Futuristic Mission Control Header                                 */}
+        {/* ================================================================= */}
+        <header className="futuristic-header">
+          <div className="header-brand-block">
+            <div className="futuristic-badge">
+              <span className="badge-pulse-dot" />
+              <span className="badge-text">GAVEL SPATIAL INTELLIGENCE · SOVEREIGN VECTOR SYSTEM</span>
             </div>
-            <h1 className="cyber-page-title">National Judicial Backlog Monitor</h1>
-            <p className="cyber-page-subtitle">
-              Multi-engine spatial surveillance of awaiting-trial detainees, court dockets, and detention congestion across Nigeria's 36 States + FCT.
+            <h1 className="header-title">National Judicial Backlog Monitor</h1>
+            <p className="header-subtitle">
+              Interactive territorial analytics of criminal docket congestion and remand detention across all 36 States and the Federal Capital Territory.
             </p>
           </div>
 
-          {/* Quick HUD Controls */}
-          <div className="cyber-header-actions">
-            {/* Audio Toggle */}
-            <button
-              type="button"
-              className={`cyber-icon-btn ${audioMuted ? 'is-muted' : 'is-active'}`}
-              onClick={() => {
-                const next = !audioMuted;
-                setAudioMuted(next);
-                if (!next) cyberAudio.lockOn();
-              }}
-              title={audioMuted ? 'Enable Tactical Audio Telemetry' : 'Mute Audio Telemetry'}
-            >
-              {audioMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              <span className="cyber-btn-label">{audioMuted ? 'AUDIO OFF' : 'AUDIO ON'}</span>
-            </button>
+          {/* 3 Executive High-Impact KPI Tiles */}
+          <div className="header-kpi-strip">
+            <div className="kpi-tile">
+              <div className="kpi-icon-wrap cyan">
+                <Activity size={18} />
+              </div>
+              <div className="kpi-content">
+                <span className="kpi-label">TOTAL VERIFIED BACKLOG</span>
+                <span className="kpi-value cyan">{totalNationalBacklog}</span>
+                <span className="kpi-meta">Logged Registry Dockets</span>
+              </div>
+            </div>
 
-            {/* Scanner Patrol Toggle */}
-            <button
-              type="button"
-              className={`cyber-icon-btn ${isScannerRunning ? 'is-scanning' : ''}`}
-              onClick={() => {
-                const next = !isScannerRunning;
-                setIsScannerRunning(next);
-                playRadarPing();
-              }}
-              title="Automated Orbital Scanner Patrol"
-            >
-              <Radio size={18} className={isScannerRunning ? 'spin-icon' : ''} />
-              <span className="cyber-btn-label">{isScannerRunning ? 'SCANNING...' : 'AUTO PATROL'}</span>
-            </button>
+            <div className="kpi-tile">
+              <div className="kpi-icon-wrap emerald">
+                <Zap size={18} />
+              </div>
+              <div className="kpi-content">
+                <span className="kpi-label">IN-TRIAL HEARINGS</span>
+                <span className="kpi-value emerald">{totalActiveTrials}</span>
+                <span className="kpi-meta">Active Court Proceedings</span>
+              </div>
+            </div>
 
-            {/* Fullscreen Toggle */}
-            <button
-              type="button"
-              className="cyber-icon-btn"
-              onClick={toggleFullscreen}
-              title="Toggle Fullscreen Cartography"
-            >
-              {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-            </button>
+            <div className="kpi-tile">
+              <div className="kpi-icon-wrap crimson">
+                <AlertTriangle size={18} />
+              </div>
+              <div className="kpi-content">
+                <span className="kpi-label">STALLED REMAND DETENTIONS</span>
+                <span className="kpi-value crimson">{totalStalledRemand}</span>
+                <span className="kpi-meta">Pre-trial Delay Bottlenecks</span>
+              </div>
+            </div>
           </div>
         </header>
 
-        {/* =================================================================== */}
-        {/* National Metric Ticker HUD                                          */}
-        {/* =================================================================== */}
-        <div className="cyber-ticker-row">
-          <div className="cyber-ticker-card">
-            <div className="ticker-label">
-              <FileText size={14} className="ticker-icon cyan" />
-              <span>TOTAL LOGGED BACKLOG</span>
-            </div>
-            <div className="ticker-val cyan">{nationalTotals.total} <span className="ticker-sub">CASES</span></div>
-            <div className="ticker-meta">Verified across registry syncs</div>
+        {/* ================================================================= */}
+        {/* Interactive Mode & Zone Navigation Bar                            */}
+        {/* ================================================================= */}
+        <div className="futuristic-toolbar">
+          {/* Spatial Mode Selector */}
+          <div className="mode-segmented-control">
+            <span className="toolbar-section-label">
+              <Layers size={14} />
+              <span>Layer:</span>
+            </span>
+            <button
+              type="button"
+              className={`mode-btn ${mapMode === 'backlog' ? 'active' : ''}`}
+              onClick={() => setMapMode('backlog')}
+            >
+              Backlog Heat
+            </button>
+            <button
+              type="button"
+              className={`mode-btn ${mapMode === 'stalled' ? 'active' : ''}`}
+              onClick={() => setMapMode('stalled')}
+            >
+              Stalled Detentions
+            </button>
+            <button
+              type="button"
+              className={`mode-btn ${mapMode === 'hubs' ? 'active' : ''}`}
+              onClick={() => setMapMode('hubs')}
+            >
+              Judicial Seats
+            </button>
           </div>
 
-          <div className="cyber-ticker-card">
-            <div className="ticker-label">
-              <Activity size={14} className="ticker-icon emerald" />
-              <span>ACTIVE TRIAL PROCEEDINGS</span>
-            </div>
-            <div className="ticker-val emerald">{nationalTotals.active} <span className="ticker-sub">IN MOTION</span></div>
-            <div className="ticker-meta">Cases currently assigned to courts</div>
-          </div>
-
-          <div className="cyber-ticker-card">
-            <div className="ticker-label">
-              <AlertTriangle size={14} className="ticker-icon amber" />
-              <span>STALLED INDEFINITE DETENTIONS</span>
-            </div>
-            <div className="ticker-val amber">{nationalTotals.stalled} <span className="ticker-sub">BLOCKED</span></div>
-            <div className="ticker-meta">Requires urgent pro-bono intervention</div>
-          </div>
-
-          <div className="cyber-ticker-card">
-            <div className="ticker-label">
-              <ShieldAlert size={14} className="ticker-icon purple" />
-              <span>EST. AWAITING-TRIAL DETAINEES</span>
-            </div>
-            <div className="ticker-val purple">~{nationalTotals.detainees.toLocaleString()}</div>
-            <div className="ticker-meta">National correctional capacity strain</div>
-          </div>
-        </div>
-
-        {/* =================================================================== */}
-        {/* Tool Exploration Switcher: 3 Different Cartography Engines          */}
-        {/* =================================================================== */}
-        <div className="cyber-engine-switcher-bar">
-          <div className="switcher-lead">
-            <Layers size={16} className="switcher-icon" />
-            <span className="switcher-title">GEOSPATIAL ENGINE:</span>
-          </div>
-
-          <div className="switcher-tabs">
-            {MAP_MODES.map((mode) => (
-              <button
-                key={mode.id}
-                type="button"
-                className={`switcher-tab ${mapEngine === mode.id ? 'is-active' : ''}`}
-                onClick={() => {
-                  setMapEngine(mode.id);
-                  playBlip(1100);
-                }}
-              >
-                <span className="switcher-tab-bullet"></span>
-                <span className="switcher-tab-name">{mode.label}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="switcher-desc">
-            {MAP_MODES.find((m) => m.id === mapEngine)?.desc}
-          </div>
-        </div>
-
-        {/* =================================================================== */}
-        {/* Main Cartography Workspace (Grid: Map Viewport + Tactical Drawer)   */}
-        {/* =================================================================== */}
-        <div className="cyber-workspace-grid">
-          {/* Left: Map Viewport */}
-          <div className="cyber-map-viewport-panel">
-            {/* Viewport Header Toolbar */}
-            <div className="viewport-hud-header">
-              <div className="viewport-target-readout">
-                <span className="hud-accent-crosshair">⌖</span>
-                <span className="hud-target-label">FOCUS HUB:</span>
-                <span className="hud-target-val">{selectedState}</span>
-                <span className="hud-target-coords">
-                  [{selectedGeo.coords[0].toFixed(2)}°N, {selectedGeo.coords[1].toFixed(2)}°E]
-                </span>
-              </div>
-
-              {/* Regional Filter Pill Tabs */}
-              <div className="viewport-region-filters">
-                {JUDICIAL_REGIONS.map((r) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    className={`region-filter-tab ${regionFilter === r.id ? 'active' : ''}`}
-                    onClick={() => {
-                      setRegionFilter(r.id);
-                      playBlip(950);
-                    }}
-                  >
-                    {r.name.replace(' Division', '').replace(' Circuit', '')}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Map Canvas / Component based on selected tool */}
-            <div className="viewport-canvas-wrapper">
-              {mapEngine === 'leaflet' && (
-                <TacticalLeafletMap
-                  mapData={mapData}
-                  selectedState={selectedState}
-                  onSelectState={setSelectedState}
-                  onHoverState={setHoveredState}
-                  audioMuted={audioMuted}
-                  playBlip={playBlip}
-                  playLockOn={playLockOn}
-                />
-              )}
-
-              {mapEngine === 'radar' && (
-                <HolographicRadarMap
-                  mapData={mapData}
-                  selectedState={selectedState}
-                  hoveredState={hoveredState}
-                  onSelectState={setSelectedState}
-                  onHoverState={setHoveredState}
-                  audioMuted={audioMuted}
-                  playBlip={playBlip}
-                  playLockOn={playLockOn}
-                />
-              )}
-
-              {mapEngine === 'matrix' && (
-                <SpatialDensityMatrix
-                  mapData={mapData}
-                  selectedState={selectedState}
-                  onSelectState={setSelectedState}
-                  audioMuted={audioMuted}
-                  playBlip={playBlip}
-                  playLockOn={playLockOn}
-                />
-              )}
-            </div>
-
-            {/* Severity Legend Bar */}
-            <div className="viewport-legend-bar">
-              <span className="legend-head">Backlog Density:</span>
-              {Object.entries(SEVERITY_TIERS).map(([key, tier]) => (
-                <div key={key} className="legend-chip">
-                  <span className="legend-dot" style={{ backgroundColor: tier.color, boxShadow: `0 0 8px ${tier.color}` }} />
-                  <span className="legend-name">{tier.label}</span>
-                  <span className="legend-range">({tier.range})</span>
-                </div>
+          {/* Geopolitical Zone Filter Tabs */}
+          <div className="zone-filter-bar">
+            <span className="toolbar-section-label">
+              <Filter size={14} />
+              <span>Zone:</span>
+            </span>
+            <div className="zone-scroll-wrap">
+              {GEOPOLITICAL_ZONES.map((zone) => (
+                <button
+                  key={zone}
+                  type="button"
+                  className={`zone-pill-btn ${zoneFilter === zone ? 'active' : ''}`}
+                  onClick={() => setZoneFilter(zone)}
+                >
+                  {zone}
+                </button>
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Right: Tactical Judicial Drawer */}
-          <aside className="cyber-tactical-drawer">
-            {/* Drawer Header */}
-            <div className="drawer-header">
-              <div className="drawer-badge-row">
-                <span className="drawer-tag">
-                  {selectedGeo.isFederalHq ? 'SUPREME COURT / FEDERAL HQ' : selectedGeo.region.toUpperCase()}
-                </span>
-                <span className={`drawer-alert-pill ${selectedStateData.alertLevel}`}>
-                  {selectedStateData.alertLevel.toUpperCase()}
+        {/* ================================================================= */}
+        {/* 2-Column Responsive Matrix: Sovereign Vector Map + Dossier Panel  */}
+        {/* ================================================================= */}
+        <div className="futuristic-grid">
+          {/* Left Column: Pixel-Accurate Sovereign Vector Map Card */}
+          <section className="futuristic-map-card">
+            <div className="map-card-header">
+              <div className="map-header-status">
+                <span className="map-reticle-indicator">⌖</span>
+                <span className="map-current-target">
+                  INSPECTING: <strong className="target-name">{selectedMeta.name}</strong>
+                  <span className="target-zone">[{selectedMeta.zone.toUpperCase()}]</span>
                 </span>
               </div>
-              <h2 className="drawer-state-name">{selectedGeo.name}</h2>
-              <div className="drawer-coords-meta">
-                <span>Capital: {selectedGeo.capital}</span>
-                <span>·</span>
-                <span>Lat: {selectedGeo.coords[0]}°N</span>
-                <span>·</span>
-                <span>Lng: {selectedGeo.coords[1]}°E</span>
+              <span className="map-instruction">
+                Click any territory or drag/scroll to pan &amp; zoom
+              </span>
+            </div>
+
+            {/* Pixel-Accurate Sovereign Map Component */}
+            <div className="map-viewport-wrapper">
+              <NigeriaMap
+                data={mapData}
+                selectedState={selectedState}
+                onSelectState={(id) => setSelectedState(id)}
+                mode={mapMode}
+                theme="dark"
+                showLabels={true}
+                showBeacons={true}
+                showCircuits={true}
+                allowZoom={true}
+              />
+            </div>
+
+            {/* Futuristic Severity Legend Bar */}
+            <div className="map-footer-legend">
+              <span className="legend-head">Strain Gradient:</span>
+              <div className="legend-items">
+                <div className="legend-item">
+                  <span className="legend-node-dot compliant" />
+                  <span>Compliant (&lt; 2)</span>
+                </div>
+                <div className="legend-item">
+                  <span className="legend-node-dot active-blue" />
+                  <span>Active Trial Motion</span>
+                </div>
+                <div className="legend-item">
+                  <span className="legend-node-dot warning-amber" />
+                  <span>Moderate Strain (2–3)</span>
+                </div>
+                <div className="legend-item">
+                  <span className="legend-node-dot critical-red" />
+                  <span>Critical Bottleneck (&gt; 3)</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Right Column: State Judicial Dossier Glass Panel */}
+          <aside className="futuristic-dossier-card">
+            {/* Dossier Header */}
+            <div className="dossier-header-block">
+              <div className="dossier-badge-row">
+                <span className="dossier-zone-tag">{selectedMeta.zone}</span>
+                <span className={`dossier-alert-tag ${selectedStateData.alertLevel}`}>
+                  {selectedStateData.alertLevel === 'critical' ? 'CRITICAL DELAY' :
+                   selectedStateData.alertLevel === 'severe' ? 'CONGESTION' :
+                   selectedStateData.alertLevel === 'warning' ? 'ACTIVE DOCKET' : 'COMPLIANT'}
+                </span>
+              </div>
+              <h2 className="dossier-state-title">
+                {selectedMeta.name} {selectedMeta.id !== 'FCT' ? 'State' : ''}
+              </h2>
+              <div className="dossier-capital-row">
+                <span>Judicial Headquarters: <strong>{selectedMeta.capital}</strong></span>
               </div>
             </div>
 
-            {/* State Search & Jump Select */}
-            <div className="drawer-search-box">
-              <Search size={14} className="drawer-search-icon" />
+            {/* Quick State Search Input */}
+            <div className="dossier-search-wrapper">
+              <Search size={14} className="dossier-search-icon" />
               <input
                 type="text"
-                className="drawer-search-input"
-                placeholder="Search state or capital..."
+                className="dossier-search-field"
+                placeholder="Search any of 36 states or FCT..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
-            {/* Quick State Grid Buttons */}
-            <div className="drawer-states-scroller">
+            {/* State Picker Scroller */}
+            <div className="dossier-chips-track">
               {filteredStates.map((st) => {
                 const count = mapData[st.id]?.totalCases ?? 0;
                 const isSelected = selectedState === st.id;
@@ -488,112 +366,86 @@ export default function BacklogMapPage() {
                   <button
                     key={st.id}
                     type="button"
-                    className={`drawer-state-chip ${isSelected ? 'selected' : ''}`}
-                    onClick={() => {
-                      setSelectedState(st.id);
-                      playLockOn();
-                    }}
+                    className={`dossier-state-pill ${isSelected ? 'is-selected' : ''}`}
+                    onClick={() => setSelectedState(st.id)}
                   >
-                    <span className="chip-name">{st.name}</span>
-                    {count > 0 && <span className="chip-badge">{count}</span>}
+                    <span>{st.name}</span>
+                    {count > 0 && <span className="pill-badge">{count}</span>}
                   </button>
                 );
               })}
             </div>
 
-            {/* Detailed State Telemetry Metrics */}
-            <div className="drawer-metrics-section">
-              <div className="drawer-metric-tile">
-                <span className="tile-title">Verified Docket Backlog</span>
-                <span className="tile-number highlight">{selectedStateData.totalCases}</span>
-                <span className="tile-footnote">
-                  {selectedStateData.activeCases} Active · {selectedStateData.stalledCases} Stalled
-                </span>
+            {/* 3 Metric Glass Tiles for Selected State */}
+            <div className="dossier-metrics-grid">
+              <div className="dossier-metric-tile">
+                <span className="metric-tile-title">Verified Docket Backlog</span>
+                <span className="metric-tile-number cyan">{selectedStateData.totalCases}</span>
+                <span className="metric-tile-sub">Active in registry</span>
               </div>
 
-              <div className="drawer-metric-tile">
-                <span className="tile-title">Est. Correctional Detainees</span>
-                <span className="tile-number">
-                  {selectedGeo.estimatedDetainees.toLocaleString()}
-                </span>
-                <span className="tile-footnote">Awaiting trial / remand custody</span>
+              <div className="dossier-metric-tile">
+                <span className="metric-tile-title">Trial In Motion</span>
+                <span className="metric-tile-number emerald">{selectedStateData.activeCases}</span>
+                <span className="metric-tile-sub">Scheduled hearings</span>
               </div>
 
-              <div className="drawer-metric-tile">
-                <span className="tile-title">Judicial Congestion Index</span>
-                <div className="tile-progress-wrap">
-                  <div
-                    className="tile-progress-bar"
-                    style={{ width: `${selectedGeo.congestionIndex}%` }}
-                  />
-                </div>
-                <span className="tile-footnote">{selectedGeo.congestionIndex}% Strain Threshold</span>
+              <div className="dossier-metric-tile">
+                <span className="metric-tile-title">Stalled Remand</span>
+                <span className="metric-tile-number crimson">{selectedStateData.stalledCases}</span>
+                <span className="metric-tile-sub">Awaiting legal aid</span>
               </div>
             </div>
 
-            {/* Recognized Judicial Divisions & Court Registry */}
-            <div className="drawer-courts-section">
-              <h3 className="courts-section-title">
-                Judicial Divisions & Registries ({selectedGeo.courts.length})
+            {/* Judicial Division Registries */}
+            <div className="dossier-courts-container">
+              <h3 className="dossier-courts-title">
+                <Building2 size={14} />
+                <span>Court Registries &amp; Judicial Divisions ({selectedStateData.courts.length || 0})</span>
               </h3>
-              <div className="courts-list">
-                {selectedGeo.courts.map((courtName) => {
-                  const match = selectedStateData.courts.find((c) => c.court === courtName);
-                  return (
-                    <div key={courtName} className="court-item-card">
-                      <div className="court-item-info">
-                        <span className="court-item-name">{courtName}</span>
-                        {match && (
-                          <span className="court-badge-active">
-                            {match.active} active · {match.stalled} stalled
-                          </span>
-                        )}
+
+              {selectedStateData.courts.length > 0 ? (
+                <div className="dossier-courts-scroll">
+                  {selectedStateData.courts.map((court, idx) => (
+                    <div key={idx} className="dossier-court-card">
+                      <div className="court-card-info">
+                        <span className="court-card-name">{court.name}</span>
+                        <span className="court-card-stats">
+                          {court.active} active hearings · {court.stalled} stalled
+                        </span>
                       </div>
                       <Link
-                        to={`/lookup?court=${encodeURIComponent(courtName)}`}
-                        className="court-lookup-link"
+                        to={`/lookup?court=${encodeURIComponent(court.name)}`}
+                        className="court-card-link"
                       >
-                        Inspect →
+                        <span>Inspect</span>
+                        <ExternalLink size={12} />
                       </Link>
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="dossier-courts-empty">
+                  <Shield size={24} className="empty-shield-icon" />
+                  <p className="empty-shield-text">
+                    Zero stalled criminal backlog logged for {selectedMeta.name} in the latest registry sync.
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Drawer Action CTAs */}
-            <div className="drawer-actions">
-              <Link to="/lookup" className="drawer-btn primary">
-                <Search size={15} />
-                <span>Search Cases in {selectedGeo.name}</span>
-              </Link>
-              <Link to="/pro-bono" className="drawer-btn secondary">
-                <Zap size={15} />
-                <span>Claim Pro-Bono in this Division</span>
+            {/* Action CTAs */}
+            <div className="dossier-actions-group">
+              <Link
+                to={`/lookup?state=${encodeURIComponent(selectedMeta.name)}`}
+                className="dossier-btn primary"
+              >
+                <span>Search Dockets in {selectedMeta.name}</span>
+                <ExternalLink size={14} />
               </Link>
             </div>
           </aside>
         </div>
-
-        {/* =================================================================== */}
-        {/* Live Telemetry Log Footer                                           */}
-        {/* =================================================================== */}
-        <footer className="cyber-telemetry-footer">
-          <div className="telemetry-feed-indicator">
-            <span className="feed-pulse-dot"></span>
-            <span className="feed-title">REAL-TIME DATASTREAM:</span>
-          </div>
-          <div className="telemetry-feed-content">
-            <span>[GAVEL-NET-SYNC]</span>
-            <span>Render Cloud Cluster Connected</span>
-            <span>·</span>
-            <span>36 States + FCT Calibrated</span>
-            <span>·</span>
-            <span>Highest Strain: Lagos Judicial Division ({mapData['Lagos']?.totalCases || 3} Cases)</span>
-            <span>·</span>
-            <span>Federal HQ: Abuja FCT Active</span>
-          </div>
-        </footer>
       </div>
     </div>
   );
