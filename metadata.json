@@ -1,0 +1,7 @@
+{
+  "name": "GAVEL — Case Tracking",
+  "description": "A transparent case tracking system for awaiting-trial detainees in Nigeria. Search by Case Hash ID to check case status.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
