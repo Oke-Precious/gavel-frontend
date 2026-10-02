@@ -13,65 +13,14 @@ import {
 import Card from '../../components/Card.jsx';
 import Button from '../../components/Button.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
+import NigeriaMap from '../../components/NigeriaMap/NigeriaMap.jsx';
+import { NIGERIA_REAL_GEO_STATES } from '../../components/NigeriaMap/nigeriaRealGeoPaths.js';
 import { analyticsApi, casesApi, publicApi } from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { daysInCustody } from '../../utils/formatDate.js';
 import { getAlertLevel } from '../../utils/formatAlertLevel.js';
 import './AdminOverviewPage.css';
-
-/* ------------------------------------------------------------------ */
-/* Nigeria SVG Map Data for Preview Card                              */
-/* ------------------------------------------------------------------ */
-const MAP_PREVIEW_STATES = [
-  { id: 'Lagos', name: 'Lagos', path: 'M 160 380 L 195 385 L 210 410 L 175 415 Z' },
-  { id: 'Ogun', name: 'Ogun', path: 'M 150 340 L 220 345 L 225 385 L 160 380 Z' },
-  { id: 'Oyo', name: 'Oyo', path: 'M 140 280 L 210 270 L 220 345 L 150 340 Z' },
-  { id: 'Osun', name: 'Osun', path: 'M 210 320 L 245 315 L 250 350 L 220 345 Z' },
-  { id: 'Ondo', name: 'Ondo', path: 'M 245 315 L 275 310 L 285 365 L 250 350 Z' },
-  { id: 'Ekiti', name: 'Ekiti', path: 'M 245 285 L 275 280 L 275 310 L 245 315 Z' },
-  { id: 'Kwara', name: 'Kwara', path: 'M 180 230 L 280 220 L 275 280 L 210 270 Z' },
-  { id: 'Kogi', name: 'Kogi', path: 'M 275 280 L 370 275 L 365 345 L 275 310 Z' },
-  { id: 'Edo', name: 'Edo', path: 'M 250 350 L 305 345 L 300 405 L 260 400 Z' },
-  { id: 'Delta', name: 'Delta', path: 'M 260 400 L 315 405 L 310 450 L 245 440 Z' },
-  { id: 'Bayelsa', name: 'Bayelsa', path: 'M 285 450 L 330 450 L 320 480 L 275 470 Z' },
-  { id: 'Rivers', name: 'Rivers', path: 'M 330 435 L 375 430 L 365 475 L 320 480 Z' },
-  { id: 'Anambra', name: 'Anambra', path: 'M 315 385 L 345 385 L 345 415 L 315 415 Z' },
-  { id: 'Imo', name: 'Imo', path: 'M 330 415 L 360 415 L 360 445 L 330 445 Z' },
-  { id: 'Enugu', name: 'Enugu', path: 'M 345 355 L 390 355 L 390 395 L 345 395 Z' },
-  { id: 'Abia', name: 'Abia', path: 'M 360 415 L 390 415 L 385 450 L 355 450 Z' },
-  { id: 'Ebonyi', name: 'Ebonyi', path: 'M 390 365 L 420 365 L 415 415 L 390 405 Z' },
-  { id: 'Cross River', name: 'Cross River', path: 'M 415 390 L 460 385 L 440 470 L 385 450 Z' },
-  { id: 'Akwa Ibom', name: 'Akwa Ibom', path: 'M 370 450 L 415 445 L 405 480 L 365 475 Z' },
-  { id: 'Niger', name: 'Niger', path: 'M 210 130 L 340 120 L 330 220 L 180 230 Z' },
-  { id: 'FCT', name: 'FCT Abuja', path: 'M 330 200 L 365 200 L 365 235 L 330 235 Z' },
-  { id: 'Kaduna', name: 'Kaduna', path: 'M 320 110 L 420 100 L 410 190 L 330 200 Z' },
-  { id: 'Kano', name: 'Kano', path: 'M 360 40 L 450 35 L 440 110 L 360 115 Z' },
-  { id: 'Katsina', name: 'Katsina', path: 'M 290 35 L 360 40 L 350 110 L 290 105 Z' },
-  { id: 'Zamfara', name: 'Zamfara', path: 'M 220 50 L 290 35 L 290 120 L 210 130 Z' },
-  { id: 'Sokoto', name: 'Sokoto', path: 'M 140 30 L 220 50 L 210 110 L 130 90 Z' },
-  { id: 'Kebbi', name: 'Kebbi', path: 'M 120 70 L 210 110 L 180 210 L 110 170 Z' },
-  { id: 'Nasarawa', name: 'Nasarawa', path: 'M 365 220 L 450 215 L 440 270 L 365 265 Z' },
-  { id: 'Benue', name: 'Benue', path: 'M 370 275 L 480 270 L 470 345 L 390 355 Z' },
-  { id: 'Plateau', name: 'Plateau', path: 'M 420 170 L 490 165 L 485 240 L 420 235 Z' },
-  { id: 'Bauchi', name: 'Bauchi', path: 'M 440 100 L 530 90 L 520 175 L 440 170 Z' },
-  { id: 'Jigawa', name: 'Jigawa', path: 'M 450 35 L 530 30 L 520 95 L 440 100 Z' },
-  { id: 'Yobe', name: 'Yobe', path: 'M 530 30 L 610 25 L 600 115 L 530 110 Z' },
-  { id: 'Borno', name: 'Borno', path: 'M 610 25 L 680 20 L 660 165 L 590 160 Z' },
-  { id: 'Gombe', name: 'Gombe', path: 'M 520 115 L 580 110 L 570 175 L 520 175 Z' },
-  { id: 'Adamawa', name: 'Adamawa', path: 'M 570 145 L 650 140 L 620 245 L 550 235 Z' },
-  { id: 'Taraba', name: 'Taraba', path: 'M 480 230 L 560 225 L 530 330 L 460 320 Z' },
-];
-
-function getAlertColor(alertLevel) {
-  switch (alertLevel) {
-    case 'compliant': return '#10B981'; // Emerald
-    case 'warning': return '#F59E0B'; // Amber
-    case 'severe': return '#F97316'; // Orange
-    case 'critical': return '#EF4444'; // Crimson
-    default: return '#CBD5E1'; // Neutral Slate
-  }
-}
 
 /* ------------------------------------------------------------------ */
 /* Smooth Count-Up Animation Hook                                      */
@@ -194,7 +143,7 @@ export default function AdminOverviewPage() {
         const merged = {};
         mapResult.value.forEach((item) => {
           const courtName = String(item.court ?? '').toLowerCase();
-          const matchedState = (courtName.includes('ikeja') ? 'Lagos' : null) ?? MAP_PREVIEW_STATES.find((st) =>
+          const matchedState = (courtName.includes('ikeja') ? 'Lagos' : null) ?? NIGERIA_REAL_GEO_STATES.find((st) =>
             courtName.includes(st.id.toLowerCase()) ||
             (st.id === 'FCT' && (courtName.includes('abuja') || courtName.includes('fct'))),
           )?.id;
@@ -377,76 +326,20 @@ export default function AdminOverviewPage() {
                 <Skeleton variant="card" height={260} />
               ) : (
                 <div className="admin-overview__map-wrapper">
-                  <svg
-                    viewBox="0 0 720 520"
-                    className="admin-overview__map-svg"
-                    role="img"
-                    aria-label="National Backlog Distribution Map Preview"
-                  >
-                    <defs>
-                      <filter id="map-drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
-                        <feDropShadow dx="0" dy="3" stdDeviation="3" floodOpacity="0.12" />
-                      </filter>
-                      <radialGradient id="glow-ring-critical" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#EF4444" stopOpacity="0.6" />
-                        <stop offset="100%" stopColor="#EF4444" stopOpacity="0.0" />
-                      </radialGradient>
-                      <radialGradient id="glow-ring-warning" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.6" />
-                        <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.0" />
-                      </radialGradient>
-                    </defs>
-
-                    <g filter="url(#map-drop-shadow)">
-                      {MAP_PREVIEW_STATES.map((st) => {
-                        const stData = mapData[st.id];
-                        const isHovered = hoveredState === st.id;
-                        const fillColor = stData ? getAlertColor(stData.alertLevel) : '#CBD5E1';
-                        return (
-                          <path
-                            key={st.id}
-                            d={st.path}
-                            fill={fillColor}
-                            stroke="#FFFFFF"
-                            strokeWidth={isHovered ? '2.5' : '1.5'}
-                            strokeLinejoin="round"
-                            strokeLinecap="round"
-                            className={`admin-overview__state-path ${isHovered ? 'is-hovered' : ''}`}
-                            onMouseEnter={() => setHoveredState(st.id)}
-                            onMouseLeave={() => setHoveredState(null)}
-                            onClick={() => navigate('/backlog-map')}
-                          />
-                        );
-                      })}
-                    </g>
-
-                    {/* Interactive Hub Node Indicators for major backlog centers */}
-                    {[
-                      { id: 'Lagos', cx: 185, cy: 400, level: 'critical' },
-                      { id: 'FCT', cx: 347, cy: 217, level: 'critical' },
-                      { id: 'Rivers', cx: 350, cy: 455, level: 'warning' },
-                      { id: 'Kano', cx: 405, cy: 75, level: 'severe' },
-                      { id: 'Oyo', cx: 180, cy: 310, level: 'compliant' },
-                      { id: 'Kaduna', cx: 370, cy: 150, level: 'warning' },
-                    ].map((hub) => (
-                      <g key={`hub-${hub.id}`} className="admin-overview__hub-node" onClick={() => navigate('/backlog-map')}>
-                        <circle cx={hub.cx} cy={hub.cy} r="14" fill={`url(#glow-ring-${hub.level === 'critical' ? 'critical' : 'warning'})`} className="admin-overview__pulse-ring" />
-                        <circle cx={hub.cx} cy={hub.cy} r="4.5" fill={getAlertColor(hub.level)} stroke="#FFFFFF" strokeWidth="2" />
-                      </g>
-                    ))}
-                  </svg>
-
-                  {/* Floating State Tooltip */}
-                  {hoveredState && (
-                    <div className="admin-overview__map-tooltip" role="status">
-                      <strong>{hoveredState}</strong>
-                      <span>
-                        {mapData[hoveredState]
-                          ? `${mapData[hoveredState].totalCases} total cases`
-                          : 'No active tracking data'}
-                      </span>
-                    </div>
-                  )}
+                  <NigeriaMap
+                    data={mapData}
+                    selectedState={hoveredState}
+                    onSelectState={(stateId) => {
+                      setHoveredState(stateId);
+                      navigate('/backlog-map');
+                    }}
+                    theme="light"
+                    compact={true}
+                    showLabels={false}
+                    showBeacons={true}
+                    showCircuits={false}
+                    allowZoom={false}
+                  />
 
                   {/* Map Severity Legend */}
                   <div className="admin-overview__map-legend" role="region" aria-label="Map severity legend">

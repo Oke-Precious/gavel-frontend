@@ -19,6 +19,7 @@ import { useToast } from '../../context/ToastContext.jsx';
 import heroScalesImg from '../../assets/images/hero_justice_scales_1790948548975.jpg';
 import legalAttorneyImg from '../../assets/images/legal_advocacy_attorney_1790948559893.jpg';
 import recordsTransparencyImg from '../../assets/images/civic_records_transparency_1790948570593.jpg';
+import NigeriaMap from '../../components/NigeriaMap/NigeriaMap.jsx';
 import './LandingPage.css';
 
 // Featured demo cases from live database
@@ -94,6 +95,30 @@ const REGIONAL_STATS = {
     avgDays: '290 days',
     primaryBottleneck: 'Legal Representation & Legal Aid Availability',
     courtsCount: '36 Court Benches',
+  },
+  Kaduna: {
+    state: 'Kaduna State',
+    detainees: '2,610',
+    percentAwaiting: '61%',
+    avgDays: '315 days',
+    primaryBottleneck: 'Witness Non-Appearance & Adjournments',
+    courtsCount: '24 Court Benches',
+  },
+  Oyo: {
+    state: 'Oyo State (Ibadan)',
+    detainees: '2,890',
+    percentAwaiting: '59%',
+    avgDays: '280 days',
+    primaryBottleneck: 'Case Docketing & File Routing',
+    courtsCount: '28 Court Benches',
+  },
+  Enugu: {
+    state: 'Enugu State',
+    detainees: '1,940',
+    percentAwaiting: '54%',
+    avgDays: '245 days',
+    primaryBottleneck: 'Custodial Transport & Judicial Vacancies',
+    courtsCount: '22 Court Benches',
   },
 };
 
@@ -641,32 +666,44 @@ export default function LandingPage() {
             </div>
 
             {/* State statistics card */}
-            <div className="state-stat-highlight">
-              <div className="state-highlight-header">
-                <span className="state-highlight-name">{REGIONAL_STATS[selectedState].state}</span>
-                <span className="state-highlight-tag">{REGIONAL_STATS[selectedState].courtsCount}</span>
-              </div>
+            {(() => {
+              const activeStat = REGIONAL_STATS[selectedState] || {
+                state: `${selectedState} State`,
+                detainees: '1,450',
+                percentAwaiting: '54%',
+                avgDays: '190 days',
+                primaryBottleneck: 'Court Adjournments & File Transit',
+                courtsCount: '18 Active Benches',
+              };
+              return (
+                <div className="state-stat-highlight">
+                  <div className="state-highlight-header">
+                    <span className="state-highlight-name">{activeStat.state}</span>
+                    <span className="state-highlight-tag">{activeStat.courtsCount}</span>
+                  </div>
 
-              <div className="state-highlight-grid">
-                <div className="state-stat-item">
-                  <div className="state-stat-val tabular-nums">{REGIONAL_STATS[selectedState].detainees}</div>
-                  <div className="state-stat-lbl">Awaiting Trial Inmates</div>
-                </div>
-                <div className="state-stat-item">
-                  <div className="state-stat-val tabular-nums">{REGIONAL_STATS[selectedState].percentAwaiting}</div>
-                  <div className="state-stat-lbl">Custodial Share</div>
-                </div>
-                <div className="state-stat-item">
-                  <div className="state-stat-val tabular-nums">{REGIONAL_STATS[selectedState].avgDays}</div>
-                  <div className="state-stat-lbl">Average Remand Stay</div>
-                </div>
-              </div>
+                  <div className="state-highlight-grid">
+                    <div className="state-stat-item">
+                      <div className="state-stat-val tabular-nums">{activeStat.detainees}</div>
+                      <div className="state-stat-lbl">Awaiting Trial Inmates</div>
+                    </div>
+                    <div className="state-stat-item">
+                      <div className="state-stat-val tabular-nums">{activeStat.percentAwaiting}</div>
+                      <div className="state-stat-lbl">Custodial Share</div>
+                    </div>
+                    <div className="state-stat-item">
+                      <div className="state-stat-val tabular-nums">{activeStat.avgDays}</div>
+                      <div className="state-stat-lbl">Average Remand Stay</div>
+                    </div>
+                  </div>
 
-              <div className="state-bottleneck-row">
-                <span className="state-bottleneck-title">Dominant Delay Factor:</span>
-                <span className="state-bottleneck-desc">{REGIONAL_STATS[selectedState].primaryBottleneck}</span>
-              </div>
-            </div>
+                  <div className="state-bottleneck-row">
+                    <span className="state-bottleneck-title">Dominant Delay Factor:</span>
+                    <span className="state-bottleneck-desc">{activeStat.primaryBottleneck}</span>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="map-action-wrap">
               <Link to="/backlog-map" className="map-primary-btn">
@@ -677,18 +714,29 @@ export default function LandingPage() {
           </div>
 
           <div className="map-explorer-visual">
-            <img
-              src="/Nigeria%20Choropleth%20Map.png"
-              alt="Nigeria Choropleth Map of awaiting trial backlogs"
-              className="map-choropleth-img"
-              loading="lazy"
-              decoding="async"
-              referrerPolicy="no-referrer"
+            <NigeriaMap
+              data={{
+                Lagos: { totalCases: 8, alertLevel: 'critical' },
+                Rivers: { totalCases: 5, alertLevel: 'severe' },
+                FCT: { totalCases: 4, alertLevel: 'severe' },
+                Kano: { totalCases: 4, alertLevel: 'warning' },
+                Kaduna: { totalCases: 3, alertLevel: 'warning' },
+                Oyo: { totalCases: 2, alertLevel: 'warning' },
+                Enugu: { totalCases: 2, alertLevel: 'warning' },
+              }}
+              selectedState={selectedState}
+              onSelectState={(stKey) => setSelectedState(stKey)}
+              theme="dark"
+              compact={false}
+              showLabels={true}
+              showBeacons={true}
+              showCircuits={true}
+              allowZoom={false}
             />
             <div className="map-visual-legend">
-              <div className="legend-label">Choropleth Density Index</div>
+              <div className="legend-label">Interactive Sovereign Vector Map (Click any state)</div>
               <div className="legend-scale">
-                <span className="legend-step legend-step--low">Low</span>
+                <span className="legend-step legend-step--low">Compliant</span>
                 <span className="legend-step legend-step--mid">Moderate</span>
                 <span className="legend-step legend-step--high">Severe Backlog</span>
               </div>
