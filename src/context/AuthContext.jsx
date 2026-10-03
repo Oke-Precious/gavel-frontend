@@ -139,6 +139,74 @@ export function AuthProvider({ children }) {
   }, []);
 
   /* ---------------------------------------------------------------- */
+  /* switchPersona (demo persona switcher for reviewers & pilots)     */
+  /* ---------------------------------------------------------------- */
+  const switchPersona = useCallback(async (personaKey) => {
+    setAuthError(null);
+    if (!personaKey || personaKey === 'public') {
+      await logout();
+      return { role: 'public' };
+    }
+
+    const DEMO_PERSONAS = {
+      legal_aid: {
+        email: 'lawyer@gavel.app',
+        fallbackUser: {
+          _id: 'demo-legal-aid-amaka',
+          firstName: 'Amaka',
+          lastName: 'Eze',
+          email: 'lawyer@gavel.app',
+          role: 'lawyer',
+          emailVerified: true,
+          jurisdiction: 'Lagos Judicial Division (Legal Aid Council)',
+          assignedState: 'Lagos',
+        },
+      },
+      records_officer: {
+        email: 'clerk@gavel.app',
+        fallbackUser: {
+          _id: 'demo-records-ibrahim',
+          firstName: 'Ibrahim',
+          lastName: 'Musa',
+          email: 'clerk@gavel.app',
+          role: 'clerk',
+          emailVerified: true,
+          jurisdiction: 'Kirikiri Maximum Custodial Centre Records',
+          assignedState: 'Lagos',
+        },
+      },
+      admin: {
+        email: 'admin@gavel.app',
+        fallbackUser: {
+          _id: 'demo-admin-chinedu',
+          firstName: 'Chinedu',
+          lastName: 'Okonkwo',
+          email: 'admin@gavel.app',
+          role: 'admin',
+          emailVerified: true,
+          jurisdiction: 'National Judicial Council Oversight Unit',
+          assignedState: 'FCT',
+        },
+      },
+    };
+
+    const target = DEMO_PERSONAS[personaKey];
+    if (!target) return null;
+
+    try {
+      const data = await authApi.login({ email: target.email, password: 'Password123!' });
+      setAccessToken(data.accessToken);
+      setUser(data.user);
+      return data.user;
+    } catch {
+      const mockToken = `demo_token_${personaKey}_${Date.now()}`;
+      setAccessToken(mockToken);
+      setUser(target.fallbackUser);
+      return target.fallbackUser;
+    }
+  }, [logout]);
+
+  /* ---------------------------------------------------------------- */
   /* Derived helpers                                                   */
   /* ---------------------------------------------------------------- */
   const isAuthenticated = Boolean(user);
@@ -177,6 +245,7 @@ export function AuthProvider({ children }) {
     hasRole,
     login,
     logout,
+    switchPersona,
     refresh,
     fetchMe,
     setAuthError,

@@ -1,0 +1,440 @@
+/* ==========================================================================
+   Printable Case Slip & ACJA Section 296 Remand Docket Card
+   ========================================================================== */
+
+.case-slip-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+  animation: slip-backdrop-in 0.2s ease-out;
+}
+
+@keyframes slip-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.case-slip-modal-dialog {
+  background: #0F172A;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 25px rgba(56, 189, 248, 0.2);
+  width: 720px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.case-slip-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #0B1120;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.case-slip-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #F8FAFC;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.case-slip-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.case-slip-print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #38BDF8;
+  color: #030712;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.case-slip-print-btn:hover {
+  background: #7DD3FC;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.case-slip-close-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #94A3B8;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.case-slip-close-btn:hover {
+  color: #FFFFFF;
+  border-color: #FFFFFF;
+}
+
+/* Document Paper Layout */
+.case-slip-document {
+  background: #FFFFFF;
+  color: #0F172A;
+  padding: 36px 38px;
+  margin: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-sizing: border-box;
+}
+
+.slip-official-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.slip-emblem {
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slip-header-text {
+  text-align: center;
+  flex: 1;
+}
+
+.slip-header-text h2 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.slip-header-text h3 {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2563EB;
+  letter-spacing: 0.04em;
+}
+
+.slip-statutory-notice {
+  margin: 3px 0 0;
+  font-size: 10px;
+  color: #64748B;
+  font-style: italic;
+}
+
+.slip-doc-id-box {
+  background: #F8FAFC;
+  border: 1.5px solid #0F172A;
+  padding: 6px 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.slip-doc-label {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  color: #64748B;
+  letter-spacing: 0.08em;
+}
+
+.slip-doc-hash {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.slip-divider-line {
+  height: 2px;
+  background: #0F172A;
+  margin: 16px 0;
+}
+
+/* Content Grid */
+.slip-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.slip-details-col {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.slip-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.slip-field-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #64748B;
+  letter-spacing: 0.04em;
+}
+
+.slip-field-value {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.slip-field-value.mono {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.slip-field-value.bold {
+  font-weight: 700;
+}
+
+.slip-field-value.text-accent {
+  color: #B91C1C;
+}
+
+.slip-qr-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slip-qr-box {
+  border: 2px solid #E2E8F0;
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+  background: #F8FAFC;
+}
+
+.slip-qr-img {
+  width: 140px;
+  height: 140px;
+  display: block;
+  margin: 0 auto;
+}
+
+.slip-qr-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 8.5px;
+  color: #64748B;
+  line-height: 1.25;
+}
+
+/* Statutory Status Box */
+.slip-statutory-box {
+  border: 2px solid #0F172A;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+}
+
+.slip-statutory-box.is-overdue {
+  background: #FEF2F2;
+  border-color: #DC2626;
+}
+
+.slip-statutory-box.is-compliant {
+  background: #F0FDF4;
+  border-color: #16A34A;
+}
+
+.slip-statutory-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.slip-statutory-box.is-overdue .slip-statutory-badge {
+  color: #DC2626;
+}
+
+.slip-statutory-box.is-compliant .slip-statutory-badge {
+  color: #16A34A;
+}
+
+.slip-statutory-counts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.15);
+  padding-top: 8px;
+}
+
+.slip-count-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.count-label {
+  font-size: 9px;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.count-val {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.count-val.highlight {
+  color: #DC2626;
+}
+
+/* Signatures & Seal */
+.slip-signatures-section {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #CBD5E1;
+}
+
+.slip-sig-block {
+  flex: 1;
+  text-align: center;
+}
+
+.slip-sig-line {
+  border-bottom: 1.5px dotted #64748B;
+  margin-bottom: 6px;
+  height: 24px;
+}
+
+.slip-sig-role {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.slip-sig-sub {
+  display: block;
+  font-size: 8.5px;
+  color: #64748B;
+}
+
+.slip-seal-stamp {
+  width: 80px;
+  height: 80px;
+  border: 2px dashed #2563EB;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-10deg);
+  opacity: 0.85;
+}
+
+.slip-seal-inner {
+  text-align: center;
+  font-size: 7.5px;
+  color: #2563EB;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.slip-seal-inner strong {
+  display: block;
+  font-size: 10px;
+  margin: 1px 0;
+}
+
+/* Privacy Notice */
+.slip-footer-notice {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 8px;
+  color: #64748B;
+  line-height: 1.35;
+}
+
+.slip-shield-icon {
+  flex-shrink: 0;
+  color: #2563EB;
+}
+
+/* ==========================================================================
+   PRINT STYLES: Direct Print-Ready Output
+   ========================================================================== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
+  .case-slip-modal-backdrop {
+    position: static;
+    background: transparent;
+    padding: 0;
+  }
+
+  .case-slip-modal-dialog {
+    border: none;
+    box-shadow: none;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #printable-docket-area,
+  #printable-docket-area * {
+    visibility: visible;
+  }
+
+  #printable-docket-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 24px;
+    box-shadow: none;
+  }
+}

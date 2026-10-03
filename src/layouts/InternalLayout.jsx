@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar.jsx';
+import PersonaSwitcher from '../components/PersonaSwitcher/PersonaSwitcher.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import Skeleton from '../components/Skeleton.jsx';
 import './InternalLayout.css';
@@ -52,6 +53,7 @@ export default function InternalLayout() {
             {/* Breadcrumb or page title injected by child pages via context if needed */}
           </div>
           <div className="internal-layout__header-right">
+            <PersonaSwitcher compact={true} />
             <div className="internal-layout__user-chip">
               <div className="internal-layout__avatar" aria-hidden="true">
                 {user?.firstName?.[0]}{user?.lastName?.[0]}

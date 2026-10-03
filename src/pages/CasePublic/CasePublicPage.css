@@ -81,6 +81,26 @@
   line-height: 1.2;
 }
 
+.case-public-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.case-public-print-btn {
+  height: 44px;
+  min-height: 44px;
+  font-weight: 600;
+  border-color: #CBD5E1;
+  color: #0F172A;
+}
+
+.case-public-print-btn:hover {
+  background: #F1F5F9;
+  border-color: #94A3B8;
+}
+
 .case-public-watch-btn {
   height: 44px;
   min-height: 44px;

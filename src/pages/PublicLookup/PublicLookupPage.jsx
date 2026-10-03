@@ -9,10 +9,14 @@ import {
   Lock,
   ArrowRight,
   Scale,
+  Phone,
+  Radio,
 } from 'lucide-react';
 import { publicApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { useLanguage } from '../../context/LanguageContext.jsx';
 import { validateCaseHashId } from '../../utils/validators.js';
+import UssdSimulatorModal from '../../components/UssdSimulatorModal/UssdSimulatorModal.jsx';
 import './PublicLookupPage.css';
 
 // Seeded live cases from backend for immediate public testing
@@ -58,9 +62,11 @@ const SAMPLE_CASES = [
 export default function PublicLookupPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [caseHashId, setCaseHashId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [isUssdOpen, setIsUssdOpen] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -165,6 +171,28 @@ export default function PublicLookupPage() {
               </p>
             </div>
           </form>
+
+          {/* Feature Phone / USSD Dial Simulator Card */}
+          <div className="lookup-ussd-card">
+            <div className="lookup-ussd-info">
+              <div className="lookup-ussd-badge">
+                <Radio size={14} className="animate-pulse text-emerald-400" />
+                <span>Feature Phone Access (2G GSM / No Internet)</span>
+              </div>
+              <h3 className="lookup-ussd-title">No smartphone or 4G data in court?</h3>
+              <p className="lookup-ussd-desc">
+                Dial <code>*384*26#</code> from any basic phone (MTN, Airtel, Glo, 9mobile) to audit statutory remand duration without data charges.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="lookup-ussd-launch-btn"
+              onClick={() => setIsUssdOpen(true)}
+            >
+              <Phone size={15} />
+              <span>Launch USSD Terminal 📲</span>
+            </button>
+          </div>
 
           {/* Sample Cases Carousel / Chips */}
           <div className="lookup-samples-section">
@@ -282,6 +310,13 @@ export default function PublicLookupPage() {
             <ArrowRight size={16} />
           </Link>
         </div>
+
+        {/* 2G Feature Phone USSD Simulator Modal */}
+        <UssdSimulatorModal
+          isOpen={isUssdOpen}
+          onClose={() => setIsUssdOpen(false)}
+          initialHash={caseHashId || 'GAV-26-AD447B'}
+        />
       </div>
     </div>
   );

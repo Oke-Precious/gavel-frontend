@@ -16,6 +16,7 @@ import {
   AlertOctagon,
   ArrowLeft,
   Plus,
+  Printer,
 } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
@@ -24,6 +25,7 @@ import Timeline from '../../components/Timeline.jsx';
 import Modal from '../../components/Modal.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
+import PrintableCaseSlip from '../../components/PrintableCaseSlip/PrintableCaseSlip.jsx';
 import { casesApi, documentsApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -103,6 +105,9 @@ export default function CaseDetailPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileDescription, setFileDescription] = useState('');
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
+
+  // Printable Remand Slip Modal State
+  const [isSlipOpen, setIsSlipOpen] = useState(false);
 
   // Fetch Case Data
   const fetchCase = useCallback(async () => {

@@ -1,21 +1,26 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Globe } from 'lucide-react';
+import PersonaSwitcher from './PersonaSwitcher/PersonaSwitcher.jsx';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { useAuth } from '../hooks/useAuth.js';
 import './Navbar.css';
 
 /**
  * Navbar — Public Top Navigation Bar.
- * Links match exact design in attached screenshots:
- * About | Look Up a Case | Transparency | Volunteer | Login
+ * Links match exact design with Persona Switcher and Pidgin toggle.
  */
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { language, toggleLanguage, t } = useLanguage();
+  const { isAuthenticated, user } = useAuth();
 
   const isAboutActive = location.pathname === '/' || location.pathname === '/about';
   const isLookupActive = location.pathname.startsWith('/lookup');
   const isScorecardActive = location.pathname === '/scorecard';
+  const isMapActive = location.pathname === '/backlog-map';
   const isProBonoActive = location.pathname === '/register';
 
   return (
@@ -33,36 +38,64 @@ export default function Navbar() {
               to="/about"
               className={`navbar__link${isAboutActive ? ' navbar__link--active' : ''}`}
             >
-              About
+              {t('nav.about')}
             </Link>
 
             <Link
               to="/lookup"
               className={`navbar__link${isLookupActive ? ' navbar__link--active' : ''}`}
             >
-              Look Up a Case
+              {t('nav.lookup')}
+            </Link>
+
+            <Link
+              to="/backlog-map"
+              className={`navbar__link${isMapActive ? ' navbar__link--active' : ''}`}
+            >
+              {t('nav.map')}
             </Link>
 
             <Link
               to="/scorecard"
               className={`navbar__link${isScorecardActive ? ' navbar__link--active' : ''}`}
             >
-              Transparency
+              {t('nav.transparency')}
             </Link>
 
             <Link
               to="/register"
               className={`navbar__link${isProBonoActive ? ' navbar__link--active' : ''}`}
             >
-              Volunteer
+              {t('nav.volunteer')}
             </Link>
           </nav>
 
           {/* Right Actions */}
           <div className="navbar__actions">
-            <Link to="/login" className="navbar__login-btn">
-              Login
-            </Link>
+            {/* Interactive Demo Persona Switcher */}
+            <PersonaSwitcher compact={false} />
+
+            {/* Language Toggle: English / Nigerian Pidgin */}
+            <button
+              type="button"
+              className="navbar__lang-btn"
+              onClick={toggleLanguage}
+              title={language === 'en' ? 'Switch to Nigerian Pidgin English' : 'Switch to English'}
+              aria-label="Toggle language"
+            >
+              <Globe size={13} />
+              <span>{language === 'en' ? '🇳🇬 Pidgin' : '🇬🇧 English'}</span>
+            </button>
+
+            {isAuthenticated ? (
+              <Link to="/dashboard" className="navbar__login-btn">
+                {t('nav.dashboard')}
+              </Link>
+            ) : (
+              <Link to="/login" className="navbar__login-btn">
+                {t('nav.login')}
+              </Link>
+            )}
 
             <button
               className="navbar__hamburger"
@@ -98,43 +131,73 @@ export default function Navbar() {
           </button>
         </div>
 
+        {/* Mobile Persona Switcher & Language Controls */}
+        <div className="navbar__drawer-controls">
+          <PersonaSwitcher compact={false} />
+          <button
+            type="button"
+            className="navbar__drawer-lang-btn"
+            onClick={toggleLanguage}
+          >
+            <Globe size={14} />
+            <span>{language === 'en' ? 'Switch to 🇳🇬 Naija Pidgin' : 'Switch to 🇬🇧 English'}</span>
+          </button>
+        </div>
+
         <div className="navbar__drawer-body">
           <Link
             to="/about"
             className={`navbar__drawer-link${isAboutActive ? ' navbar__drawer-link--active' : ''}`}
             onClick={() => setMobileOpen(false)}
           >
-            About
+            {t('nav.about')}
           </Link>
           <Link
             to="/lookup"
             className={`navbar__drawer-link${isLookupActive ? ' navbar__drawer-link--active' : ''}`}
             onClick={() => setMobileOpen(false)}
           >
-            Look Up a Case
+            {t('nav.lookup')}
+          </Link>
+          <Link
+            to="/backlog-map"
+            className={`navbar__drawer-link${isMapActive ? ' navbar__drawer-link--active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            {t('nav.map')}
           </Link>
           <Link
             to="/scorecard"
             className={`navbar__drawer-link${isScorecardActive ? ' navbar__drawer-link--active' : ''}`}
             onClick={() => setMobileOpen(false)}
           >
-            Transparency
+            {t('nav.transparency')}
           </Link>
           <Link
             to="/register"
             className={`navbar__drawer-link${isProBonoActive ? ' navbar__drawer-link--active' : ''}`}
             onClick={() => setMobileOpen(false)}
           >
-            Volunteer
+            {t('nav.volunteer')}
           </Link>
 
-          <Link
-            to="/login"
-            className="navbar__drawer-login"
-            onClick={() => setMobileOpen(false)}
-          >
-            Login
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              to="/dashboard"
+              className="navbar__drawer-login"
+              onClick={() => setMobileOpen(false)}
+            >
+              {t('nav.dashboard')}
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="navbar__drawer-login"
+              onClick={() => setMobileOpen(false)}
+            >
+              {t('nav.login')}
+            </Link>
+          )}
         </div>
       </nav>
     </>

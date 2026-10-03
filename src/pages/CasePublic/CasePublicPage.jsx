@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Eye, MapPin, Landmark, FileText, Mail, ArrowLeft } from 'lucide-react';
+import { Eye, MapPin, Landmark, FileText, Mail, ArrowLeft, Printer } from 'lucide-react';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
 import StatusPill from '../../components/StatusPill.jsx';
@@ -9,6 +9,7 @@ import Timeline from '../../components/Timeline.jsx';
 import Modal from '../../components/Modal.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
+import PrintableCaseSlip from '../../components/PrintableCaseSlip/PrintableCaseSlip.jsx';
 import { publicApi, watchApi } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { getAlertLevel } from '../../utils/formatAlertLevel.js';
@@ -36,6 +37,9 @@ export default function CasePublicPage() {
   const [isWatchModalOpen, setIsWatchModalOpen] = useState(false);
   const [watchEmail, setWatchEmail] = useState('');
   const [isSubmittingWatch, setIsSubmittingWatch] = useState(false);
+
+  // Printable Docket Slip State
+  const [isSlipOpen, setIsSlipOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -201,15 +205,27 @@ export default function CasePublicPage() {
             </div>
           </div>
 
-          <Button
-            variant="secondary"
-            size="md"
-            iconLeft={Eye}
-            onClick={() => setIsWatchModalOpen(true)}
-            className="case-public-watch-btn"
-          >
-            Watch This Case
-          </Button>
+          <div className="case-public-header__actions">
+            <Button
+              variant="outline"
+              size="md"
+              iconLeft={Printer}
+              onClick={() => setIsSlipOpen(true)}
+              className="case-public-print-btn"
+            >
+              Print Remand Slip
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="md"
+              iconLeft={Eye}
+              onClick={() => setIsWatchModalOpen(true)}
+              className="case-public-watch-btn"
+            >
+              Watch This Case
+            </Button>
+          </div>
         </div>
 
         {/* Main Grid: Remand Clock + Case Jurisdiction */}
@@ -335,6 +351,13 @@ export default function CasePublicPage() {
             </div>
           </form>
         </Modal>
+
+        {/* Official ACJA Section 296 Printable Remand Slip Modal */}
+        <PrintableCaseSlip
+          isOpen={isSlipOpen}
+          onClose={() => setIsSlipOpen(false)}
+          caseData={caseData}
+        />
       </div>
     </div>
   );

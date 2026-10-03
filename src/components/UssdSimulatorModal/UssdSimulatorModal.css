@@ -1,0 +1,391 @@
+/* ==========================================================================
+   USSD & Feature Phone Terminal Simulator
+   ========================================================================== */
+
+.ussd-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: ussd-fade 0.2s ease-out;
+}
+
+@keyframes ussd-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ussd-modal-dialog {
+  background: #0B1120;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 14px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 25px rgba(56, 189, 248, 0.15);
+  width: 480px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ussd-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(15, 23, 42, 0.85);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.ussd-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #F8FAFC;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.ussd-close-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #94A3B8;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ussd-close-btn:hover {
+  color: #FFFFFF;
+  border-color: #38BDF8;
+}
+
+.ussd-context-banner {
+  padding: 10px 16px;
+  background: rgba(56, 189, 248, 0.08);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  color: #94A3B8;
+  line-height: 1.4;
+}
+
+.ussd-tab-bar {
+  display: flex;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.ussd-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #94A3B8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ussd-tab-btn.is-active {
+  color: #38BDF8;
+  border-bottom-color: #38BDF8;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+/* Feature Phone Shell */
+.feature-phone-shell {
+  background: #1E293B;
+  border: 3px solid #334155;
+  border-radius: 20px;
+  margin: 18px 24px;
+  padding: 18px;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1), 0 10px 25px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.phone-brand-mark {
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 10px;
+  color: #64748B;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+}
+
+/* LCD Screen */
+.phone-lcd-screen {
+  background: #C7DFB4; /* Classic Nokia green backlight */
+  color: #1A3311;
+  border: 4px solid #0F172A;
+  border-radius: 6px;
+  padding: 12px;
+  min-height: 180px;
+  max-height: 240px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.lcd-status-bar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5px;
+  font-weight: 700;
+  border-bottom: 1px dotted rgba(26, 51, 17, 0.5);
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.lcd-idle-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.lcd-dial-text {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  min-height: 28px;
+}
+
+.lcd-idle-hint {
+  font-size: 10px;
+  color: rgba(26, 51, 17, 0.8);
+}
+
+.lcd-session-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lcd-session-text {
+  flex: 1;
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  font-family: inherit;
+  overflow-y: auto;
+}
+
+.lcd-input-form {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  border-top: 1px dotted rgba(26, 51, 17, 0.5);
+  padding-top: 6px;
+}
+
+.lcd-input-field {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #1A3311;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 11px;
+  color: #1A3311;
+  font-weight: 700;
+}
+
+.lcd-input-field:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.lcd-send-btn {
+  background: #1A3311;
+  color: #C7DFB4;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Quick Fill Chips */
+.lcd-quick-fills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.quick-label {
+  font-size: 10.5px;
+  color: #94A3B8;
+}
+
+.quick-hash-chip {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 4px;
+  color: #38BDF8;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-hash-chip:hover {
+  background: rgba(56, 189, 248, 0.3);
+  color: #FFFFFF;
+}
+
+/* Keypad */
+.phone-keypad {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keypad-call-row {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr;
+  gap: 8px;
+}
+
+.key-btn {
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #F8FAFC;
+  font-weight: 700;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  transition: all 0.1s ease;
+  user-select: none;
+}
+
+.key-btn:active {
+  transform: translateY(1px);
+  background: #38BDF8;
+  color: #030712;
+}
+
+.key-call {
+  background: #166534;
+  border-color: #22C55E;
+  color: #DCFCE7;
+  font-size: 11px;
+}
+
+.key-clear {
+  color: #94A3B8;
+}
+
+.key-end {
+  background: #991B1B;
+  border-color: #EF4444;
+  color: #FEE2E2;
+  font-size: 11px;
+}
+
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.key-num {
+  font-size: 13px;
+  padding: 7px 0;
+}
+
+/* SMS View */
+.sms-simulator-view {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sms-instructions {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px dashed rgba(56, 189, 248, 0.3);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.sms-instructions h4 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #38BDF8;
+}
+
+.sms-instructions p {
+  margin: 0;
+  font-size: 12px;
+  color: #94A3B8;
+}
+
+.sms-instructions code {
+  color: #F8FAFC;
+  background: #0F172A;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sms-chat-bubble {
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  max-width: 85%;
+}
+
+.sms-chat-bubble.out {
+  align-self: flex-end;
+  background: #2563EB;
+  color: #FFFFFF;
+  border-bottom-right-radius: 2px;
+}
+
+.sms-chat-bubble.in {
+  align-self: flex-start;
+  background: #1E293B;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  color: #F8FAFC;
+  border-bottom-left-radius: 2px;
+}
+
+.sms-time {
+  display: block;
+  font-size: 10px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
