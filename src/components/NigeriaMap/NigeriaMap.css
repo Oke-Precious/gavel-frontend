@@ -1,12 +1,14 @@
 /* ==========================================================================
    Nigeria Sovereign Vector Map — Futuristic Cyber-GIS Styling
+   Ultra-Responsive Mobile & Desktop Matrix Layout
    ========================================================================== */
 
 .nigeria-cyber-map-container {
   position: relative;
   width: 100%;
-  height: 100%;
-  min-height: 480px;
+  max-width: 100%;
+  aspect-ratio: 800 / 650;
+  min-height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,6 +16,16 @@
   user-select: none;
   border-radius: 12px;
   cursor: grab;
+  box-sizing: border-box;
+  touch-action: pan-y; /* Allows smooth vertical scrolling on mobile */
+}
+
+@media (min-width: 769px) {
+  .nigeria-cyber-map-container {
+    height: 100%;
+    min-height: 480px;
+    aspect-ratio: auto;
+  }
 }
 
 .nigeria-cyber-map-container:active {
@@ -30,35 +42,60 @@
 
 .nigeria-cyber-svg {
   width: 100%;
-  height: 100%;
-  max-height: 600px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 800 / 650;
   display: block;
+  box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  .nigeria-cyber-svg {
+    height: 100%;
+    max-height: 600px;
+  }
 }
 
 /* Floating Tactical Navigation Controls */
 .map-hud-controls {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 12px;
+  right: 12px;
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
+}
+
+@media (max-width: 480px) {
+  .map-hud-controls {
+    top: 8px;
+    right: 8px;
+    gap: 4px;
+  }
 }
 
 .hud-ctrl-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: rgba(15, 23, 42, 0.85);
+  width: 30px;
+  height: 30px;
+  background: rgba(15, 23, 42, 0.88);
   border: 1px solid rgba(56, 189, 248, 0.3);
-  border-radius: 8px;
+  border-radius: 6px;
   color: #94A3B8;
   cursor: pointer;
   backdrop-filter: blur(8px);
   transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .hud-ctrl-btn {
+    width: 26px;
+    height: 26px;
+  }
 }
 
 .hud-ctrl-btn:hover {
@@ -142,6 +179,12 @@
   font-size: 10px;
 }
 
+@media (max-width: 480px) {
+  .state-centroid-label {
+    font-size: 7.5px;
+  }
+}
+
 /* Pulsing Radar Hotspot Ring */
 .hotspot-pulse-ring {
   animation: hotspot-pulse-anim 2s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -164,7 +207,8 @@
   padding: 10px 14px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(56, 189, 248, 0.25);
   backdrop-filter: blur(10px);
-  min-width: 160px;
+  min-width: 150px;
+  max-width: 220px;
   transform: translateY(-50%);
   animation: tooltip-scale 0.15s ease-out;
 }
@@ -195,7 +239,7 @@
 
 .hologram-tooltip-title {
   margin: 2px 0 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #FFFFFF;
 }
@@ -236,7 +280,8 @@
 
 /* Compact Widget Mode */
 .nigeria-cyber-map-container.is-compact {
-  min-height: 280px;
+  min-height: 240px;
+  aspect-ratio: 800 / 650;
 }
 
 .nigeria-cyber-map-container.is-compact .nigeria-cyber-svg {

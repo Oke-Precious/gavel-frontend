@@ -172,6 +172,7 @@ export default function NigeriaMap({
       {/* SVG Canvas */}
       <svg
         viewBox="0 0 800 650"
+        preserveAspectRatio="xMidYMid meet"
         className="nigeria-cyber-svg"
         aria-label="Pixel-accurate map of Nigerian sovereign state borders"
         role="img"
