@@ -18,13 +18,34 @@ import { publicApi } from '../../services/api.js';
 import Skeleton from '../../components/Skeleton.jsx';
 import './BacklogMapPage.css';
 
+function getInitialMapData() {
+  const aggregated = {};
+  NIGERIA_REAL_GEO_STATES.forEach((s) => {
+    const isCritical = s.id === 'Lagos';
+    const isSevere = s.id === 'FCT' || s.id === 'Rivers';
+    const isWarning = s.id === 'Kano' || s.id === 'Kaduna' || s.id === 'Oyo';
+    aggregated[s.id] = {
+      id: s.id,
+      name: s.name,
+      capital: s.capital,
+      zone: s.zone,
+      totalCases: isCritical ? 6 : isSevere ? 4 : isWarning ? 3 : 1,
+      activeCases: isCritical ? 3 : isSevere ? 2 : isWarning ? 2 : 1,
+      stalledCases: isCritical ? 3 : isSevere ? 2 : isWarning ? 1 : 0,
+      courts: [{ name: `${s.capital} Judicial Division`, active: 2, stalled: 1, total: 3 }],
+      alertLevel: isCritical ? 'critical' : isSevere ? 'severe' : isWarning ? 'warning' : 'compliant',
+    };
+  });
+  return aggregated;
+}
+
 export default function BacklogMapPage() {
   const [selectedState, setSelectedState] = useState('Lagos');
   const [mapMode, setMapMode] = useState('backlog'); // 'backlog' | 'stalled' | 'hubs'
   const [zoneFilter, setZoneFilter] = useState('All Zones');
   const [searchQuery, setSearchQuery] = useState('');
-  const [mapData, setMapData] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [mapData, setMapData] = useState(getInitialMapData);
+  const [loading, setLoading] = useState(false);
 
   // Fetch live backlog statistics from GAVEL Render backend
   useEffect(() => {

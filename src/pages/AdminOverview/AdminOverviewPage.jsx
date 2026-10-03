@@ -13,7 +13,6 @@ import {
 import Card from '../../components/Card.jsx';
 import Button from '../../components/Button.jsx';
 import Skeleton from '../../components/Skeleton.jsx';
-import NigeriaMap from '../../components/NigeriaMap/NigeriaMap.jsx';
 import { NIGERIA_REAL_GEO_STATES } from '../../components/NigeriaMap/nigeriaRealGeoPaths.js';
 import { analyticsApi, casesApi, publicApi } from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -21,6 +20,8 @@ import { useToast } from '../../context/ToastContext.jsx';
 import { daysInCustody } from '../../utils/formatDate.js';
 import { getAlertLevel } from '../../utils/formatAlertLevel.js';
 import './AdminOverviewPage.css';
+
+const NigeriaMap = React.lazy(() => import('../../components/NigeriaMap/NigeriaMap.jsx'));
 
 /* ------------------------------------------------------------------ */
 /* Smooth Count-Up Animation Hook                                      */
@@ -326,20 +327,22 @@ export default function AdminOverviewPage() {
                 <Skeleton variant="card" height={260} />
               ) : (
                 <div className="admin-overview__map-wrapper">
-                  <NigeriaMap
-                    data={mapData}
-                    selectedState={hoveredState}
-                    onSelectState={(stateId) => {
-                      setHoveredState(stateId);
-                      navigate('/backlog-map');
-                    }}
-                    theme="light"
-                    compact={true}
-                    showLabels={false}
-                    showBeacons={true}
-                    showCircuits={false}
-                    allowZoom={false}
-                  />
+                  <React.Suspense fallback={<Skeleton variant="card" height={240} />}>
+                    <NigeriaMap
+                      data={mapData}
+                      selectedState={hoveredState}
+                      onSelectState={(stateId) => {
+                        setHoveredState(stateId);
+                        navigate('/backlog-map');
+                      }}
+                      theme="light"
+                      compact={true}
+                      showLabels={false}
+                      showBeacons={true}
+                      showCircuits={false}
+                      allowZoom={false}
+                    />
+                  </React.Suspense>
 
                   {/* Map Severity Legend */}
                   <div className="admin-overview__map-legend" role="region" aria-label="Map severity legend">

@@ -222,8 +222,22 @@ export const documentsApi = {
 };
 
 /* ================================================================== */
-/* 4. Public (no auth required)                                         */
+/* 4. Public (no auth required) with in-memory caching                  */
 /* ================================================================== */
+const publicApiCache = new Map();
+
+function cachedPublicCall(key, fn, ttlMs = 120000) {
+  const cached = publicApiCache.get(key);
+  const now = Date.now();
+  if (cached && now - cached.time < ttlMs) {
+    return Promise.resolve(cached.value);
+  }
+  return fn().then((val) => {
+    publicApiCache.set(key, { value: val, time: now });
+    return val;
+  });
+}
+
 export const publicApi = {
   /** @param {string} caseHashId — e.g. GAV-26-8A3F9 */
   getCaseByHashId: (caseHashId) =>
@@ -231,24 +245,30 @@ export const publicApi = {
 
   /** @returns {{ totalCases, activeCases, resolvedCases, stalledCases, resolutionRate }} */
   scorecard: () =>
-    axiosClient.get('/public/scorecard').then((response) => {
-      const data = unwrap(response);
-      return data?.scorecard ?? data;
-    }),
+    cachedPublicCall('scorecard', () =>
+      axiosClient.get('/public/scorecard').then((response) => {
+        const data = unwrap(response);
+        return data?.scorecard ?? data;
+      })
+    ),
 
   /** @returns {Array<{ court, activeCases, stalledCases }>} */
   backlogMap: () =>
-    axiosClient.get('/public/backlog-map').then((response) => {
-      const data = unwrap(response);
-      return data?.backlog ?? data;
-    }),
+    cachedPublicCall('backlogMap', () =>
+      axiosClient.get('/public/backlog-map').then((response) => {
+        const data = unwrap(response);
+        return data?.backlog ?? data;
+      })
+    ),
 
   /** @returns {Array<{ period: string, filed: number, resolved: number }>} */
   trends: () =>
-    axiosClient.get('/public/trends').then((response) => {
-      const data = unwrap(response);
-      return data?.trends ?? data;
-    }),
+    cachedPublicCall('trends', () =>
+      axiosClient.get('/public/trends').then((response) => {
+        const data = unwrap(response);
+        return data?.trends ?? data;
+      })
+    ),
 };
 
 /* ================================================================== */

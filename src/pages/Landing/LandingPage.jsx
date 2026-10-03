@@ -19,8 +19,9 @@ import { useToast } from '../../context/ToastContext.jsx';
 import heroScalesImg from '../../assets/images/hero_justice_scales_1790948548975.jpg';
 import legalAttorneyImg from '../../assets/images/legal_advocacy_attorney_1790948559893.jpg';
 import recordsTransparencyImg from '../../assets/images/civic_records_transparency_1790948570593.jpg';
-import NigeriaMap from '../../components/NigeriaMap/NigeriaMap.jsx';
 import './LandingPage.css';
+
+const NigeriaMap = React.lazy(() => import('../../components/NigeriaMap/NigeriaMap.jsx'));
 
 // Featured demo cases from live database
 const DEMO_CASES = [
@@ -714,25 +715,27 @@ export default function LandingPage() {
           </div>
 
           <div className="map-explorer-visual">
-            <NigeriaMap
-              data={{
-                Lagos: { totalCases: 8, alertLevel: 'critical' },
-                Rivers: { totalCases: 5, alertLevel: 'severe' },
-                FCT: { totalCases: 4, alertLevel: 'severe' },
-                Kano: { totalCases: 4, alertLevel: 'warning' },
-                Kaduna: { totalCases: 3, alertLevel: 'warning' },
-                Oyo: { totalCases: 2, alertLevel: 'warning' },
-                Enugu: { totalCases: 2, alertLevel: 'warning' },
-              }}
-              selectedState={selectedState}
-              onSelectState={(stKey) => setSelectedState(stKey)}
-              theme="dark"
-              compact={false}
-              showLabels={true}
-              showBeacons={true}
-              showCircuits={true}
-              allowZoom={false}
-            />
+            <React.Suspense fallback={<div className="nigeria-map-skeleton-wrap"><div className="skeleton-radar-pulse" /></div>}>
+              <NigeriaMap
+                data={{
+                  Lagos: { totalCases: 8, alertLevel: 'critical' },
+                  Rivers: { totalCases: 5, alertLevel: 'severe' },
+                  FCT: { totalCases: 4, alertLevel: 'severe' },
+                  Kano: { totalCases: 4, alertLevel: 'warning' },
+                  Kaduna: { totalCases: 3, alertLevel: 'warning' },
+                  Oyo: { totalCases: 2, alertLevel: 'warning' },
+                  Enugu: { totalCases: 2, alertLevel: 'warning' },
+                }}
+                selectedState={selectedState}
+                onSelectState={(stKey) => setSelectedState(stKey)}
+                theme="dark"
+                compact={false}
+                showLabels={true}
+                showBeacons={true}
+                showCircuits={true}
+                allowZoom={false}
+              />
+            </React.Suspense>
             <div className="map-visual-legend">
               <div className="legend-label">Interactive Sovereign Vector Map (Click any state)</div>
               <div className="legend-scale">

@@ -1,7 +1,19 @@
-# Netlify configuration for Single Page Application routing
+# Netlify configuration for GAVEL Frontend SPA & API Proxy
 [build]
   publish = "dist"
   command = "npm run build"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://gavel-backend-nw0p.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/uploads/*"
+  to = "https://gavel-backend-nw0p.onrender.com/uploads/:splat"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
